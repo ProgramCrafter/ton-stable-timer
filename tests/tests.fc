@@ -1,0 +1,101 @@
+;; New-style tests
+
+#include "func/stdlib-ext.fc";
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() set_init_data() impure {
+  cell v = new_dict();
+  ;; v~udict_set_builder(32, 0xFFFFFFFF, begin_cell());  ;; otherwise type-check error is thrown
+  
+  set_data(begin_cell().store_dict(v).end_cell());
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+int __test_donation() method_id {
+  set_init_data();
+  
+  int coins = 10000000000;    ;; 10 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0, 2).end_cell();
+  cell body = begin_cell().end_cell();
+  
+  (int gas_wasted, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  return gas_wasted;
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[int, int] __test_schedules() method_id {
+  set_init_data();
+  
+  int coins_1 = 100000000;    ;; 0.1 TON
+  int coins_2 = 1000000000;   ;; 1 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0, 2).end_cell();
+  
+  cell void = begin_cell().end_cell();
+  cell body = begin_cell().store_uint(0, 32).store_ref(void).store_ref(void).end_cell();
+  
+  int gas_wasted_on_fail = invoke_method_expect_fail(recv_internal, [coins_1, half_full_msg, body.begin_parse()]);
+  
+  (int gas_used, _) = invoke_method(recv_internal, [coins_2, half_full_msg, body.begin_parse()]);
+  
+  return [gas_wasted_on_fail, gas_used];
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+int __test_schedule_loop_start() method_id {
+  set_init_data();
+  
+  int coins = 1000000000;   ;; 1 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x15be3c3171911009bbcc473d07d8fc2b, 128)
+    .store_uint(0xcc0c7192fed2237719da256e07fa7948, 128)
+    .store_uint(0, 2).end_cell();
+  
+  cell body = begin_cell().store_uint(1, 64).end_cell();
+  
+  (int gas_used, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  return gas_used;
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+int __test_self_schedule_message_parsed() method_id {
+  set_init_data();
+  
+  int coins = 500000000;   ;; 0.5 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_slice(my_address())
+    .store_uint(0, 2).end_cell();
+  
+  cell body = begin_cell().end_cell();
+  
+  (int gas_used, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  return gas_used;
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+int __test_pull_ton() method_id {
+  set_init_data();
+  
+  int coins = 10000000;   ;; 0.01 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x15be3c3171911009bbcc473d07d8fc2b, 128)
+    .store_uint(0xcc0c7192fed2237719da256e07fa7948, 128)
+    .store_uint(0, 2).end_cell();
+  
+  cell body = begin_cell().store_uint(500000000, 64).end_cell();
+  
+  (int gas_used, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  return gas_used;
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

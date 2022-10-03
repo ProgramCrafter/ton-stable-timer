@@ -1,0 +1,438 @@
+"Asm.fif" include
+// automatically generated from `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\error_codes.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\math.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\stdlib.func` `D:\TON_FunC\timer\func\timer.fc` incl:`func/stdlib-ext.fc` 
+PROGRAM{
+  DECLPROC power
+  DECLPROC sqrt
+  DECLPROC avg
+  DECLPROC exp
+  DECLPROC log2
+  97986 DECLMETHOD swap_remove
+  80537 DECLMETHOD parse_one_action
+  DECLPROC send_schedule_loop_msg
+  DECLPROC continue_parsing
+  DECLPROC process_schedule
+  DECLPROC put_scheduled
+  DECLPROC recv_internal
+  DECLPROC recv_external
+  power PROCREF:<{
+    //  x exponent
+    OVER	//  x exponent x
+    0 EQINT	//  x exponent _3
+    IFJMP:<{	//  x exponent
+      2DROP	// 
+      0 PUSHINT	//  _4=0
+    }>	//  x exponent
+    DUP	//  x exponent exponent
+    0 EQINT	//  x exponent _6
+    IFJMP:<{	//  x exponent
+      2DROP	// 
+      1 PUSHINT	//  _7=1
+    }>	//  x exponent
+    OVER	//  x counter result
+    WHILE:<{
+      OVER	//  x counter result counter
+      1 GTINT	//  x counter result _11
+    }>DO<{	//  x counter result
+      s2 PUSH	//  x counter result x
+      MUL	//  x counter result
+      SWAP	//  x result counter
+      DEC	//  x result counter
+      SWAP	//  x counter result
+    }>	//  x counter result
+    2 1 BLKDROP2	//  result
+  }>
+  sqrt PROCREF:<{
+    //  x
+    DUP	//  x x
+    0 EQINT	//  x _2
+    IFJMP:<{	//  x
+      DROP	// 
+      0 PUSHINT	//  _3=0
+    }>	//  x
+    DUP	//  x x
+    4 LESSINT	//  x _5
+    IFJMP:<{	//  x
+      DROP	// 
+      1 PUSHINT	//  _6=1
+    }>	//  x
+    DUP	//  x x
+    INC	//  x _9
+    1 RSHIFT#	//  x z
+    OVER	//  x z y
+    WHILE:<{
+      2DUP	//  x z y z y
+      LESS	//  x z y _13
+    }>DO<{	//  x z y
+      DROP	//  x z
+      s0 s1 s0 PUSH3	//  x z y x z
+      DIV	//  x z y _14
+      ROT	//  x y _14 z
+      ADD	//  x y _15
+      1 RSHIFT#	//  x y z
+      SWAP	//  x z y
+    }>	//  x z y
+    2 1 BLKDROP2	//  y
+  }>
+  avg PROCREF:<{
+    //  x y
+    ADD	//  _2
+    1 RSHIFT#	//  _4
+  }>
+  exp PROCREF:<{
+    //  x
+    DUP	//  x x
+    -1 GTINT	//  x _2
+    IF:<{	//  x
+      POW2	//  _3
+    }>ELSE<{	//  x
+      1 PUSHINT	//  x _6=1
+      SWAP	//  _6=1 x
+      NEGATE	//  _6=1 _8
+      RSHIFT	//  _3
+    }>
+  }>
+  log2 PROCREF:<{
+    //  x
+    0 PUSHINT	//  x n=0
+    7 PUSHPOW2	//  x n=0 _3=128
+    exp INLINECALLDICT	//  x n=0 _4
+    s2 s(-1) PUXC	//  x n=0 x _4
+    GEQ	//  x n=0 _5
+    IF:<{	//  x n=0
+      DROP	//  x
+      128 RSHIFT#	//  x
+      7 PUSHPOW2	//  x n
+    }>	//  x n
+    64 PUSHINT	//  x n _10=64
+    exp INLINECALLDICT	//  x n _11
+    s2 s(-1) PUXC	//  x n x _11
+    GEQ	//  x n _12
+    IF:<{	//  x n
+      SWAP	//  n x
+      64 RSHIFT#	//  n x
+      SWAP	//  x n
+      64 ADDCONST	//  x n
+    }>	//  x n
+    32 PUSHINT	//  x n _17=32
+    exp INLINECALLDICT	//  x n _18
+    s2 s(-1) PUXC	//  x n x _18
+    GEQ	//  x n _19
+    IF:<{	//  x n
+      SWAP	//  n x
+      32 RSHIFT#	//  n x
+      SWAP	//  x n
+      32 ADDCONST	//  x n
+    }>	//  x n
+    16 PUSHINT	//  x n _24=16
+    exp INLINECALLDICT	//  x n _25
+    s2 s(-1) PUXC	//  x n x _25
+    GEQ	//  x n _26
+    IF:<{	//  x n
+      SWAP	//  n x
+      16 RSHIFT#	//  n x
+      SWAP	//  x n
+      16 ADDCONST	//  x n
+    }>	//  x n
+    8 PUSHINT	//  x n _31=8
+    exp INLINECALLDICT	//  x n _32
+    s2 s(-1) PUXC	//  x n x _32
+    GEQ	//  x n _33
+    IF:<{	//  x n
+      SWAP	//  n x
+      8 RSHIFT#	//  n x
+      SWAP	//  x n
+      8 ADDCONST	//  x n
+    }>	//  x n
+    4 PUSHINT	//  x n _38=4
+    exp INLINECALLDICT	//  x n _39
+    s2 s(-1) PUXC	//  x n x _39
+    GEQ	//  x n _40
+    IF:<{	//  x n
+      SWAP	//  n x
+      4 RSHIFT#	//  n x
+      SWAP	//  x n
+      4 ADDCONST	//  x n
+    }>	//  x n
+    2 PUSHINT	//  x n _45=2
+    exp INLINECALLDICT	//  x n _46
+    s2 s(-1) PUXC	//  x n x _46
+    GEQ	//  x n _47
+    IF:<{	//  x n
+      SWAP	//  n x
+      2 RSHIFT#	//  n x
+      SWAP	//  x n
+      2 ADDCONST	//  x n
+    }>	//  x n
+    1 PUSHINT	//  x n _52=1
+    exp INLINECALLDICT	//  x n _53
+    s1 s2 XCHG	//  n x _53
+    GEQ	//  n _54
+    IF:<{	//  n
+      INC	//  n
+    }>	//  n
+  }>
+  swap_remove PROC:<{
+    //  t index
+    OVER	//  t index t
+    TLEN	//  t index _3
+    DEC	//  t index l
+    s1 s(-1) PUXC	//  t index index l
+    EQUAL	//  t index _6
+    IFJMP:<{	//  t index
+      DROP	//  t
+      TPOP	//  t value
+    }>	//  t index
+    2DUP	//  t index t index
+    INDEXVAR	//  t index value
+    s0 s2 XCHG	//  value index t
+    TPOP	//  value index t _12
+    s1 s2 XCHG	//  value t index _12
+    SETINDEXVAR	//  value t
+    SWAP	//  t value
+  }>
+  parse_one_action PROC:<{
+    //  actions
+    LDREF	//  previous actions
+    32 LDU	//  previous action_id actions
+    SWAP	//  previous actions action_id
+    s0 DUMP	//  previous actions action_id
+    DUP
+    247711853 PUSHINT	//  previous actions action_id action_id _10=247711853
+    EQUAL	//  previous actions action_id _11
+    IF:<{	//  previous actions action_id
+      DROP	//  previous actions
+      4445 PUSHINT	//  previous actions _12=4445
+      s0 DUMP	//  previous actions _13
+      DROP	//  previous actions
+      1397050948 PUSHINT	//  previous actions _14=1397050948
+      s0 DUMP	//  previous actions _15
+      DROP	//  previous actions
+      8 LDU	//  previous _16 actions
+      SWAP	//  previous actions _16
+      s0 DUMP	//  previous actions _19
+      DROP	//  previous actions
+      LDREF	//  previous _55 _54
+      DROP	//  previous _20
+      s0 DUMP	//  previous _22
+      DROP	//  previous
+    }>ELSE<{	//  previous actions action_id
+      DUP
+      2907562126 PUSHINT	//  previous actions action_id action_id _23=2907562126
+      EQUAL	//  previous actions action_id _24
+      IF:<{	//  previous actions action_id
+        DROP	//  previous actions
+        4445 PUSHINT	//  previous actions _25=4445
+        s0 DUMP	//  previous actions _26
+        DROP	//  previous actions
+        23438651275822149 PUSHINT	//  previous actions _27=23438651275822149
+        s0 DUMP	//  previous actions _28
+        DROP	//  previous actions
+        LDREF	//  previous _57 _56
+        DROP	//  previous _29
+        s0 DUMP	//  previous _31
+        DROP	//  previous
+      }>ELSE<{	//  previous actions action_id
+        921090057 PUSHINT	//  previous actions action_id _32=921090057
+        EQUAL	//  previous actions _33
+        IF:<{	//  previous actions
+          4445 PUSHINT	//  previous actions _34=4445
+          s0 DUMP	//  previous actions _35
+          DROP	//  previous actions
+          23157172037899845 PUSHINT	//  previous actions _36=23157172037899845
+          s0 DUMP	//  previous actions _37
+          DROP	//  previous actions
+          8 LDU	//  previous _38 actions
+          SWAP	//  previous actions _38
+          s0 DUMP	//  previous actions _41
+          DROP	//  previous actions
+          LDDICT	//  previous _61 _60
+          DROP	//  previous _42
+          s0 DUMP	//  previous _44
+          DROP	//  previous
+        }>ELSE<{	//  previous actions
+          DROP	//  previous
+          100 THROW
+        }>
+      }>
+    }>
+    CTOS	//  _47
+  }>
+  send_schedule_loop_msg PROC:<{
+    // 
+    0 PUSHINT	//  _0=0
+    24 PUSHINT	//  _0=0 _1=24
+    NEWC	//  _0=0 _1=24 _2
+    6 STU	//  _0=0 _4
+    MYADDR	//  _0=0 _4 _5
+    STSLICER	//  _0=0 _6
+    500000000 PUSHINT	//  _0=0 _6 _7=500000000
+    STVARUINT16	//  _0=0 _8
+    107 STU	//  _22
+    ENDC	//  _23
+    0 PUSHINT	//  _23 _24=0
+    SENDRAWMSG
+  }>
+  continue_parsing PROCREF:<{
+    //  success scheduled_at current_time
+    s0 s2 XCHG	//  current_time scheduled_at success
+    NOT	//  current_time scheduled_at _3
+    IFJMP:<{	//  current_time scheduled_at
+      2DROP	// 
+      0 PUSHINT	//  _4=0
+    }>	//  current_time scheduled_at
+    SWAP	//  scheduled_at current_time
+    LEQ	//  _5
+  }>
+  process_schedule PROC:<{
+    // 
+    c4 PUSH	//  _2
+    CTOS	//  _3
+    LDDICT	//  _61 _60
+    DROP	//  scheduled
+    NOW	//  scheduled current_time
+    OVER
+    32 PUSHINT	//  scheduled current_time scheduled _10=32
+    DICTUMIN
+    NULLSWAPIFNOT2	//  scheduled current_time schedules scheduled_at success
+    WHILE:<{
+      s0 s1 s3 PUSH3	//  scheduled current_time schedules scheduled_at success success scheduled_at current_time
+      continue_parsing INLINECALLDICT	//  scheduled current_time schedules scheduled_at success _12
+    }>DO<{	//  scheduled current_time schedules scheduled_at success
+      s0 s2 XCHG	//  scheduled current_time success scheduled_at schedules
+      LDREF	//  scheduled current_time success scheduled_at addr schedules
+      LDREF	//  scheduled current_time success scheduled_at addr body schedules
+      1 PUSHINT	//  scheduled current_time success scheduled_at addr body schedules _19=1
+      24 PUSHINT	//  scheduled current_time success scheduled_at addr body schedules _19=1 _20=24
+      NEWC	//  scheduled current_time success scheduled_at addr body schedules _19=1 _20=24 _21
+      6 STU	//  scheduled current_time success scheduled_at addr body schedules _19=1 _23
+      s0 s4 XCHG	//  scheduled current_time success scheduled_at _23 body schedules _19=1 addr
+      CTOS	//  scheduled current_time success scheduled_at _23 body schedules _19=1 _24
+      s1 s4 XCHG	//  scheduled current_time success scheduled_at _19=1 body schedules _23 _24
+      STSLICER	//  scheduled current_time success scheduled_at _19=1 body schedules _25
+      200000000 PUSHINT	//  scheduled current_time success scheduled_at _19=1 body schedules _25 _26=200000000
+      STVARUINT16	//  scheduled current_time success scheduled_at _19=1 body schedules _27
+      s1 s3 XCHG	//  scheduled current_time success scheduled_at schedules body _19=1 _27
+      107 STU	//  scheduled current_time success scheduled_at schedules body _41
+      STREF	//  scheduled current_time success scheduled_at schedules _42
+      ENDC	//  scheduled current_time success scheduled_at schedules _43
+      0 PUSHINT	//  scheduled current_time success scheduled_at schedules _43 _44=0
+      SENDRAWMSG
+      s1 s4 PUXC
+      32 PUSHINT	//  schedules current_time success scheduled_at scheduled_at scheduled _48=32
+      DICTUDEL	//  schedules current_time success scheduled_at _69 _70
+      DROP	//  schedules current_time success scheduled_at scheduled
+      s4 s1 s4 XCHG3	//  scheduled current_time schedules scheduled_at success
+    }>	//  scheduled current_time schedules scheduled_at success
+    4 BLKDROP	//  scheduled
+    NEWC	//  scheduled _55
+    STDICT	//  _56
+    ENDC	//  _57
+    c4 POP
+    send_schedule_loop_msg CALLDICT
+  }>
+  put_scheduled PROC:<{
+    //  in_msg
+    32 LDU	//  schedule_at in_msg
+    12 PUSHPOW2	//  schedule_at in_msg _5=4096
+    RAND	//  schedule_at in_msg _6
+    s1 s2 XCHG	//  in_msg schedule_at _6
+    ADD	//  in_msg schedule_at
+    c4 PUSH	//  in_msg schedule_at _10
+    CTOS	//  in_msg schedule_at _11
+    LDDICT	//  in_msg schedule_at _38 _37
+    DROP	//  in_msg schedule_at scheduled
+    2DUP
+    32 PUSHINT	//  in_msg schedule_at scheduled schedule_at scheduled _15=32
+    DICTUGET
+    NULLSWAPIFNOT	//  in_msg schedule_at scheduled _39 _40
+    NIP	//  in_msg schedule_at scheduled old_schedule_exist
+    101 THROWIF
+    s0 s2 XCHG	//  scheduled schedule_at in_msg
+    LDREF	//  scheduled schedule_at schedule_to in_msg
+    LDREF	//  scheduled schedule_at schedule_to _44 _43
+    DROP	//  scheduled schedule_at schedule_to body
+    SWAP
+    NEWC	//  scheduled schedule_at body schedule_to _26
+    STREF	//  scheduled schedule_at body _27
+    STREF	//  scheduled schedule_at _28
+    s0 s2 XCHG
+    32 PUSHINT	//  _28 schedule_at scheduled _29=32
+    DICTUSETB	//  scheduled
+    NEWC	//  scheduled _31
+    STDICT	//  _32
+    ENDC	//  _33
+    c4 POP
+  }>
+  recv_internal PROC:<{
+    //  coins in_msg_full in_msg
+    SWAP	//  coins in_msg in_msg_full
+    CTOS	//  coins in_msg in_msg_full
+    4 LDU	//  coins in_msg _5 in_msg_full
+    SWAP
+    1 PUSHINT	//  coins in_msg in_msg_full _5 _8=1
+    AND	//  coins in_msg in_msg_full _9
+    IFJMP:<{	//  coins in_msg in_msg_full
+      3 BLKDROP	// 
+    }>	//  coins in_msg in_msg_full
+    LDMSGADDR	//  coins in_msg _65 _64
+    DROP	//  coins in_msg src
+    HASHSU	//  coins in_msg src_hash
+    MYADDR	//  coins in_msg src_hash _15
+    HASHSU	//  coins in_msg src_hash _16
+    s1 s(-1) PUXC	//  coins in_msg src_hash src_hash _16
+    EQUAL	//  coins in_msg src_hash _17
+    IFJMP:<{	//  coins in_msg src_hash
+      3 BLKDROP	// 
+      process_schedule CALLDICT
+    }>	//  coins in_msg src_hash
+    OVER	//  coins in_msg src_hash in_msg
+    SBITS	//  coins in_msg src_hash _19
+    32 LESSINT	//  coins in_msg src_hash _21
+    IFJMP:<{	//  coins in_msg src_hash
+      3 BLKDROP	// 
+    }>	//  coins in_msg src_hash
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src_hash _22
+    HASHSU	//  coins in_msg src_hash _23
+    EQUAL	//  coins in_msg _24
+    IFJMP:<{	//  coins in_msg
+      NIP	//  in_msg
+      64 LDU	//  _67 _66
+      DROP	//  request_nton
+      DUP	//  request_nton request_nton
+      1 EQINT	//  request_nton _30
+      IFJMP:<{	//  request_nton
+        DROP	// 
+        send_schedule_loop_msg CALLDICT
+      }>	//  request_nton
+      0 PUSHINT	//  request_nton _32=0
+      24 PUSHINT	//  request_nton _32=0 _33=24
+      NEWC	//  request_nton _32=0 _33=24 _34
+      6 STU	//  request_nton _32=0 _36
+      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _32=0 _36 _37
+      STSLICER	//  request_nton _32=0 _38
+      ROT	//  _32=0 _38 request_nton
+      STVARUINT16	//  _32=0 _39
+      107 STU	//  _53
+      ENDC	//  _54
+      1 PUSHINT	//  _54 _55=1
+      SENDRAWMSG
+    }>	//  coins in_msg
+    SWAP
+    1000000000 PUSHINT	//  in_msg coins _58=1000000000
+    LESS	//  in_msg _59
+    100 THROWIF
+    put_scheduled CALLDICT
+  }>
+  recv_external PROC:<{
+    // 
+    BALANCE	//  _2
+    UNPAIR	//  _7 _8
+    DROP	//  balance
+    100000000 PUSHINT	//  balance _4=100000000
+    LESS	//  _5
+    IF:<{	// 
+      ACCEPT
+    }>	// 
+  }>
+}END>c
+boc>B "build/boc/contract.boc" B>file

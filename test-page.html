@@ -1,0 +1,204 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="https://wallet.ton.org/libs/tonweb.min.js?v=1.1.41"></script>
+    <script type="text/javascript" src="https://wallet.ton.org/libs/tonweb-mnemonic.min.js?v=1.1.41"></script>
+    
+    <script>
+      const tonweb = new TonWeb(
+        new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
+      );
+      
+      const seed = [75,5,181,210,168,14,181,101,187,153,123,140,58,110,9,40,183,249,229,223,216,81,152,98,151,110,192,236,80,103,161,100];
+      const keys = tonweb.utils.keyPairFromSeed(new Uint8Array(seed));
+      const wallet = tonweb.wallet.create(keys);
+      
+      console.log(keys);
+      
+      window.keys = keys;
+      
+      let requests = [];
+      let last_finish = 0;
+      setInterval(() => {
+        if (requests.length && Date.now() - last_finish > 1600) {
+          const req = requests.pop();
+          console.log(req);
+          
+          last_finish = Date.now() + 86400 * 1000;
+          req.fn(...req.args).then((...args) => {
+            last_finish = Date.now();
+            
+            return req.onresult(...args);
+          }, () => {last_finish = Date.now();});
+        }
+      }, 100);
+      
+      function update_wallet_info() {
+        wallet.getAddress().then((addr) => {
+          requests.push({
+            'fn': tonweb.getBalance.bind(tonweb),
+            'args': [addr],
+            'onresult': (v) => {
+              document.getElementById('wallet_info').innerText = 'Баланс: ' + v / 1000000000;
+            }
+          })
+        });
+      }
+      
+      async function pay(target, seq = null, amt = null, payload = null) {
+        if (seq == null) {
+          console.debug("Acquiring sequence number...");
+          seq = await wallet.methods.seqno().call();
+          await (new Promise(resolve => setTimeout(resolve, 1200)));
+        }
+        
+        amt = amt || '0.1';
+        
+        return wallet.methods.transfer({
+          secretKey: keys.secretKey,           toAddress: target,
+          amount:    tonweb.utils.toNano(amt), seqno:     seq,
+          sendMode:  3,                        payload}).send();
+      }
+      
+      class Timer extends tonweb.Contract {
+        constructor(provider, options) {
+          options.code = tonweb.boc.Cell.oneFromBoc('B5EE9C7201021101000226000114FF00F4A413F4BCF2C80B01020120020302014804050022F2F8276F2230821005F5E100B992F800DE0202CC06070201480E0F02012008090201D40B0C01B9D00E8698180B8D8492F81F07D20187C80FC147C80A9085D4A2F81F8047010EBA4E090492F81F04684300056F8F0C5C6444026EF311CF41F63F0AF3031C64BFB488DDC676895B81FE9E5227C80DD718100C1081DCD65005CF968327804C0A003169C20063232C17E0A33C5A084077359403E80B2DAB25C3EC02008231D33F3020C0019330F006E0708018C8CB058D086000ADF1E18B8C88804DDE6239E83EC7E15E60638C97F6911BB8CED12B703FD3CA44CF1658FA02CB6AC971FB0001953B51343D010C3E08C860083D219BE963A1551C04F6CF2389C0B5351C60063232C141340533C5A08402FAF0803E8084F2DAB3325C3EC0148560083D16CC11053A17C1323D00327B553C01A00D005934C7E0C2FE0444A83B51343D010C1720083D039BE84C7CB41940B5350C0072333300A0083D10F23D00327B5520001002B3925B70E001BB01CFBBA99D4D31F01FE202082100EC3C86DBA8E52208210AD4DE08EBA8E183081115DFE20308228534554434F4445FE2030D430FE20308E2D821036E6B809BA8E1E81115DFE2030822852455345525645FE2030D30701FE2030F40430FE20309430F2C064E2E2E30DD08100031BBEC2216F88A55210BA93306F8DE05C6F81026F8D126F8501800363081115DFE2030821053454E44FE2030D30701FE2030D430FE2030');
+          super(provider, options);
+        }
+        
+        createDataCell() {
+          const cell = new tonweb.boc.Cell();
+          cell.bits.writeUint(0, 1); // empty dict
+          return cell;
+        }
+        
+        createSigningMessage() {
+          throw new Error('stacktrace');
+        }
+        
+        async createInitExternalMessage() {
+          const {stateInit, address, code, data} = await this.createStateInit();
+          
+          const body = new tonweb.boc.Cell();
+          const header = tonweb.Contract.createExternalMessageHeader(address);
+          const externalMessage = tonweb.Contract.createCommonMsgInfo(header, stateInit, body);
+          
+          return {
+            address: address,
+            message: externalMessage,
+          }
+        }
+        
+        async deploy() {
+          window.iem = await this.createInitExternalMessage();
+          window.iem_boc = await iem.message.toBoc(false, true);
+          await tonweb.sendBoc(window.iem_boc);
+        }
+      }
+      
+      const timer = new Timer(tonweb, {});
+      
+      function update_wallet_info_timer() {
+        timer.getAddress().then((addr) => {
+          requests.push({
+            'fn': tonweb.getBalance.bind(tonweb),
+            'args': [addr],
+            'onresult': (v) => {
+              document.getElementById('wallet_info_timer').innerText = 'Баланс таймера: ' + v / 1000000000;
+            }
+          })
+        });
+      }
+      
+      async function deposit() {
+        let value = window.prompt('Value to send to timer');
+        if (!(+value)) {return;}
+        
+        await pay(await timer.getAddress(), null, value, null);
+      }
+      
+      /*
+      async function schedule_message() {
+        let time = window.prompt('Time to send');
+        if (!time) {return;}
+        
+        let text = window.prompt('Text');
+        
+        
+      }
+      */
+      
+      async function withdraw() {
+        let amount = +window.prompt('NanoTONs to pull');
+        if (!amount) {return;}
+        
+        let body = new tonweb.boc.Cell();
+        body.bits.writeUint(amount, 64);
+        
+        await pay(await timer.getAddress(), null, '0.05', body);
+      }
+      
+      async function start_loop() {
+        let body = new tonweb.boc.Cell();
+        body.bits.writeUint(1, 64);
+        await pay(await timer.getAddress(), null, '0.05', body);
+      }
+      
+      function dump_stores(bits) {
+        let s = '';
+        while (bits.length >= 256) {
+          s += '.store_uint(0x' + tonweb.utils.bytesToHex(bits.array.slice(0, 32)) + ', 256)';
+          bits.array = bits.array.slice(32);
+          bits.length -= 256;
+        }
+        s += '.store_uint(0x' + tonweb.utils.bytesToHex(bits.array) + ' >> ' +
+          (bits.length - bits.cursor % 256) + ', ' + bits.cursor % 256 + ')';
+        return s;
+      }
+      
+      function dump_cell(cell, i = 1, s = '') {
+        let orig = i;
+        s += '  var b' + i + ' = begin_cell()' + dump_stores(cell.bits) + ';\n';
+        
+        for (let j = 0; j < cell.refs.length; j++) {
+          let k = ++i;
+          [i, s] = dump_cell(cell.refs[j], i, s);
+          s += '  b' + orig + ' = b' + orig + '.store_ref(b' + k + '.end_cell());\n';
+        }
+        
+        return [i, s];
+      }
+      
+      // timer.deploy().then(console.log)
+      // iem.message.print()
+      // wallet.deploy(keys.secretKey).getQuery().then((b) => console.log(b.print()))
+      
+      // timer.getAssociatedUSDQWallet().then(console.log)
+    </script>
+  </head>
+  <body>
+    <p id="address">Адрес: ?</p>
+    <p id="wallet_info">Баланс: ?</p>
+    <button onclick="update_wallet_info();">Обновить данные кошелька</button>
+    
+    
+    <p id="address_timer">Адрес таймера: ?</p>
+    <p id="wallet_info_timer">Баланс таймера: ?</p>
+    <button onclick="deposit();">Пополнить баланс таймера</button>
+    <button onclick="withdraw();">Снять TON с таймера</button>
+    <button onclick="timer.deploy();">Развернуть контракт таймера</button>
+    <button onclick="update_wallet_info_timer();">Обновить баланс контракта таймера</button>
+    <button onclick="schedule_message();">Запланировать отправку сообщения</button>
+    <button onclick="start_loop();">Начать цикл таймера</button>
+    
+    <script>
+      (async () => {
+        let addr = await wallet.getAddress();
+        document.getElementById('address').innerText = 'Адрес: ' + addr.toString(true, true, true);
+        
+        let timer_addr = await timer.getAddress();
+        document.getElementById('address_timer').innerText = 'Адрес таймера: ' + timer_addr.toString(true, true, true);
+      })();
+    </script>
+  </body>
+</html>
