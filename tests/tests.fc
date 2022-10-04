@@ -99,3 +99,34 @@ int __test_pull_ton() method_id {
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+int __test_schedule_and_loop() method_id {
+  set_init_data();
+  
+  int coins = 1000000000;   ;; 1 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0, 2).end_cell();
+  cell addr = begin_cell().store_slice(owner_address()).end_cell();
+  cell void = begin_cell().end_cell();
+  cell body = begin_cell().store_uint(1664821506, 32).store_ref(addr).store_ref(void).end_cell();
+  (int gas_used, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  
+  {-
+  int coins_loop = 480000000;   ;; 0.48 TON
+  cell half_full_msg = begin_cell().store_uint(7, 4).store_uint(1279, 11)
+    .store_uint(0x03102200000000000000000000000000, 128)
+    .store_uint(0x00000000000000000000000000000001, 128)
+    .store_uint(0, 2).end_cell();
+  cell body = begin_cell().store_uint(1, 64).end_cell();
+  (int gas_used_loop, _) = invoke_method(recv_internal, [coins_loop, half_full_msg, body.begin_parse()]);
+  -}
+  
+  (int gas_used_loop, _) = invoke_method(process_schedule, []);
+  
+  return gas_used + gas_used_loop;
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

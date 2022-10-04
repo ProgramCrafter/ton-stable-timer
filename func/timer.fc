@@ -18,19 +18,25 @@ slice owner_address() asm "b{100} x{00} |+ x{dab812df8ae259099c63455c8d1c3775eed
 ;; testnet version
 slice owner_address() asm "b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE";
 
+slice unused_masterchain_address() asm "b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE";
+
 
 () send_schedule_loop_msg() impure {
+  ;; Instant Hypercube Routing is disabled
+  ;;   we are sending message to another shardchain
+  ;;   so bounce won't be received earlier than two blocks later,
+  ;;   effectively limiting TON spending
   send_raw_message(
      begin_cell()
     .store_uint(0x18, 6)
-    .store_slice(my_address())
+    .store_slice(unused_masterchain_address())
     .store_coins(500000000)     {-  0.5 TON  -}
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
     .end_cell(), 0);
 }
 
 
-int continue_parsing(int success, int scheduled_at, int current_time) inline_ref {
+int continue_parsing(int success, int scheduled_at, int current_time) {
   ;; lazy evaluation required, because `scheduled_at` is nullable
   if (~ success) {
     return 0;
@@ -57,7 +63,7 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
       .end_cell(), 0);
     
     int t = scheduled~udict_delete?(32, scheduled_at);
-    (int scheduled_at, slice schedules, int success) = udict_get_min?(scheduled, 32);
+    (scheduled_at, schedules, success) = udict_get_min?(scheduled, 32);
   }
   
   set_data(begin_cell().store_dict(scheduled).end_cell());
@@ -68,7 +74,7 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
 
 () put_scheduled(slice in_msg) impure {
   int schedule_at = in_msg~load_uint(32);
-  schedule_at += rand(4096);    {-  The Open Network doesn't support precision higher than 5s  -}
+  schedule_at += rand(16);      {-  The Open Network doesn't support precision higher than 5s  -}
                                 {-  avoiding collisions near beautiful numbers  -}
   
   (_, cell scheduled) = get_data().begin_parse().load_dict();
@@ -97,22 +103,26 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
   {------------------------------------------------------}
   
   slice in_msg_full = in_msg_full.begin_parse();
-  if (in_msg_full~load_uint(4) & 1) {  ;; int_msg_info$0, ihr_disabled, bounce, bounced
-    return ();
-  }
+  int bounced = in_msg_full~load_uint(4);  ;; int_msg_info$0, ihr_disabled, bounce, bounced
+  
   slice src = in_msg_full~load_msg_addr();
   int src_hash = slice_hash(src);
   
   {----------------------------------------------------}
   {-    Messages from self for processing schedule    -}
+  {-    bounced from masterchain to slow down timer   -}
   {-    [FASTPATH]                                    -}
   {----------------------------------------------------}
-  if (src_hash == slice_hash(my_address())) {
+  if (src_hash == slice_hash(unused_masterchain_address())) {
     process_schedule();
     
     return ();
   }
   
+  
+  if (bounced & 1) {
+    return ();
+  }
   
   {----------------------------------------------------------}
   {-    No message present - considering this a donation    -}

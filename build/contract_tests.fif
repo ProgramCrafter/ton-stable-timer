@@ -75,6 +75,7 @@ PROGRAM{
   106184 DECLMETHOD __test_schedule_loop_start
   127974 DECLMETHOD __test_self_schedule_message_parsed
   67996 DECLMETHOD __test_pull_ton
+  100248 DECLMETHOD __test_schedule_and_loop
   power PROCREF:<{
     //  x exponent
     OVER	//  x exponent x
@@ -2105,7 +2106,7 @@ PROGRAM{
     24 PUSHINT	//  _0=0 _1=24
     NEWC	//  _0=0 _1=24 _2
     6 STU	//  _0=0 _4
-    MYADDR	//  _0=0 _4 _5
+    b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  _0=0 _4 _5
     STSLICER	//  _0=0 _6
     500000000 PUSHINT	//  _0=0 _6 _7=500000000
     STVARUINT16	//  _0=0 _8
@@ -2114,7 +2115,7 @@ PROGRAM{
     0 PUSHINT	//  _23 _24=0
     SENDRAWMSG
   }>
-  continue_parsing PROCREF:<{
+  continue_parsing PROC:<{
     //  success scheduled_at current_time
     s0 s2 XCHG	//  current_time scheduled_at success
     NOT	//  current_time scheduled_at _3
@@ -2129,7 +2130,7 @@ PROGRAM{
     // 
     c4 PUSH	//  _2
     CTOS	//  _3
-    LDDICT	//  _61 _60
+    LDDICT	//  _58 _57
     DROP	//  scheduled
     NOW	//  scheduled current_time
     OVER
@@ -2137,45 +2138,50 @@ PROGRAM{
     DICTUMIN
     NULLSWAPIFNOT2	//  scheduled current_time schedules scheduled_at success
     WHILE:<{
-      s0 s1 s3 PUSH3	//  scheduled current_time schedules scheduled_at success success scheduled_at current_time
-      continue_parsing INLINECALLDICT	//  scheduled current_time schedules scheduled_at success _12
-    }>DO<{	//  scheduled current_time schedules scheduled_at success
-      s0 s2 XCHG	//  scheduled current_time success scheduled_at schedules
-      LDREF	//  scheduled current_time success scheduled_at addr schedules
-      LDREF	//  scheduled current_time success scheduled_at addr body schedules
-      1 PUSHINT	//  scheduled current_time success scheduled_at addr body schedules _19=1
-      24 PUSHINT	//  scheduled current_time success scheduled_at addr body schedules _19=1 _20=24
-      NEWC	//  scheduled current_time success scheduled_at addr body schedules _19=1 _20=24 _21
-      6 STU	//  scheduled current_time success scheduled_at addr body schedules _19=1 _23
-      s0 s4 XCHG	//  scheduled current_time success scheduled_at _23 body schedules _19=1 addr
-      CTOS	//  scheduled current_time success scheduled_at _23 body schedules _19=1 _24
-      s1 s4 XCHG	//  scheduled current_time success scheduled_at _19=1 body schedules _23 _24
-      STSLICER	//  scheduled current_time success scheduled_at _19=1 body schedules _25
-      200000000 PUSHINT	//  scheduled current_time success scheduled_at _19=1 body schedules _25 _26=200000000
-      STVARUINT16	//  scheduled current_time success scheduled_at _19=1 body schedules _27
-      s1 s3 XCHG	//  scheduled current_time success scheduled_at schedules body _19=1 _27
-      107 STU	//  scheduled current_time success scheduled_at schedules body _41
-      STREF	//  scheduled current_time success scheduled_at schedules _42
-      ENDC	//  scheduled current_time success scheduled_at schedules _43
-      0 PUSHINT	//  scheduled current_time success scheduled_at schedules _43 _44=0
+      s1 s3 PUSH2	//  scheduled current_time schedules scheduled_at success scheduled_at current_time
+      continue_parsing CALLDICT	//  scheduled current_time schedules scheduled_at _12
+    }>DO<{	//  scheduled current_time schedules scheduled_at
+      SWAP	//  scheduled current_time scheduled_at schedules
+      LDREF	//  scheduled current_time scheduled_at addr schedules
+      LDREF	//  scheduled current_time scheduled_at addr _65 _64
+      DROP	//  scheduled current_time scheduled_at addr body
+      1 PUSHINT	//  scheduled current_time scheduled_at addr body _19=1
+      24 PUSHINT	//  scheduled current_time scheduled_at addr body _19=1 _20=24
+      NEWC	//  scheduled current_time scheduled_at addr body _19=1 _20=24 _21
+      6 STU	//  scheduled current_time scheduled_at addr body _19=1 _23
+      s0 s3 XCHG	//  scheduled current_time scheduled_at _23 body _19=1 addr
+      CTOS	//  scheduled current_time scheduled_at _23 body _19=1 _24
+      s1 s3 XCHG	//  scheduled current_time scheduled_at _19=1 body _23 _24
+      STSLICER	//  scheduled current_time scheduled_at _19=1 body _25
+      200000000 PUSHINT	//  scheduled current_time scheduled_at _19=1 body _25 _26=200000000
+      STVARUINT16	//  scheduled current_time scheduled_at _19=1 body _27
+      s1 s2 XCHG	//  scheduled current_time scheduled_at body _19=1 _27
+      107 STU	//  scheduled current_time scheduled_at body _41
+      STREF	//  scheduled current_time scheduled_at _42
+      ENDC	//  scheduled current_time scheduled_at _43
+      0 PUSHINT	//  scheduled current_time scheduled_at _43 _44=0
       SENDRAWMSG
-      s1 s4 PUXC
-      32 PUSHINT	//  schedules current_time success scheduled_at scheduled_at scheduled _48=32
-      DICTUDEL	//  schedules current_time success scheduled_at _69 _70
-      DROP	//  schedules current_time success scheduled_at scheduled
-      s4 s1 s4 XCHG3	//  scheduled current_time schedules scheduled_at success
-    }>	//  scheduled current_time schedules scheduled_at success
-    4 BLKDROP	//  scheduled
-    NEWC	//  scheduled _55
-    STDICT	//  _56
-    ENDC	//  _57
+      ROT
+      32 PUSHINT	//  current_time scheduled_at scheduled _48=32
+      DICTUDEL	//  current_time _66 _67
+      DROP	//  current_time scheduled
+      DUP
+      32 PUSHINT	//  current_time scheduled scheduled _50=32
+      DICTUMIN
+      NULLSWAPIFNOT2	//  current_time scheduled schedules scheduled_at success
+      s3 s4 XCHG	//  scheduled current_time schedules scheduled_at success
+    }>	//  scheduled current_time schedules scheduled_at
+    3 BLKDROP	//  scheduled
+    NEWC	//  scheduled _52
+    STDICT	//  _53
+    ENDC	//  _54
     c4 POP
     send_schedule_loop_msg CALLDICT
   }>
   put_scheduled PROC:<{
     //  in_msg
     32 LDU	//  schedule_at in_msg
-    12 PUSHPOW2	//  schedule_at in_msg _5=4096
+    16 PUSHINT	//  schedule_at in_msg _5=16
     RAND	//  schedule_at in_msg _6
     s1 s2 XCHG	//  in_msg schedule_at _6
     ADD	//  in_msg schedule_at
@@ -2209,59 +2215,59 @@ PROGRAM{
     //  coins in_msg_full in_msg
     SWAP	//  coins in_msg in_msg_full
     CTOS	//  coins in_msg in_msg_full
-    4 LDU	//  coins in_msg _5 in_msg_full
+    4 LDU	//  coins in_msg bounced in_msg_full
+    LDMSGADDR	//  coins in_msg bounced _66 _65
+    DROP	//  coins in_msg bounced src
+    HASHSU	//  coins in_msg bounced src_hash
+    b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  coins in_msg bounced src_hash _14
+    HASHSU	//  coins in_msg bounced src_hash _15
+    s1 s(-1) PUXC	//  coins in_msg bounced src_hash src_hash _15
+    EQUAL	//  coins in_msg bounced src_hash _16
+    IFJMP:<{	//  coins in_msg bounced src_hash
+      4 BLKDROP	// 
+      process_schedule CALLDICT
+    }>	//  coins in_msg bounced src_hash
     SWAP
-    1 PUSHINT	//  coins in_msg in_msg_full _5 _8=1
-    AND	//  coins in_msg in_msg_full _9
-    IFJMP:<{	//  coins in_msg in_msg_full
-      3 BLKDROP	// 
-    }>	//  coins in_msg in_msg_full
-    LDMSGADDR	//  coins in_msg _65 _64
-    DROP	//  coins in_msg src
-    HASHSU	//  coins in_msg src_hash
-    MYADDR	//  coins in_msg src_hash _15
-    HASHSU	//  coins in_msg src_hash _16
-    s1 s(-1) PUXC	//  coins in_msg src_hash src_hash _16
-    EQUAL	//  coins in_msg src_hash _17
+    1 PUSHINT	//  coins in_msg src_hash bounced _18=1
+    AND	//  coins in_msg src_hash _19
     IFJMP:<{	//  coins in_msg src_hash
       3 BLKDROP	// 
-      process_schedule CALLDICT
     }>	//  coins in_msg src_hash
     OVER	//  coins in_msg src_hash in_msg
-    SBITS	//  coins in_msg src_hash _19
-    32 LESSINT	//  coins in_msg src_hash _21
+    SBITS	//  coins in_msg src_hash _20
+    32 LESSINT	//  coins in_msg src_hash _22
     IFJMP:<{	//  coins in_msg src_hash
       3 BLKDROP	// 
     }>	//  coins in_msg src_hash
-    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src_hash _22
-    HASHSU	//  coins in_msg src_hash _23
-    EQUAL	//  coins in_msg _24
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src_hash _23
+    HASHSU	//  coins in_msg src_hash _24
+    EQUAL	//  coins in_msg _25
     IFJMP:<{	//  coins in_msg
       NIP	//  in_msg
-      64 LDU	//  _67 _66
+      64 LDU	//  _68 _67
       DROP	//  request_nton
       DUP	//  request_nton request_nton
-      1 EQINT	//  request_nton _30
+      1 EQINT	//  request_nton _31
       IFJMP:<{	//  request_nton
         DROP	// 
         send_schedule_loop_msg CALLDICT
       }>	//  request_nton
-      0 PUSHINT	//  request_nton _32=0
-      24 PUSHINT	//  request_nton _32=0 _33=24
-      NEWC	//  request_nton _32=0 _33=24 _34
-      6 STU	//  request_nton _32=0 _36
-      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _32=0 _36 _37
-      STSLICER	//  request_nton _32=0 _38
-      ROT	//  _32=0 _38 request_nton
-      STVARUINT16	//  _32=0 _39
-      107 STU	//  _53
-      ENDC	//  _54
-      1 PUSHINT	//  _54 _55=1
+      0 PUSHINT	//  request_nton _33=0
+      24 PUSHINT	//  request_nton _33=0 _34=24
+      NEWC	//  request_nton _33=0 _34=24 _35
+      6 STU	//  request_nton _33=0 _37
+      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _33=0 _37 _38
+      STSLICER	//  request_nton _33=0 _39
+      ROT	//  _33=0 _39 request_nton
+      STVARUINT16	//  _33=0 _40
+      107 STU	//  _54
+      ENDC	//  _55
+      1 PUSHINT	//  _55 _56=1
       SENDRAWMSG
     }>	//  coins in_msg
     SWAP
-    1000000000 PUSHINT	//  in_msg coins _58=1000000000
-    LESS	//  in_msg _59
+    1000000000 PUSHINT	//  in_msg coins _59=1000000000
+    LESS	//  in_msg _60
     100 THROWIF
     put_scheduled CALLDICT
   }>
@@ -2442,5 +2448,51 @@ PROGRAM{
     TRIPLE	//  _29 _30
     invoke_method CALLDICT	//  _33 _34
     DROP	//  gas_used
+  }>
+  __test_schedule_and_loop PROC:<{
+    // 
+    set_init_data CALLDICT
+    1000000000 PUSHINT	//  coins=1000000000
+    0 PUSHINT	//  coins=1000000000 _4=0
+    68056473384187692692674921486353642291 PUSHINT	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291
+    DUP	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _6=68056473384187692692674921486353642291
+    10 PUSHPOW2	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _6=68056473384187692692674921486353642291 _7=1024
+    6 PUSHINT	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _6=68056473384187692692674921486353642291 _7=1024 _8=6
+    NEWC	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _6=68056473384187692692674921486353642291 _7=1024 _8=6 _9
+    4 STU	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _6=68056473384187692692674921486353642291 _7=1024 _11
+    11 STU	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _6=68056473384187692692674921486353642291 _13
+    128 STU	//  coins=1000000000 _4=0 _5=68056473384187692692674921486353642291 _15
+    128 STU	//  coins=1000000000 _4=0 _17
+    2 STU	//  coins=1000000000 _19
+    ENDC	//  coins=1000000000 half_full_msg
+    NEWC	//  coins=1000000000 half_full_msg _22
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins=1000000000 half_full_msg _22 _23
+    STSLICER	//  coins=1000000000 half_full_msg _24
+    ENDC	//  coins=1000000000 half_full_msg addr
+    NEWC	//  coins=1000000000 half_full_msg addr _27
+    ENDC	//  coins=1000000000 half_full_msg addr void
+    1664821506 PUSHINT	//  coins=1000000000 half_full_msg addr void _30=1664821506
+    NEWC	//  coins=1000000000 half_full_msg addr void _30=1664821506 _31
+    32 STU	//  coins=1000000000 half_full_msg addr void _33
+    s1 s2 XCHG	//  coins=1000000000 half_full_msg void addr _33
+    STREF	//  coins=1000000000 half_full_msg void _34
+    STREF	//  coins=1000000000 half_full_msg _35
+    ENDC	//  coins=1000000000 half_full_msg body
+    CONT:<{
+      recv_internal CALLDICT
+    }>	//  coins=1000000000 half_full_msg body _39
+    SWAP	//  coins=1000000000 half_full_msg _39 body
+    CTOS	//  coins=1000000000 half_full_msg _39 _41
+    s3 s3 s0 XCHG3	//  _39 coins=1000000000 half_full_msg _41
+    TRIPLE	//  _39 _40
+    invoke_method CALLDICT	//  _49 _50
+    DROP	//  gas_used
+    CONT:<{
+      process_schedule CALLDICT
+    }>	//  gas_used _45
+    0 TUPLE	//  gas_used _45 _46
+    invoke_method CALLDICT	//  gas_used _51 _52
+    DROP	//  gas_used gas_used_loop
+    ADD	//  _48
   }>
 }END>c

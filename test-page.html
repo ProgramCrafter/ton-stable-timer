@@ -9,13 +9,17 @@
         new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
       );
       
-      const seed = [75,5,181,210,168,14,181,101,187,153,123,140,58,110,9,40,183,249,229,223,216,81,152,98,151,110,192,236,80,103,161,100];
+      const seed  = [75,5,181,210,168,14,181,101,187,153,123,140,58,110,9,40,183,249,229,223,216,81,152,98,151,110,192,236,80,103,161,100];
+      const seed2 = [75,5,181,210,168,14,181,101,187,153,123,140,58,110,9,40,183,249,229,223,216,81,152,98,151,110,192,236,80,103,161,99];
       const keys = tonweb.utils.keyPairFromSeed(new Uint8Array(seed));
+      const keys2 = tonweb.utils.keyPairFromSeed(new Uint8Array(seed2));
       const wallet = tonweb.wallet.create(keys);
+      const wallet2 = tonweb.wallet.create(keys2);
       
       console.log(keys);
       
       window.keys = keys;
+      window.keys2 = keys2;
       
       let requests = [];
       let last_finish = 0;
@@ -45,24 +49,38 @@
         });
       }
       
-      async function pay(target, seq = null, amt = null, payload = null) {
+      function update_wallet_info2() {
+        wallet2.getAddress().then((addr) => {
+          requests.push({
+            'fn': tonweb.getBalance.bind(tonweb),
+            'args': [addr],
+            'onresult': (v) => {
+              document.getElementById('wallet_info2').innerText = 'Баланс 2: ' + v / 1000000000;
+            }
+          })
+        });
+      }
+      
+      async function pay(target, seq = null, amt = null, payload = null, w = 1) {
         if (seq == null) {
           console.debug("Acquiring sequence number...");
-          seq = await wallet.methods.seqno().call();
+          seq = await (w == 1 ? wallet : wallet2).methods.seqno().call();
           await (new Promise(resolve => setTimeout(resolve, 1200)));
         }
         
         amt = amt || '0.1';
         
-        return wallet.methods.transfer({
-          secretKey: keys.secretKey,           toAddress: target,
+        let kp = (w == 1 ? keys : keys2);
+        
+        return (w == 1 ? wallet : wallet2).methods.transfer({
+          secretKey: kp.secretKey,             toAddress: target,
           amount:    tonweb.utils.toNano(amt), seqno:     seq,
           sendMode:  3,                        payload}).send();
       }
       
       class Timer extends tonweb.Contract {
         constructor(provider, options) {
-          options.code = tonweb.boc.Cell.oneFromBoc('B5EE9C7201021101000226000114FF00F4A413F4BCF2C80B01020120020302014804050022F2F8276F2230821005F5E100B992F800DE0202CC06070201480E0F02012008090201D40B0C01B9D00E8698180B8D8492F81F07D20187C80FC147C80A9085D4A2F81F8047010EBA4E090492F81F04684300056F8F0C5C6444026EF311CF41F63F0AF3031C64BFB488DDC676895B81FE9E5227C80DD718100C1081DCD65005CF968327804C0A003169C20063232C17E0A33C5A084077359403E80B2DAB25C3EC02008231D33F3020C0019330F006E0708018C8CB058D086000ADF1E18B8C88804DDE6239E83EC7E15E60638C97F6911BB8CED12B703FD3CA44CF1658FA02CB6AC971FB0001953B51343D010C3E08C860083D219BE963A1551C04F6CF2389C0B5351C60063232C141340533C5A08402FAF0803E8084F2DAB3325C3EC0148560083D16CC11053A17C1323D00327B553C01A00D005934C7E0C2FE0444A83B51343D010C1720083D039BE84C7CB41940B5350C0072333300A0083D10F23D00327B5520001002B3925B70E001BB01CFBBA99D4D31F01FE202082100EC3C86DBA8E52208210AD4DE08EBA8E183081115DFE20308228534554434F4445FE2030D430FE20308E2D821036E6B809BA8E1E81115DFE2030822852455345525645FE2030D30701FE2030F40430FE20309430F2C064E2E2E30DD08100031BBEC2216F88A55210BA93306F8DE05C6F81026F8D126F8501800363081115DFE2030821053454E44FE2030D30701FE2030D430FE2030');
+          options.code = tonweb.boc.Cell.oneFromBoc('B5EE9C7201021301000277000114FF00F4A413F4BCF2C80B01020120020302014804050022F2F8276F2230821005F5E100B992F800DE0202CC0607020148101102012008090201D40E0F02F3D00E86981FD20187C80C68433FC0C408088000000000000000000000000000000000000000000000000000000067C80A9085D4A2F8278047000B8D8492F81F010EBA4E090492F81F04684300056F8F0C5C6444026EF311CF41F63F0AF3031C64BFB488DDC676895B81FE9E5227C80DD718100C1081DCD65005CC0A0B0201580C0D008231D33F3020C0019330F006E0708018C8CB058D086000ADF1E18B8C88804DDE6239E83EC7E15E60638C97F6911BB8CED12B703FD3CA44CF1658FA02CB6AC971FB00000AF2D064F00900751C20063232C1634219FE062040440000000000000000000000000000000000000000000000000000000333C5A084077359403E80B2DAB25C3EC020001100ACE496DC38006EE0009F3B51343D010C3E08C860083D219BE96514C4FC01E38B8075350C1C60063232C140F404F3C5A08402FAF0803E8084B2DAB3325C3EC01620083D16CC0820083D219BE9440D3A17C0F23D00327B553C01A0005934C7E0043E0444A83B51343D010C1720083D039BE84C7CB41940B5350C0072333300A0083D10F23D00327B552001CFBBA99D4D31F01FE202082100EC3C86DBA8E52208210AD4DE08EBA8E183081115DFE20308228534554434F4445FE2030D430FE20308E2D821036E6B809BA8E1E81115DFE2030822852455345525645FE2030D30701FE2030F40430FE20309430F2C064E2E2E30DD08120031BBEC2216F88A55210BA93306F8DE05C6F81026F8D126F8501800363081115DFE2030821053454E44FE2030D30701FE2030D430FE2030');
           super(provider, options);
         }
         
@@ -128,6 +146,28 @@
       }
       */
       
+      async function schedule_message() {
+        let wanted_body = new tonweb.boc.Cell();
+        wanted_body.bits.writeUint(1, 64);
+        wanted_body.bits.writeUint(72, 8);
+        wanted_body.bits.writeUint(101, 8);
+        wanted_body.bits.writeUint(108, 8);
+        wanted_body.bits.writeUint(108, 8);
+        wanted_body.bits.writeUint(111, 8);
+        
+        let wanted_time = 1664821506;
+        
+        let wanted_to = new tonweb.boc.Cell();
+        wanted_to.bits.writeAddress(await wallet.getAddress());
+        
+        let request = new tonweb.boc.Cell();
+        request.bits.writeUint(wanted_time, 32);
+        request.refs.push(wanted_to);
+        request.refs.push(wanted_body);
+        
+        await pay(await timer.getAddress(), null, '1.01', request, 2);
+      }
+      
       async function withdraw() {
         let amount = +window.prompt('NanoTONs to pull');
         if (!amount) {return;}
@@ -181,6 +221,10 @@
     <p id="wallet_info">Баланс: ?</p>
     <button onclick="update_wallet_info();">Обновить данные кошелька</button>
     
+    <p id="address2">Адрес 2: ?</p>
+    <p id="wallet_info2">Баланс 2: ?</p>
+    <button onclick="update_wallet_info2();">Обновить данные кошелька 2</button>
+    
     
     <p id="address_timer">Адрес таймера: ?</p>
     <p id="wallet_info_timer">Баланс таймера: ?</p>
@@ -195,6 +239,9 @@
       (async () => {
         let addr = await wallet.getAddress();
         document.getElementById('address').innerText = 'Адрес: ' + addr.toString(true, true, true);
+        
+        let addr2 = await wallet2.getAddress();
+        document.getElementById('address2').innerText = 'Адрес 2: ' + addr2.toString(true, true, true);
         
         let timer_addr = await timer.getAddress();
         document.getElementById('address_timer').innerText = 'Адрес таймера: ' + timer_addr.toString(true, true, true);
