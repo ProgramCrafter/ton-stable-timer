@@ -40,7 +40,7 @@ int __test_donation() method_id {
     .store_uint(0, 2).end_cell();
   
   cell void = begin_cell().end_cell();
-  cell body = begin_cell().store_uint(0, 32).store_ref(void).store_ref(void).end_cell();
+  cell body = begin_cell().store_uint(coins_2 / 2, 64).store_uint(0, 32).store_ref(void).store_ref(void).end_cell();
   
   int gas_wasted_on_fail = invoke_method_expect_fail(recv_internal, [coins_1, half_full_msg, body.begin_parse()]);
   
@@ -83,7 +83,9 @@ int __test_self_schedule_message_parsed() method_id {
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-int __test_pull_ton() method_id {
+() __test_pull_ton_failure() method_id {
+  ;; pulling TON can lead to timer unexpectedly stopping, so this test must fail
+  
   set_init_data();
   
   int coins = 10000000;   ;; 0.01 TON
@@ -94,8 +96,7 @@ int __test_pull_ton() method_id {
   
   cell body = begin_cell().store_uint(500000000, 64).end_cell();
   
-  (int gas_used, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
-  return gas_used;
+  invoke_method_expect_fail(recv_internal, [coins, half_full_msg, body.begin_parse()]);
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -111,7 +112,7 @@ int __test_schedule_and_loop() method_id {
     .store_uint(0, 2).end_cell();
   cell addr = begin_cell().store_slice(owner_address()).end_cell();
   cell void = begin_cell().end_cell();
-  cell body = begin_cell().store_uint(1664821506, 32).store_ref(addr).store_ref(void).end_cell();
+  cell body = begin_cell().store_uint(coins / 2, 64).store_uint(1664821506, 32).store_ref(addr).store_ref(void).end_cell();
   (int gas_used, _) = invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
   
   {-

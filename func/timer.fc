@@ -1,11 +1,5 @@
 ;; Timer smart-contract for scheduling messages.
-;;    v1 - [current]
-;;    v2 - [planned] sharding support
 ;; (c) ProgramCrafter, 2022
-
-
-#include "func/stdlib-ext.fc";
-
 
 {-
 slice owner_address() asm "b{100} x{00} |+ x{dab812df8ae259099c63455c8d1c3775eed2622425532e2dd8a8a33be132a3f5} |+ PUSHSLICE";
@@ -21,7 +15,7 @@ slice owner_address() asm "b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0
 slice unused_masterchain_address() asm "b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE";
 
 
-() send_schedule_loop_msg() impure {
+() send_schedule_loop_msg() impure inline_ref {
   ;; Instant Hypercube Routing is disabled
   ;;   we are sending message to another shardchain
   ;;   so bounce won't be received earlier than two blocks later,
@@ -36,55 +30,61 @@ slice unused_masterchain_address() asm "b{100} x{FF} |+ x{0310202200000000000000
 }
 
 
-int continue_parsing(int success, int scheduled_at, int current_time) {
+int continue_parsing(int success, int scheduled_at, int current_time) inline_ref {
   ;; lazy evaluation required, because `scheduled_at` is nullable
   if (~ success) {
     return 0;
   }
-  return scheduled_at <= current_time;
+  return current_time >= scheduled_at;
 }
-() process_schedule() impure {
+() process_schedule() impure inline_ref {
   (_, cell scheduled) = get_data().begin_parse().load_dict();
   
   int current_time = now();
   
-  (int scheduled_at, slice schedules, int success) = udict_get_min?(scheduled, 32);
+  (int scheduled_at, slice scheduled_msg, int success) = udict_get_min?(scheduled, 32);
   while (continue_parsing(success, scheduled_at, current_time)) {
-    cell addr = schedules~load_ref();
-    cell body = schedules~load_ref();
+    cell addr = scheduled_msg~load_ref();
+    cell body = scheduled_msg~load_ref();
     
     send_raw_message(
        begin_cell()
       .store_uint(0x18, 6)
       .store_slice(addr.begin_parse())
-      .store_coins(200000000)                       {-  returning 0.2 TON out of 1.0      -}
+      .store_coins(scheduled_msg~load_uint(64))     {-  returning some TON as requested   -}
       .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  message body stored in reference  -}
       .store_ref(body)
       .end_cell(), 0);
     
     int t = scheduled~udict_delete?(32, scheduled_at);
-    (scheduled_at, schedules, success) = udict_get_min?(scheduled, 32);
+    (scheduled_at, scheduled_msg, success) = udict_get_min?(scheduled, 32);
   }
   
   set_data(begin_cell().store_dict(scheduled).end_cell());
   
-  send_schedule_loop_msg();
+  if (~ dict_empty?(scheduled)) {
+    send_schedule_loop_msg();
+  }
 }
 
 
-() put_scheduled(slice in_msg) impure {
-  int schedule_at = in_msg~load_uint(32);
+() put_scheduled(int schedule_at, int forward_nton, slice in_msg) impure inline_ref {
   schedule_at += rand(16);      {-  The Open Network doesn't support precision higher than 5s  -}
                                 {-  avoiding collisions near beautiful numbers  -}
   
   (_, cell scheduled) = get_data().begin_parse().load_dict();
+  
+  if (~ dict_empty?(scheduled)) {
+    send_schedule_loop_msg();
+  }
+  
   (slice old_schedule_here, int old_schedule_exist) = udict_get?(scheduled, 32, schedule_at);
-  throw_if(101, old_schedule_exist);
+  throw_if(102, old_schedule_exist);
   
   cell schedule_to = in_msg~load_ref();
   cell body = in_msg~load_ref();
   
-  scheduled~udict_set_builder(32, schedule_at, begin_cell().store_ref(schedule_to).store_ref(body));
+  scheduled~udict_set_builder(32, schedule_at, begin_cell().store_uint(forward_nton, 64).store_ref(schedule_to).store_ref(body));
   
   set_data(begin_cell().store_dict(scheduled).end_cell());
 }
@@ -145,15 +145,25 @@ int continue_parsing(int success, int scheduled_at, int current_time) {
       return ();
     }
     
+    [int balance, _] = get_balance();
+    int time_to_unix_epoch_end = 4294967295 - now();
+    
+    ;; Cost of maintaining contract is equal to 13 TON/h = 3'611'111 nTON/s.
+    ;; This timer is able to work up to end of the Unix epoch (2**32 seconds - year 2106).
+    ;; Assuring that there will be always enough money to work.
+    
+    ;; 10M TON will be sufficient to provide service from 2022 to 2106 years.
+    ;; All excess money can be taken by me, author of the timer, for other purposes.
+    
+    throw_if(105, balance - request_nton < 3611111 * time_to_unix_epoch_end);
+    
     send_raw_message(
        begin_cell()
       .store_uint(0x18, 6)
       .store_slice(owner_address())
       .store_coins(request_nton)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-      .end_cell(),
-      
-      1   {-  paying transfer fees separately so exactly `request_nton` is delivered  -}
+      .end_cell(), 0
     );
     
     return ();
@@ -163,10 +173,30 @@ int continue_parsing(int success, int scheduled_at, int current_time) {
   {-    Incoming message - maybe schedule    -}
   {-------------------------------------------}
   
-  throw_if(100, coins < 1000000000);    ;; at least 1 TON is required for message scheduling
-                                        ;; 0.2 TON will be returned later
+  ;; Components of message scheduling cost
+  ;; 1. Forwarding TON amount           specified by user; not less than 0.01 TON
+  ;; 2. Price for keeping timer awake.  6.5 TON/h = 6'500'000'000 nTON/h = 1'805'556 nTON/s
+  ;; 3. Timer's profit.                 0.4 TON
   
-  put_scheduled(in_msg);
+  int forward_nton = in_msg~load_uint(64);
+  throw_if(100, forward_nton < 10000000);
+  
+  int schedule_at = in_msg~load_uint(32);
+  int timer_work_cost = 1805556 * max(0, schedule_at - now());
+  
+  throw_if(101, coins < timer_work_cost + forward_nton + 400000000);
+  
+  put_scheduled(schedule_at, forward_nton, in_msg);
+  send_raw_message(
+     begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(owner_address())
+    .store_coins(200000000)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
+    .end_cell(),
+    
+    1   {-  paying transfer fees separately so exactly 0.2 TON is delivered  -}
+  );
 }
 
 () recv_external() impure {

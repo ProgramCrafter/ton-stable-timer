@@ -1,5 +1,5 @@
 "Asm.fif" include
-// automatically generated from `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\error_codes.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\math.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\stdlib.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\1.address_helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\bad_messages_generator.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\c5_parse_helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\message_helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\storage-test-helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\tests-helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\token-helpers.func` `D:\TON_FunC\timer\func\timer.fc` incl:`func/stdlib-ext.fc` `D:\TON_FunC\timer\tests\tests.fc` 
+// automatically generated from `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\error_codes.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\math.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\stdlib.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\1.address_helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\bad_messages_generator.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\c5_parse_helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\message_helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\storage-test-helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\tests-helpers.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\test-libs\token-helpers.func` `D:\TON_FunC\timer\func\timer.fc` `D:\TON_FunC\timer\tests\tests.fc` incl:`func/stdlib-ext.fc` 
 PROGRAM{
   DECLPROC power
   DECLPROC sqrt
@@ -61,20 +61,20 @@ PROGRAM{
   103208 DECLMETHOD snake_concat
   DECLPROC snake_concat_tagged
   DECLPROC snake_equal?
-  97986 DECLMETHOD swap_remove
-  80537 DECLMETHOD parse_one_action
   DECLPROC send_schedule_loop_msg
   DECLPROC continue_parsing
   DECLPROC process_schedule
   DECLPROC put_scheduled
   DECLPROC recv_internal
   DECLPROC recv_external
+  97986 DECLMETHOD swap_remove
+  80537 DECLMETHOD parse_one_action
   DECLPROC set_init_data
   97577 DECLMETHOD __test_donation
   84429 DECLMETHOD __test_schedules
   106184 DECLMETHOD __test_schedule_loop_start
   127974 DECLMETHOD __test_self_schedule_message_parsed
-  67996 DECLMETHOD __test_pull_ton
+  84801 DECLMETHOD __test_pull_ton_failure
   100248 DECLMETHOD __test_schedule_and_loop
   power PROCREF:<{
     //  x exponent
@@ -2014,6 +2014,242 @@ PROGRAM{
     }>	//  snake1 snake2 equal
     2 1 BLKDROP2	//  equal
   }>
+  send_schedule_loop_msg PROCREF:<{
+    // 
+    0 PUSHINT	//  _0=0
+    24 PUSHINT	//  _0=0 _1=24
+    NEWC	//  _0=0 _1=24 _2
+    6 STU	//  _0=0 _4
+    b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  _0=0 _4 _5
+    STSLICER	//  _0=0 _6
+    500000000 PUSHINT	//  _0=0 _6 _7=500000000
+    STVARUINT16	//  _0=0 _8
+    107 STU	//  _22
+    ENDC	//  _23
+    0 PUSHINT	//  _23 _24=0
+    SENDRAWMSG
+  }>
+  continue_parsing PROCREF:<{
+    //  success scheduled_at current_time
+    s0 s2 XCHG	//  current_time scheduled_at success
+    NOT	//  current_time scheduled_at _3
+    IFJMP:<{	//  current_time scheduled_at
+      2DROP	// 
+      0 PUSHINT	//  _4=0
+    }>	//  current_time scheduled_at
+    GEQ	//  _5
+  }>
+  process_schedule PROCREF:<{
+    // 
+    c4 PUSH	//  _2
+    CTOS	//  _3
+    LDDICT	//  _62 _61
+    DROP	//  scheduled
+    NOW	//  scheduled current_time
+    OVER
+    32 PUSHINT	//  scheduled current_time scheduled _10=32
+    DICTUMIN
+    NULLSWAPIFNOT2	//  scheduled current_time scheduled_msg scheduled_at success
+    WHILE:<{
+      s1 s3 PUSH2	//  scheduled current_time scheduled_msg scheduled_at success scheduled_at current_time
+      continue_parsing INLINECALLDICT	//  scheduled current_time scheduled_msg scheduled_at _12
+    }>DO<{	//  scheduled current_time scheduled_msg scheduled_at
+      SWAP	//  scheduled current_time scheduled_at scheduled_msg
+      LDREF	//  scheduled current_time scheduled_at addr scheduled_msg
+      LDREF	//  scheduled current_time scheduled_at addr body scheduled_msg
+      1 PUSHINT	//  scheduled current_time scheduled_at addr body scheduled_msg _19=1
+      24 PUSHINT	//  scheduled current_time scheduled_at addr body scheduled_msg _19=1 _20=24
+      NEWC	//  scheduled current_time scheduled_at addr body scheduled_msg _19=1 _20=24 _21
+      6 STU	//  scheduled current_time scheduled_at addr body scheduled_msg _19=1 _23
+      s0 s4 XCHG	//  scheduled current_time scheduled_at _23 body scheduled_msg _19=1 addr
+      CTOS	//  scheduled current_time scheduled_at _23 body scheduled_msg _19=1 _24
+      s1 s4 XCHG	//  scheduled current_time scheduled_at _19=1 body scheduled_msg _23 _24
+      STSLICER	//  scheduled current_time scheduled_at _19=1 body scheduled_msg _25
+      SWAP	//  scheduled current_time scheduled_at _19=1 body _25 scheduled_msg
+      64 LDU	//  scheduled current_time scheduled_at _19=1 body _25 _71 _70
+      DROP	//  scheduled current_time scheduled_at _19=1 body _25 _26
+      STVARUINT16	//  scheduled current_time scheduled_at _19=1 body _29
+      s1 s2 XCHG	//  scheduled current_time scheduled_at body _19=1 _29
+      107 STU	//  scheduled current_time scheduled_at body _43
+      STREF	//  scheduled current_time scheduled_at _44
+      ENDC	//  scheduled current_time scheduled_at _45
+      0 PUSHINT	//  scheduled current_time scheduled_at _45 _46=0
+      SENDRAWMSG
+      ROT
+      32 PUSHINT	//  current_time scheduled_at scheduled _50=32
+      DICTUDEL	//  current_time _72 _73
+      DROP	//  current_time scheduled
+      DUP
+      32 PUSHINT	//  current_time scheduled scheduled _52=32
+      DICTUMIN
+      NULLSWAPIFNOT2	//  current_time scheduled scheduled_msg scheduled_at success
+      s3 s4 XCHG	//  scheduled current_time scheduled_msg scheduled_at success
+    }>	//  scheduled current_time scheduled_msg scheduled_at
+    3 BLKDROP	//  scheduled
+    DUP
+    NEWC	//  scheduled scheduled _54
+    STDICT	//  scheduled _55
+    ENDC	//  scheduled _56
+    c4 POP
+    DICTEMPTY	//  _58
+    NOT	//  _59
+    IF:<{	// 
+      send_schedule_loop_msg INLINECALLDICT
+    }>	// 
+  }>
+  put_scheduled PROCREF:<{
+    //  schedule_at forward_nton in_msg
+    16 PUSHINT	//  schedule_at forward_nton in_msg _3=16
+    RAND	//  schedule_at forward_nton in_msg _4
+    s1 s3 XCHG	//  in_msg forward_nton schedule_at _4
+    ADD	//  in_msg forward_nton schedule_at
+    c4 PUSH	//  in_msg forward_nton schedule_at _8
+    CTOS	//  in_msg forward_nton schedule_at _9
+    LDDICT	//  in_msg forward_nton schedule_at _39 _38
+    DROP	//  in_msg forward_nton schedule_at scheduled
+    DUP	//  in_msg forward_nton schedule_at scheduled scheduled
+    DICTEMPTY	//  in_msg forward_nton schedule_at scheduled _11
+    NOT	//  in_msg forward_nton schedule_at scheduled _12
+    IF:<{	//  in_msg forward_nton schedule_at scheduled
+      send_schedule_loop_msg INLINECALLDICT
+    }>	//  in_msg forward_nton schedule_at scheduled
+    2DUP
+    32 PUSHINT	//  in_msg forward_nton schedule_at scheduled schedule_at scheduled _16=32
+    DICTUGET
+    NULLSWAPIFNOT	//  in_msg forward_nton schedule_at scheduled _40 _41
+    NIP	//  in_msg forward_nton schedule_at scheduled old_schedule_exist
+    102 THROWIF
+    s0 s3 XCHG	//  scheduled forward_nton schedule_at in_msg
+    LDREF	//  scheduled forward_nton schedule_at schedule_to in_msg
+    LDREF	//  scheduled forward_nton schedule_at schedule_to _45 _44
+    DROP	//  scheduled forward_nton schedule_at schedule_to body
+    s0 s3 XCHG
+    NEWC	//  scheduled body schedule_at schedule_to forward_nton _27
+    64 STU	//  scheduled body schedule_at schedule_to _29
+    STREF	//  scheduled body schedule_at _30
+    s1 s2 XCHG	//  scheduled schedule_at body _30
+    STREF	//  scheduled schedule_at _31
+    s0 s2 XCHG
+    32 PUSHINT	//  _31 schedule_at scheduled _32=32
+    DICTUSETB	//  scheduled
+    NEWC	//  scheduled _34
+    STDICT	//  _35
+    ENDC	//  _36
+    c4 POP
+  }>
+  recv_internal PROC:<{
+    //  coins in_msg_full in_msg
+    SWAP	//  coins in_msg in_msg_full
+    CTOS	//  coins in_msg in_msg_full
+    4 LDU	//  coins in_msg bounced in_msg_full
+    LDMSGADDR	//  coins in_msg bounced _127 _126
+    DROP	//  coins in_msg bounced src
+    HASHSU	//  coins in_msg bounced src_hash
+    b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  coins in_msg bounced src_hash _14
+    HASHSU	//  coins in_msg bounced src_hash _15
+    s1 s(-1) PUXC	//  coins in_msg bounced src_hash src_hash _15
+    EQUAL	//  coins in_msg bounced src_hash _16
+    IFJMP:<{	//  coins in_msg bounced src_hash
+      4 BLKDROP	// 
+      process_schedule INLINECALLDICT
+    }>	//  coins in_msg bounced src_hash
+    SWAP
+    1 PUSHINT	//  coins in_msg src_hash bounced _18=1
+    AND	//  coins in_msg src_hash _19
+    IFJMP:<{	//  coins in_msg src_hash
+      3 BLKDROP	// 
+    }>	//  coins in_msg src_hash
+    OVER	//  coins in_msg src_hash in_msg
+    SBITS	//  coins in_msg src_hash _20
+    32 LESSINT	//  coins in_msg src_hash _22
+    IFJMP:<{	//  coins in_msg src_hash
+      3 BLKDROP	// 
+    }>	//  coins in_msg src_hash
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src_hash _23
+    HASHSU	//  coins in_msg src_hash _24
+    EQUAL	//  coins in_msg _25
+    IFJMP:<{	//  coins in_msg
+      NIP	//  in_msg
+      64 LDU	//  _129 _128
+      DROP	//  request_nton
+      DUP	//  request_nton request_nton
+      1 EQINT	//  request_nton _31
+      IFJMP:<{	//  request_nton
+        DROP	// 
+        send_schedule_loop_msg INLINECALLDICT
+      }>	//  request_nton
+      BALANCE	//  request_nton _35
+      UNPAIR	//  request_nton _130 _131
+      DROP	//  request_nton balance
+      32 PUSHPOW2DEC	//  request_nton balance _38=4294967295
+      NOW	//  request_nton balance _38=4294967295 _39
+      SUB	//  request_nton balance time_to_unix_epoch_end
+      s1 s2 XCPU	//  request_nton time_to_unix_epoch_end balance request_nton
+      SUB	//  request_nton time_to_unix_epoch_end _42
+      3611111 PUSHINT
+      ROT	//  request_nton _42 _43=3611111 time_to_unix_epoch_end
+      MUL	//  request_nton _42 _44
+      LESS	//  request_nton _45
+      105 THROWIF
+      0 PUSHINT	//  request_nton _47=0
+      24 PUSHINT	//  request_nton _47=0 _48=24
+      NEWC	//  request_nton _47=0 _48=24 _49
+      6 STU	//  request_nton _47=0 _51
+      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _47=0 _51 _52
+      STSLICER	//  request_nton _47=0 _53
+      ROT	//  _47=0 _53 request_nton
+      STVARUINT16	//  _47=0 _54
+      107 STU	//  _68
+      ENDC	//  _69
+      0 PUSHINT	//  _69 _70=0
+      SENDRAWMSG
+    }>	//  coins in_msg
+    64 LDU	//  coins forward_nton in_msg
+    OVER
+    10000000 PUSHINT	//  coins forward_nton in_msg forward_nton _77=10000000
+    LESS	//  coins forward_nton in_msg _78
+    100 THROWIF
+    32 LDU	//  coins forward_nton schedule_at in_msg
+    1805556 PUSHINT	//  coins forward_nton schedule_at in_msg _85=1805556
+    0 PUSHINT	//  coins forward_nton schedule_at in_msg _85=1805556 _86=0
+    s3 PUSH
+    NOW	//  coins forward_nton schedule_at in_msg _85=1805556 _86=0 schedule_at _87
+    SUB	//  coins forward_nton schedule_at in_msg _85=1805556 _86=0 _88
+    MAX	//  coins forward_nton schedule_at in_msg _85=1805556 _89
+    MUL	//  coins forward_nton schedule_at in_msg timer_work_cost
+    s3 PUSH	//  coins forward_nton schedule_at in_msg timer_work_cost forward_nton
+    ADD	//  coins forward_nton schedule_at in_msg _92
+    400000000 PUSHINT	//  coins forward_nton schedule_at in_msg _92 _93=400000000
+    ADD	//  coins forward_nton schedule_at in_msg _94
+    s1 s4 XCHG	//  in_msg forward_nton schedule_at coins _94
+    LESS	//  in_msg forward_nton schedule_at _95
+    101 THROWIF
+    s0 s2 XCHG	//  schedule_at forward_nton in_msg
+    put_scheduled INLINECALLDICT
+    0 PUSHINT	//  _98=0
+    24 PUSHINT	//  _98=0 _99=24
+    NEWC	//  _98=0 _99=24 _100
+    6 STU	//  _98=0 _102
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  _98=0 _102 _103
+    STSLICER	//  _98=0 _104
+    200000000 PUSHINT	//  _98=0 _104 _105=200000000
+    STVARUINT16	//  _98=0 _106
+    107 STU	//  _120
+    ENDC	//  _121
+    1 PUSHINT	//  _121 _122=1
+    SENDRAWMSG
+  }>
+  recv_external PROC:<{
+    // 
+    BALANCE	//  _2
+    UNPAIR	//  _7 _8
+    DROP	//  balance
+    100000000 PUSHINT	//  balance _4=100000000
+    LESS	//  _5
+    IF:<{	// 
+      ACCEPT
+    }>	// 
+  }>
   swap_remove PROC:<{
     //  t index
     OVER	//  t index t
@@ -2100,188 +2336,6 @@ PROGRAM{
     }>
     CTOS	//  _47
   }>
-  send_schedule_loop_msg PROC:<{
-    // 
-    0 PUSHINT	//  _0=0
-    24 PUSHINT	//  _0=0 _1=24
-    NEWC	//  _0=0 _1=24 _2
-    6 STU	//  _0=0 _4
-    b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  _0=0 _4 _5
-    STSLICER	//  _0=0 _6
-    500000000 PUSHINT	//  _0=0 _6 _7=500000000
-    STVARUINT16	//  _0=0 _8
-    107 STU	//  _22
-    ENDC	//  _23
-    0 PUSHINT	//  _23 _24=0
-    SENDRAWMSG
-  }>
-  continue_parsing PROC:<{
-    //  success scheduled_at current_time
-    s0 s2 XCHG	//  current_time scheduled_at success
-    NOT	//  current_time scheduled_at _3
-    IFJMP:<{	//  current_time scheduled_at
-      2DROP	// 
-      0 PUSHINT	//  _4=0
-    }>	//  current_time scheduled_at
-    SWAP	//  scheduled_at current_time
-    LEQ	//  _5
-  }>
-  process_schedule PROC:<{
-    // 
-    c4 PUSH	//  _2
-    CTOS	//  _3
-    LDDICT	//  _58 _57
-    DROP	//  scheduled
-    NOW	//  scheduled current_time
-    OVER
-    32 PUSHINT	//  scheduled current_time scheduled _10=32
-    DICTUMIN
-    NULLSWAPIFNOT2	//  scheduled current_time schedules scheduled_at success
-    WHILE:<{
-      s1 s3 PUSH2	//  scheduled current_time schedules scheduled_at success scheduled_at current_time
-      continue_parsing CALLDICT	//  scheduled current_time schedules scheduled_at _12
-    }>DO<{	//  scheduled current_time schedules scheduled_at
-      SWAP	//  scheduled current_time scheduled_at schedules
-      LDREF	//  scheduled current_time scheduled_at addr schedules
-      LDREF	//  scheduled current_time scheduled_at addr _65 _64
-      DROP	//  scheduled current_time scheduled_at addr body
-      1 PUSHINT	//  scheduled current_time scheduled_at addr body _19=1
-      24 PUSHINT	//  scheduled current_time scheduled_at addr body _19=1 _20=24
-      NEWC	//  scheduled current_time scheduled_at addr body _19=1 _20=24 _21
-      6 STU	//  scheduled current_time scheduled_at addr body _19=1 _23
-      s0 s3 XCHG	//  scheduled current_time scheduled_at _23 body _19=1 addr
-      CTOS	//  scheduled current_time scheduled_at _23 body _19=1 _24
-      s1 s3 XCHG	//  scheduled current_time scheduled_at _19=1 body _23 _24
-      STSLICER	//  scheduled current_time scheduled_at _19=1 body _25
-      200000000 PUSHINT	//  scheduled current_time scheduled_at _19=1 body _25 _26=200000000
-      STVARUINT16	//  scheduled current_time scheduled_at _19=1 body _27
-      s1 s2 XCHG	//  scheduled current_time scheduled_at body _19=1 _27
-      107 STU	//  scheduled current_time scheduled_at body _41
-      STREF	//  scheduled current_time scheduled_at _42
-      ENDC	//  scheduled current_time scheduled_at _43
-      0 PUSHINT	//  scheduled current_time scheduled_at _43 _44=0
-      SENDRAWMSG
-      ROT
-      32 PUSHINT	//  current_time scheduled_at scheduled _48=32
-      DICTUDEL	//  current_time _66 _67
-      DROP	//  current_time scheduled
-      DUP
-      32 PUSHINT	//  current_time scheduled scheduled _50=32
-      DICTUMIN
-      NULLSWAPIFNOT2	//  current_time scheduled schedules scheduled_at success
-      s3 s4 XCHG	//  scheduled current_time schedules scheduled_at success
-    }>	//  scheduled current_time schedules scheduled_at
-    3 BLKDROP	//  scheduled
-    NEWC	//  scheduled _52
-    STDICT	//  _53
-    ENDC	//  _54
-    c4 POP
-    send_schedule_loop_msg CALLDICT
-  }>
-  put_scheduled PROC:<{
-    //  in_msg
-    32 LDU	//  schedule_at in_msg
-    16 PUSHINT	//  schedule_at in_msg _5=16
-    RAND	//  schedule_at in_msg _6
-    s1 s2 XCHG	//  in_msg schedule_at _6
-    ADD	//  in_msg schedule_at
-    c4 PUSH	//  in_msg schedule_at _10
-    CTOS	//  in_msg schedule_at _11
-    LDDICT	//  in_msg schedule_at _38 _37
-    DROP	//  in_msg schedule_at scheduled
-    2DUP
-    32 PUSHINT	//  in_msg schedule_at scheduled schedule_at scheduled _15=32
-    DICTUGET
-    NULLSWAPIFNOT	//  in_msg schedule_at scheduled _39 _40
-    NIP	//  in_msg schedule_at scheduled old_schedule_exist
-    101 THROWIF
-    s0 s2 XCHG	//  scheduled schedule_at in_msg
-    LDREF	//  scheduled schedule_at schedule_to in_msg
-    LDREF	//  scheduled schedule_at schedule_to _44 _43
-    DROP	//  scheduled schedule_at schedule_to body
-    SWAP
-    NEWC	//  scheduled schedule_at body schedule_to _26
-    STREF	//  scheduled schedule_at body _27
-    STREF	//  scheduled schedule_at _28
-    s0 s2 XCHG
-    32 PUSHINT	//  _28 schedule_at scheduled _29=32
-    DICTUSETB	//  scheduled
-    NEWC	//  scheduled _31
-    STDICT	//  _32
-    ENDC	//  _33
-    c4 POP
-  }>
-  recv_internal PROC:<{
-    //  coins in_msg_full in_msg
-    SWAP	//  coins in_msg in_msg_full
-    CTOS	//  coins in_msg in_msg_full
-    4 LDU	//  coins in_msg bounced in_msg_full
-    LDMSGADDR	//  coins in_msg bounced _66 _65
-    DROP	//  coins in_msg bounced src
-    HASHSU	//  coins in_msg bounced src_hash
-    b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  coins in_msg bounced src_hash _14
-    HASHSU	//  coins in_msg bounced src_hash _15
-    s1 s(-1) PUXC	//  coins in_msg bounced src_hash src_hash _15
-    EQUAL	//  coins in_msg bounced src_hash _16
-    IFJMP:<{	//  coins in_msg bounced src_hash
-      4 BLKDROP	// 
-      process_schedule CALLDICT
-    }>	//  coins in_msg bounced src_hash
-    SWAP
-    1 PUSHINT	//  coins in_msg src_hash bounced _18=1
-    AND	//  coins in_msg src_hash _19
-    IFJMP:<{	//  coins in_msg src_hash
-      3 BLKDROP	// 
-    }>	//  coins in_msg src_hash
-    OVER	//  coins in_msg src_hash in_msg
-    SBITS	//  coins in_msg src_hash _20
-    32 LESSINT	//  coins in_msg src_hash _22
-    IFJMP:<{	//  coins in_msg src_hash
-      3 BLKDROP	// 
-    }>	//  coins in_msg src_hash
-    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src_hash _23
-    HASHSU	//  coins in_msg src_hash _24
-    EQUAL	//  coins in_msg _25
-    IFJMP:<{	//  coins in_msg
-      NIP	//  in_msg
-      64 LDU	//  _68 _67
-      DROP	//  request_nton
-      DUP	//  request_nton request_nton
-      1 EQINT	//  request_nton _31
-      IFJMP:<{	//  request_nton
-        DROP	// 
-        send_schedule_loop_msg CALLDICT
-      }>	//  request_nton
-      0 PUSHINT	//  request_nton _33=0
-      24 PUSHINT	//  request_nton _33=0 _34=24
-      NEWC	//  request_nton _33=0 _34=24 _35
-      6 STU	//  request_nton _33=0 _37
-      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _33=0 _37 _38
-      STSLICER	//  request_nton _33=0 _39
-      ROT	//  _33=0 _39 request_nton
-      STVARUINT16	//  _33=0 _40
-      107 STU	//  _54
-      ENDC	//  _55
-      1 PUSHINT	//  _55 _56=1
-      SENDRAWMSG
-    }>	//  coins in_msg
-    SWAP
-    1000000000 PUSHINT	//  in_msg coins _59=1000000000
-    LESS	//  in_msg _60
-    100 THROWIF
-    put_scheduled CALLDICT
-  }>
-  recv_external PROC:<{
-    // 
-    BALANCE	//  _2
-    UNPAIR	//  _7 _8
-    DROP	//  balance
-    100000000 PUSHINT	//  balance _4=100000000
-    LESS	//  _5
-    IF:<{	// 
-      ACCEPT
-    }>	// 
-  }>
   set_init_data PROC:<{
     // 
     NEWDICT	//  v
@@ -2338,32 +2392,34 @@ PROGRAM{
     NEWC	//  coins_1=100000000 coins_2=1000000000 half_full_msg _24
     ENDC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void
     0 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0
-    NEWC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _28
-    32 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _30
-    s1 s(-1) PUXC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void void _30
-    STREF	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _31
-    STREF	//  coins_1=100000000 coins_2=1000000000 half_full_msg _32
+    500000000 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _29
+    NEWC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _29 _30
+    64 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _32
+    32 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _34
+    s1 s(-1) PUXC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void void _34
+    STREF	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _35
+    STREF	//  coins_1=100000000 coins_2=1000000000 half_full_msg _36
     ENDC	//  coins_1=100000000 coins_2=1000000000 half_full_msg body
     CONT:<{
       recv_internal CALLDICT
-    }>	//  coins_1=100000000 coins_2=1000000000 half_full_msg body _35
-    OVER	//  coins_1=100000000 coins_2=1000000000 half_full_msg body _35 body
-    CTOS	//  coins_1=100000000 coins_2=1000000000 half_full_msg body _35 _37
-    s5 s3 s(-1) XCPUXC	//  _35 coins_2=1000000000 half_full_msg body coins_1=100000000 half_full_msg _37
-    TRIPLE	//  _35 coins_2=1000000000 half_full_msg body _36
-    s1 s4 XCHG	//  body coins_2=1000000000 half_full_msg _35 _36
+    }>	//  coins_1=100000000 coins_2=1000000000 half_full_msg body _39
+    OVER	//  coins_1=100000000 coins_2=1000000000 half_full_msg body _39 body
+    CTOS	//  coins_1=100000000 coins_2=1000000000 half_full_msg body _39 _41
+    s5 s3 s(-1) XCPUXC	//  _39 coins_2=1000000000 half_full_msg body coins_1=100000000 half_full_msg _41
+    TRIPLE	//  _39 coins_2=1000000000 half_full_msg body _40
+    s1 s4 XCHG	//  body coins_2=1000000000 half_full_msg _39 _40
     invoke_method_expect_fail CALLDICT	//  body coins_2=1000000000 half_full_msg gas_wasted_on_fail
     CONT:<{
       recv_internal CALLDICT
-    }>	//  body coins_2=1000000000 half_full_msg gas_wasted_on_fail _41
-    s0 s4 XCHG	//  _41 coins_2=1000000000 half_full_msg gas_wasted_on_fail body
-    CTOS	//  _41 coins_2=1000000000 half_full_msg gas_wasted_on_fail _43
-    s3 s3 s0 XCHG3	//  _41 gas_wasted_on_fail coins_2=1000000000 half_full_msg _43
-    TRIPLE	//  _41 gas_wasted_on_fail _42
-    s1 s2 XCHG	//  gas_wasted_on_fail _41 _42
-    invoke_method CALLDICT	//  gas_wasted_on_fail _46 _47
+    }>	//  body coins_2=1000000000 half_full_msg gas_wasted_on_fail _45
+    s0 s4 XCHG	//  _45 coins_2=1000000000 half_full_msg gas_wasted_on_fail body
+    CTOS	//  _45 coins_2=1000000000 half_full_msg gas_wasted_on_fail _47
+    s3 s3 s0 XCHG3	//  _45 gas_wasted_on_fail coins_2=1000000000 half_full_msg _47
+    TRIPLE	//  _45 gas_wasted_on_fail _46
+    s1 s2 XCHG	//  gas_wasted_on_fail _45 _46
+    invoke_method CALLDICT	//  gas_wasted_on_fail _50 _51
     DROP	//  gas_wasted_on_fail gas_used
-    PAIR	//  _45
+    PAIR	//  _49
   }>
   __test_schedule_loop_start PROC:<{
     // 
@@ -2419,7 +2475,7 @@ PROGRAM{
     invoke_method CALLDICT	//  _23 _24
     DROP	//  gas_used
   }>
-  __test_pull_ton PROC:<{
+  __test_pull_ton_failure PROC:<{
     // 
     set_init_data CALLDICT
     10000000 PUSHINT	//  coins=10000000
@@ -2441,13 +2497,13 @@ PROGRAM{
     ENDC	//  coins=10000000 half_full_msg body
     CONT:<{
       recv_internal CALLDICT
-    }>	//  coins=10000000 half_full_msg body _29
-    SWAP	//  coins=10000000 half_full_msg _29 body
-    CTOS	//  coins=10000000 half_full_msg _29 _31
-    s3 s3 s0 XCHG3	//  _29 coins=10000000 half_full_msg _31
-    TRIPLE	//  _29 _30
-    invoke_method CALLDICT	//  _33 _34
-    DROP	//  gas_used
+    }>	//  coins=10000000 half_full_msg body _27
+    SWAP	//  coins=10000000 half_full_msg _27 body
+    CTOS	//  coins=10000000 half_full_msg _27 _29
+    s3 s3 s0 XCHG3	//  _27 coins=10000000 half_full_msg _29
+    TRIPLE	//  _27 _28
+    invoke_method_expect_fail CALLDICT	//  _30
+    DROP	// 
   }>
   __test_schedule_and_loop PROC:<{
     // 
@@ -2472,27 +2528,29 @@ PROGRAM{
     NEWC	//  coins=1000000000 half_full_msg addr _27
     ENDC	//  coins=1000000000 half_full_msg addr void
     1664821506 PUSHINT	//  coins=1000000000 half_full_msg addr void _30=1664821506
-    NEWC	//  coins=1000000000 half_full_msg addr void _30=1664821506 _31
-    32 STU	//  coins=1000000000 half_full_msg addr void _33
-    s1 s2 XCHG	//  coins=1000000000 half_full_msg void addr _33
-    STREF	//  coins=1000000000 half_full_msg void _34
-    STREF	//  coins=1000000000 half_full_msg _35
+    500000000 PUSHINT	//  coins=1000000000 half_full_msg addr void _30=1664821506 _32
+    NEWC	//  coins=1000000000 half_full_msg addr void _30=1664821506 _32 _33
+    64 STU	//  coins=1000000000 half_full_msg addr void _30=1664821506 _35
+    32 STU	//  coins=1000000000 half_full_msg addr void _37
+    s1 s2 XCHG	//  coins=1000000000 half_full_msg void addr _37
+    STREF	//  coins=1000000000 half_full_msg void _38
+    STREF	//  coins=1000000000 half_full_msg _39
     ENDC	//  coins=1000000000 half_full_msg body
     CONT:<{
       recv_internal CALLDICT
-    }>	//  coins=1000000000 half_full_msg body _39
-    SWAP	//  coins=1000000000 half_full_msg _39 body
-    CTOS	//  coins=1000000000 half_full_msg _39 _41
-    s3 s3 s0 XCHG3	//  _39 coins=1000000000 half_full_msg _41
-    TRIPLE	//  _39 _40
-    invoke_method CALLDICT	//  _49 _50
+    }>	//  coins=1000000000 half_full_msg body _43
+    SWAP	//  coins=1000000000 half_full_msg _43 body
+    CTOS	//  coins=1000000000 half_full_msg _43 _45
+    s3 s3 s0 XCHG3	//  _43 coins=1000000000 half_full_msg _45
+    TRIPLE	//  _43 _44
+    invoke_method CALLDICT	//  _53 _54
     DROP	//  gas_used
     CONT:<{
       process_schedule CALLDICT
-    }>	//  gas_used _45
-    0 TUPLE	//  gas_used _45 _46
-    invoke_method CALLDICT	//  gas_used _51 _52
+    }>	//  gas_used _49
+    0 TUPLE	//  gas_used _49 _50
+    invoke_method CALLDICT	//  gas_used _55 _56
     DROP	//  gas_used gas_used_loop
-    ADD	//  _48
+    ADD	//  _52
   }>
 }END>c
