@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="https://wallet.ton.org/libs/tonweb.min.js?v=1.1.41"></script>
+    <script type="text/javascript" src="https://wallet.ton.org/libs/tonweb-mnemonic.min.js?v=1.1.41"></script>
+    <link rel="stylesheet" href="main.css">
+  </head>
+  <body>
+    <div id="main">
+      <div id="timer-bg-top"></div>
+      <div id="timer-stats">
+        <div id="timer-stats-names">
+          <div class="timer-stat">адрес таймера</div>
+          <div class="timer-stat">баланс таймера</div>
+          <div class="timer-stat">запланировано сообщений</div>
+        </div>
+        <div id="timer-stats-values">
+          <div class="timer-stat" id="addr"><b>?</b></div>
+          <div class="timer-stat" id="balance"><b>-.- TON</b></div>
+          <div class="timer-stat" id="schedules"><b>?</b></div>
+        </div>
+      </div>
+      <div id="timer-use">
+        <input type="datetime-local" id="schedule-at" placeholder="дд.мм.гггг, --:--">
+        
+        <input type="text" placeholder="Адрес для отправки сообщения" id="schedule-addr">
+        <input type="text" placeholder="Количество TON для прикрепления" id="schedule-value">
+        
+        <input type="radio" id="send-text" name="send" checked>
+        <label for="send-text">Послать текст</label>
+        <input type="radio" id="send-boc" name="send">
+        <label for="send-boc">Послать bag-of-cells</label>
+        
+        <input type="text" placeholder="Текст/BOC сообщения" id="schedule-body">
+        
+        <div id="timer-result-link" class="err">
+          Некорректная дата
+        </div>
+      </div>
+      <div id="timer-bg-bottom"></div>
+    </div>
+    
+    <script>
+      let $ = document.querySelector.bind(document);
+      const tonweb = new TonWeb(
+        new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
+      );
+      
+      let requests = [];
+      let last_finish = 0;
+      setInterval(() => {
+        if (requests.length && Date.now() - last_finish > 1600) {
+          const req = requests.pop();
+          console.log(req);
+          
+          last_finish = Date.now() + 86400 * 1000;
+          req.fn(...req.args).then((...args) => {
+            last_finish = Date.now();
+            
+            return req.onresult(...args);
+          }, () => {last_finish = Date.now();});
+        }
+      }, 100);
+      
+      class Timer extends tonweb.Contract {
+        constructor(provider, options) {
+          options.code = tonweb.boc.Cell.oneFromBoc('B5EE9C7201021301000277000114FF00F4A413F4BCF2C80B01020120020302014804050022F2F8276F2230821005F5E100B992F800DE0202CC0607020148101102012008090201D40E0F02F3D00E86981FD20187C80C68433FC0C408088000000000000000000000000000000000000000000000000000000067C80A9085D4A2F8278047000B8D8492F81F010EBA4E090492F81F04684300056F8F0C5C6444026EF311CF41F63F0AF3031C64BFB488DDC676895B81FE9E5227C80DD718100C1081DCD65005CC0A0B0201580C0D008231D33F3020C0019330F006E0708018C8CB058D086000ADF1E18B8C88804DDE6239E83EC7E15E60638C97F6911BB8CED12B703FD3CA44CF1658FA02CB6AC971FB00000AF2D064F00900751C20063232C1634219FE062040440000000000000000000000000000000000000000000000000000000333C5A084077359403E80B2DAB25C3EC020001100ACE496DC38006EE0009F3B51343D010C3E08C860083D219BE96514C4FC01E38B8075350C1C60063232C140F404F3C5A08402FAF0803E8084B2DAB3325C3EC01620083D16CC0820083D219BE9440D3A17C0F23D00327B553C01A0005934C7E0043E0444A83B51343D010C1720083D039BE84C7CB41940B5350C0072333300A0083D10F23D00327B552001CFBBA99D4D31F01FE202082100EC3C86DBA8E52208210AD4DE08EBA8E183081115DFE20308228534554434F4445FE2030D430FE20308E2D821036E6B809BA8E1E81115DFE2030822852455345525645FE2030D30701FE2030F40430FE20309430F2C064E2E2E30DD08120031BBEC2216F88A55210BA93306F8DE05C6F81026F8D126F8501800363081115DFE2030821053454E44FE2030D30701FE2030D430FE2030');
+          super(provider, options);
+        }
+        createDataCell() {
+          const cell = new tonweb.boc.Cell();
+          cell.bits.writeUint(0, 1); // empty dict
+          return cell;
+        }
+        async createInitExternalMessage() {
+          const {stateInit, address, code, data} = await this.createStateInit();
+          
+          const body = new tonweb.boc.Cell();
+          const header = tonweb.Contract.createExternalMessageHeader(address);
+          const externalMessage = tonweb.Contract.createCommonMsgInfo(header, stateInit, body);
+          
+          return {
+            address: address,
+            message: externalMessage,
+          }
+        }
+        async deploy() {
+          window.iem = await this.createInitExternalMessage();
+          window.iem_boc = await iem.message.toBoc(false, true);
+          await tonweb.sendBoc(window.iem_boc);
+        }
+      }
+      
+      const timer = new Timer(tonweb, {});
+      
+      async function update_wallet_info_timer() {
+        let addr = await timer.getAddress();
+        
+        requests.push({
+          'fn': tonweb.getBalance.bind(tonweb),
+          'args': [addr],
+          'onresult': (v) => {
+            $('.timer-stat#balance>b').innerText = v / 1000000000 + ' TON';
+          }});
+        
+        requests.push({
+          'fn': tonweb.provider.getExtendedAddressInfo.bind(tonweb.provider),
+          'args': [addr.toString(true)],
+          'onresult': (v) => {
+            if (v.account_state['@type'] == 'uninited.accountState') {
+              $('.timer-stat#schedules>b').innerText = '0 (timer not deployed yet)';
+            } else {
+              let dict = tonweb.boc.Cell.oneFromBoc(tonweb.utils.base64ToBytes(v.account_state.data));
+              
+              let count_refs = (cell) => {
+                let n = 0;
+                for (let c in cell.refs) {
+                  n += count_refs(c) + 1;
+                }
+                return n;
+              };
+              
+              let r = count_refs(dict);
+              $('.timer-stat#schedules>b').innerText = (r ? '(?) ' : '') + r / 3;
+            }
+          }});
+      }
+      
+      function dump_stores(bits) {
+        let s = '';
+        while (bits.length >= 256) {
+          s += '.store_uint(0x' + tonweb.utils.bytesToHex(bits.array.slice(0, 32)) + ', 256)';
+          bits.array = bits.array.slice(32);
+          bits.length -= 256;
+        }
+        s += '.store_uint(0x' + tonweb.utils.bytesToHex(bits.array) + ' >> ' +
+          (bits.length - bits.cursor % 256) + ', ' + bits.cursor % 256 + ')';
+        return s;
+      }
+      
+      function dump_cell(cell, i = 1, s = '') {
+        let orig = i;
+        s += '  var b' + i + ' = begin_cell()' + dump_stores(cell.bits) + ';\n';
+        
+        for (let j = 0; j < cell.refs.length; j++) {
+          let k = ++i;
+          [i, s] = dump_cell(cell.refs[j], i, s);
+          s += '  b' + orig + ' = b' + orig + '.store_ref(b' + k + '.end_cell());\n';
+        }
+        
+        return [i, s];
+      }
+      
+      // timer.deploy().then(console.log)
+      
+      function _promise_recalc_schedule_link(resolve, reject) {
+        let d = $('#schedule-at').valueAsDate;
+        if (d == null)      {return reject('Некорректная дата');}
+        if (d < new Date()) {return reject('Эта дата уже прошла');}
+        
+        let timer_work_s = Math.floor((d - new Date()) / 1000) + 5;
+        
+        let e = $('#schedule-value').value;
+        let nano_ton_schedule = Math.max(tonweb.utils.toNano(e) * 1, 10000000);
+        let nano_ton = nano_ton_schedule + 1805556 * timer_work_s + 450000000;
+        
+        // may throw address parsing exception
+        let a = new tonweb.Address($('#schedule-addr').value);
+        let schedule_addr = new tonweb.boc.Cell();
+        schedule_addr.bits.writeAddress(a);
+        
+        let schedule_body = null;
+        if ($('#send-boc').checked) {
+          schedule_body = tonweb.boc.Cell.oneFromBoc($('#schedule-body').value);
+        } else {
+          schedule_body = new tonweb.boc.Cell();
+          schedule_body.bits.writeUint(1, 64);
+          schedule_body.bits.writeString($('#schedule-body').value);
+        }
+        
+        let body = new tonweb.boc.Cell();
+        body.bits.writeUint(nano_ton_schedule, 64);
+        body.bits.writeUint(Math.floor(d.getTime() / 1000), 32);
+        body.refs.push(schedule_addr);
+        body.refs.push(schedule_body);
+        
+        (async () => {
+          let timer_addr = await timer.getAddress();
+          let boc = await body.toBoc();
+          
+          let tonhub_link = 'https://tonhub.com/transfer/';
+          tonhub_link += timer_addr.toString(true, true, true);
+          tonhub_link += '?amount=' + nano_ton;
+          tonhub_link += '&bin=' + tonweb.utils.bytesToBase64(boc);
+          
+          let tonkeeper_link = 'https://app.tonkeeper.com/transfer/';
+          tonkeeper_link += timer_addr.toString(true, true, true);
+          tonkeeper_link += '?amount=' + nano_ton;
+          tonkeeper_link += '&bin=' + tonweb.utils.bytesToBase64(boc);
+          
+          let ton_link = 'ton://transfer/';
+          ton_link += timer_addr.toString(true, true, true);
+          ton_link += '?amount=' + nano_ton;
+          ton_link += '&bin=' + tonweb.utils.bytesToBase64(boc);
+          
+          return 'Требуемая сумма: ' + nano_ton / 1000000000 + ' TON<br><br>'
+               + '<a href="' + tonhub_link    + '">Tonhub</a><br>'
+               + '<a href="' + tonkeeper_link + '">Tonkeeper</a><br>'
+               + '<a href="' + ton_link       + '">TON</a><br><br>'
+               + '<div style="font-size: 14px">' + tonhub_link    + '</div>'
+               + '<div style="font-size: 14px">' + tonkeeper_link + '</div>'
+               + '<div style="font-size: 14px">' + ton_link       + '</div>';
+        })().then(resolve);
+      }
+      
+      function recalc_schedule_link() {
+        let link_div = $('#timer-result-link');
+        
+        (new Promise(_promise_recalc_schedule_link)).then(
+          (link) => {link_div.classList.remove('err'); link_div.innerHTML = link;},
+          (err)  => {link_div.classList.add('err');    link_div.innerText = '' + err;}
+        );
+      }
+      
+      recalc_schedule_link();
+      update_wallet_info_timer();
+      $('#schedule-at').oninput = recalc_schedule_link;
+      $('#schedule-addr').oninput = recalc_schedule_link;
+      $('#schedule-value').oninput = recalc_schedule_link;
+      $('#send-text').oninput = recalc_schedule_link;
+      $('#send-boc').oninput = recalc_schedule_link;
+      $('#schedule-body').oninput = recalc_schedule_link;
+      
+      setInterval(recalc_schedule_link, 5000);
+      setInterval(update_wallet_info_timer, 5000);
+      
+      (async () => {
+        $('.timer-stat#addr>b').innerText = (await timer.getAddress()).toString(true, true, true);
+      })();
+    </script>
+  </body>
+</html>

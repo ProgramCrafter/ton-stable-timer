@@ -9,6 +9,8 @@
         new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
       );
       
+      // Intentional secret leakage.
+      // This seed can only be used for testing timer.
       const seed  = [75,5,181,210,168,14,181,101,187,153,123,140,58,110,9,40,183,249,229,223,216,81,152,98,151,110,192,236,80,103,161,100];
       const seed2 = [75,5,181,210,168,14,181,101,187,153,123,140,58,110,9,40,183,249,229,223,216,81,152,98,151,110,192,236,80,103,161,99];
       const keys = tonweb.utils.keyPairFromSeed(new Uint8Array(seed));

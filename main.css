@@ -1,0 +1,85 @@
+html {
+  height: 100%;
+}
+body {
+  margin: 10px;
+  height: calc(100% - 20px);
+}
+
+#main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  
+  font-family: Roboto;
+  font-size: 20px;
+}
+
+#timer-bg-top {
+  flex: 0.6;
+  margin-bottom: 10px;
+  background-color: #69f;
+}
+
+#timer-stats {
+  flex: 0.6;
+  margin: 10px 0;
+  background-color: #fff;
+  
+  display: flex;
+  flex-direction: row;
+}
+#timer-stats-names, #timer-stats-values {
+  display: inline-block;
+  flex: 1;
+}
+
+#timer-use {
+  flex: 3;
+  margin: 10px 0;
+  background-color: #fafaff;
+}
+
+#timer-bg-bottom {
+  flex: 0.1;
+}
+
+.timer-stat {
+  font-size: 20px;
+  width: fit-content;
+}
+#timer-stats-names .timer-stat {
+  margin: 10px 10px 10px auto;
+}
+#timer-stats-values .timer-stat {
+  margin: 10px auto 10px 10px;
+}
+
+#schedule-at {
+  font-size: 20px;
+  margin: 20px;
+  display: block;
+}
+#timer-use label {
+  font-size: 16px;
+}
+#timer-use input[type=radio] {
+  margin: 0 5px 0 20px;
+}
+#schedule-body, #schedule-addr, #schedule-value {
+  font-size: 16px;
+  margin: 20px;
+  padding: 8px;
+  width: calc(100% - 40px - 16px);
+  display: block;
+}
+#timer-result-link.err {
+  padding: 15px;
+  border-left: 3px #a30 solid;
+  margin: 20px;
+}
+#timer-result-link:not(.err) {
+  padding: 15px;
+  border-left: 3px #03a solid;
+  margin: 20px;
+}
