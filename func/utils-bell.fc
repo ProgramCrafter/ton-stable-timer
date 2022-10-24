@@ -1,0 +1,403 @@
+#include "func/utils.fc";
+
+;; TIM::BEL::load_core_address
+slice load_core_address() {
+  ;; _ priority:uint64 time:uint32 value:uint64 destination:MsgAddressInt body:^Any = BellDescriptor;
+  ;; _ data:BellDescriptor core_addr:MsgAddressInt left:(Maybe ^BellInfo) right:(Maybe ^BellInfo) = BellContractData;
+  
+  slice d = get_data().begin_parse();
+  d~skip_bits(160);   ;; priority, schedule time, value
+  d~load_msg_addr();  ;; scheduled message destination
+  d~load_ref();       ;; scheduled message body
+  
+  return d~load_msg_addr();
+}
+
+;; TIM::BEL::check_ident_proof (get-method; impure because raises errors)
+cell check_ident_proof_get_code(slice source, slice proof) impure inline_ref method_id {
+  if (proof~load_uint(1) == 0) {
+    throw_unless(114, equal_slices(source, load_core_address()));
+    
+    return proof~load_ref();
+  } else {
+    throw_if(110, source~load_uint(11) != 1024);
+    
+    cell bell_init = proof~load_ref();
+    cell bell_code = proof~load_ref();
+    cell bell_state_init = calc_bell_state_init_by_data(bell_init, bell_code);
+    
+    throw_if(111, source~load_uint(256) != cell_hash(bell_state_init));
+    
+    slice bell_init = bell_init.begin_parse();  ;; BellContractData
+    bell_init~skip_bits(160);    ;;  \
+    bell_init~load_msg_addr();   ;;  |  BellDescriptor
+    bell_init~load_ref();        ;;  /
+    
+    throw_unless(112, equal_slices(bell_init~load_msg_addr(), load_core_address()));
+    
+    cell children = bell_init~load_ref();
+    cell init_children = bell_init~load_ref();
+    
+    throw_if(113, cell_hash(children) != cell_hash(init_children));
+    
+    slice children = children.begin_parse();  ;; BellInfoLR
+    if (children~load_uint(1)) {
+      children~load_msg_addr();
+      children~skip_bits(96);
+    }
+    if (children~load_uint(1)) {
+      children~load_msg_addr();
+      children~skip_bits(96);
+    }
+    
+    return bell_code;
+  }
+}
+
+;; TIM::BEL::store_ident_proof
+builder store_ident_proof(builder msg, cell bell_code) inline_ref method_id {
+  msg~store_uint(1, 1);
+  
+  slice bell_current_data = get_data().begin_parse();
+  builder init_bell_data = begin_cell()
+    .store_uint(bell_current_data~load_uint(160), 160)
+    .store_slice(bell_current_data~load_msg_addr())
+    .store_ref(bell_current_data~load_ref())
+    .store_slice(bell_current_data~load_msg_addr());
+  
+  bell_current_data~load_ref();
+  cell init_children = bell_current_data~load_ref();
+  
+  return msg.store_ref(
+    init_bell_data
+      .store_ref(init_children)
+      .store_ref(init_children)
+      .end_cell()).store_ref(bell_code);
+}
+
+;; TIM::BEL::bell (#733be087)
+() bell(slice parent, slice proof) impure method_id {
+  ;; We have to maintain invariants of treap.
+  ;; That's why bell signal can be sent only by some parent bell or timer contract.
+  cell bell_code = check_ident_proof_get_code(parent, proof);
+  
+  slice d = get_data().begin_parse();
+  d~skip_bits(64);
+  int time = d~load_uint(32);
+  int value = d~load_uint(64);
+  slice dest = d~load_msg_addr();
+  cell body = d~load_ref();
+  
+  slice core = d~load_msg_addr();
+  
+  slice children = d~load_ref().begin_parse();
+  if (children~load_uint(1) == 1) {
+    ;; There is bell with schedule time lower than ours.
+    ;; It has to be removed first.
+    
+    send_raw_message(begin_cell()
+      .store_uint(0x18, 6)
+      .store_slice(children~load_msg_addr())
+      .store_coins(0)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(0x733be087, 32)
+      .store_ident_proof(bell_code)
+      .end_cell(), 64);
+    
+    return ();
+  }
+  
+  throw_if(100, now() <= time);
+  
+  ;; OK, the time has come. Destroying the bell.
+  send_raw_message(begin_cell()
+    .store_uint(0x10, 6)
+    .store_slice(dest)
+    .store_coins(value)
+    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_ref(body)
+    .end_cell(), 0);
+  
+  ;; Notifying parent about having destroyed.
+  send_raw_message(begin_cell()
+    .store_uint(0x10, 6)
+    .store_slice(parent)
+    .store_coins(50000000)  ;; 0.05 TON
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0xadc8652d, 32)
+    .store_ident_proof(bell_code)
+    .store_slice(children)  ;; left node has already been read out of that slice
+    .end_cell(), 0);
+  
+  int rtime = 0xFFFFFFFF;
+  if (children~load_uint(1)) {
+    children~load_msg_addr();
+    children~skip_bits(64);
+    rtime = children~load_uint(32);
+  }
+  
+  ;; Notifying timer root node.
+  send_raw_message(begin_cell()
+    .store_uint(0x10, 6)
+    .store_slice(core)
+    .store_coins(0)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0xfa6d6098, 32)
+    .store_ident_proof(bell_code)
+    .store_uint(time, 32)
+    .store_uint(rtime, 32)
+    .end_cell(), 160);  ;; destroying contract, moving all of its funds into timer root
+}
+
+;; TIM::BEL::bell_destroyed (#adc8652d)
+() bell_destroyed(slice parent, slice body) impure method_id {
+  check_ident_proof_get_code(parent, body);
+  
+  ;; skipping IdentProof
+  if (body~load_uint(1)) {
+    body~load_ref();
+  }
+  body~load_ref();
+  
+  slice old_data = get_data().begin_parse();
+  builder new_data = begin_cell();
+  
+  ;; copying BellDescriptor
+  new_data~store_uint(old_data~load_uint(160), 160);
+  new_data~store_slice(old_data~load_msg_addr());
+  new_data~store_ref(old_data~load_ref());
+  
+  ;; copying core address
+  new_data~store_slice(old_data~load_msg_addr());
+  
+  slice old_children = old_data~load_ref().begin_parse();
+  if (old_children~load_uint(1)) {
+    old_children~load_msg_addr();
+    old_children~skip_bits(96);
+  }
+  
+  builder new_children = begin_cell();
+  new_children~store_slice(body);
+  new_children~store_slice(old_children);
+  
+  new_data~store_ref(new_children.end_cell());
+  new_data~store_ref(old_data~load_ref());
+  set_data(new_data.end_cell());
+}
+
+;; TIM::BEL::retranslate_init (#fbffab22)
+() create_bell(slice parent, slice proof, int priority, int time, int value,
+               slice dest, cell fwd_body, cell bell_code) impure inline_ref method_id {
+  cell bell_code = check_ident_proof_get_code(parent, proof);
+  
+  slice d = get_data().begin_parse();
+  throw_if(100, priority > d~load_uint(64));
+  throw_if(101, time < now());
+  
+  cell new_children = null();
+  
+  slice children = d~load_ref().begin_parse();
+  if (time < d~load_uint(32)) {
+    if (children~load_uint(1) == 0) {
+      new_children = bell_info_lr_replace_left(
+        init_bell_no_children(priority, time, value, dest, fwd_body,
+                              load_core_address(), bell_code),
+        priority, time, {- only right child remaining -} children
+      );
+    } else {
+      slice child_addr = children~load_msg_addr();
+      if (priority > children.preload_uint(64)) {
+        builder subbell_children = begin_cell();
+        if (time <= children.preload_uint(96) & 4294967295) {
+          subbell_children~store_uint(0, 1);
+        }
+        subbell_children~store_uint(1, 1);
+        subbell_children~store_slice(child_addr);
+        subbell_children~store_uint(children~load_uint(96), 96);
+        if (time > children.preload_uint(96) & 4294967295) {
+          subbell_children~store_uint(0, 1);
+        }
+        cell subbell_children = subbell_children.end_cell();
+        
+        new_children = bell_info_lr_replace_left(
+          init_bell_with_children(priority, time, value, dest, fwd_body,
+            load_core_address(), subbell_children, bell_code),
+          priority, time, children
+        );
+      } else {
+        send_raw_message(begin_cell()
+          .store_uint(0x10, 6)
+          .store_slice(child_addr)
+          .store_coins(value + 100000000)
+          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+          .store_uint(op::retranslate_init, 32)
+          .store_uint(priority, 64)  ;;  \
+          .store_uint(time, 32)      ;;  |
+          .store_uint(value, 64)     ;;  |  BellDescriptor
+          .store_slice(dest)         ;;  |
+          .store_ref(fwd_body)       ;;  /
+          .store_ident_proof(bell_code)
+          .end_cell(), 0);
+      }
+    }
+  } else {
+    builder left_child = begin_cell();
+    if (children~load_uint(1) == 0) {
+      left_child~store_uint(0, 1);
+    } else {
+      left_child~store_uint(1, 1);
+      left_child~store_slice(children~load_msg_addr());
+      left_child~store_uint(children~load_uint(96), 96);
+    }
+    
+    if (children~load_uint(1) == 0) {
+      new_children = bell_info_lr_replace_right(
+        left_child,
+        init_bell_no_children(priority, time, value, dest, fwd_body,
+                              load_core_address(), bell_code),
+        priority, time
+      );
+    } else {
+      slice child_addr = children~load_msg_addr();
+      if (priority > children.preload_uint(64)) {
+        builder subbell_children = begin_cell();
+        if (time <= children.preload_uint(96) & 4294967295) {
+          subbell_children~store_uint(0, 1);
+        }
+        subbell_children~store_uint(1, 1);
+        subbell_children~store_slice(child_addr);
+        subbell_children~store_uint(children~load_uint(96), 96);
+        if (time > children.preload_uint(96) & 4294967295) {
+          subbell_children~store_uint(0, 1);
+        }
+        cell subbell_children = subbell_children.end_cell();
+        
+        new_children = bell_info_lr_replace_right(
+          left_child,
+          init_bell_with_children(priority, time, value, dest, fwd_body,
+            load_core_address(), subbell_children, bell_code),
+          priority, time
+        );
+      } else {
+        send_raw_message(begin_cell()
+          .store_uint(0x10, 6)
+          .store_slice(child_addr)
+          .store_coins(value + 100000000)
+          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+          .store_uint(op::retranslate_init, 32)
+          .store_uint(priority, 64)  ;;  \
+          .store_uint(time, 32)      ;;  |
+          .store_uint(value, 64)     ;;  |  BellDescriptor
+          .store_slice(dest)         ;;  |
+          .store_ref(fwd_body)       ;;  /
+          .store_ident_proof(bell_code)
+          .end_cell(), 0);
+      }
+    }
+  }
+  
+  if (~ is_null(new_children)) {
+    slice d = get_data().begin_parse();
+    cell own_schedule_body = d~load_ref();
+    d~load_ref();
+    cell init_children = d~load_ref();
+    set_data(
+       begin_cell()
+      .store_slice(d)
+      .store_ref(own_schedule_body)
+      .store_ref(new_children)
+      .store_ref(init_children)
+      .end_cell()
+    );
+  }
+}
+
+;; SBT::prove_ownership (#04ded148)
+() prove_ownership(slice dest, cell fwd_body, int include_content) impure inline_ref method_id {
+  (_, int id) = parse_std_addr(my_address());
+  
+  builder msg = begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(dest)
+    .store_coins(0)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0x0f24c7ae, 32)
+    .store_uint(0x22332233, 64)
+    .store_uint(id, 256)
+    .store_slice(load_core_address())
+    .store_ref(fwd_body)
+    .store_uint(0, 64);
+  
+  if (include_content) {
+    msg~store_uint(1, 1);
+    msg = msg.store_ref(get_data());
+  } else {
+    msg~store_uint(0, 1);
+  }
+  
+  send_raw_message(msg.end_cell(), 64);
+}
+
+;; SBT::request_owner (#d0c3bfea)
+() answer_request_owner(slice dest, cell fwd_body, int include_content,
+    int qid, slice initiator) impure inline_ref method_id {
+  (_, int id) = parse_std_addr(my_address());
+  
+  builder msg = begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(dest)
+    .store_coins(0)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0x0dd607e3, 32)
+    .store_uint(qid, 64)
+    .store_uint(id, 256)
+    .store_slice(initiator)
+    .store_slice(load_core_address())
+    .store_ref(fwd_body)
+    .store_uint(0, 64);
+  
+  if (include_content) {
+    msg~store_uint(1, 1);
+    msg = msg.store_ref(get_data());
+  } else {
+    msg~store_uint(0, 1);
+  }
+  
+  send_raw_message(msg.end_cell(), 64);
+}
+
+;; SBT::destroy (#1f04537a) not supported and won't be sent by timer collection anyway
+;;   if bell is going to be transferred to initiator/destination contract, then destroy support can be added
+
+;; SBT::revoke (#6f89f5e3) not supported as it doesn't maintain mandatory invariants
+
+;; SBT::get_authority_address (get-method)
+slice get_authority_address() method_id asm "b{00} PUSHSLICE";
+
+;; SBT::get_revoked_time (get-method)
+int get_revoked_time() method_id asm "0 PUSHINT";
+
+;; NFT::get_nft_data (get-method)
+(int, int, slice, slice, cell) get_nft_data() method_id {
+  (_, int id) = parse_std_addr(my_address());
+  slice owner = load_core_address();
+  
+  return (-1, id, owner, owner, null());
+}
+
+;; NFT::answer_static_data (#2fcb26a2)
+() answer_static_data(slice dest, int qid) impure inline_ref method_id {
+  (_, int id) = parse_std_addr(my_address());
+  
+  builder msg = begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(dest)
+    .store_coins(0)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0x8b771735, 32)
+    .store_uint(qid, 64)
+    .store_uint(id, 256)
+    .store_slice(load_core_address());
+  
+  send_raw_message(msg.end_cell(), 64);
+}

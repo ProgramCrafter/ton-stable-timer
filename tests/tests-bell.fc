@@ -1,0 +1,232 @@
+#include "func/stdlib-ext.fc";
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() set_init_data(int time) impure {
+  cell bell_children = begin_cell().store_uint(0, 2).end_cell();
+  slice v = my_address();
+  
+  set_data(begin_cell()
+    .store_uint(1000000000 + (time << 64), 160)
+    .store_slice(v)
+    .store_ref(begin_cell().end_cell())
+    .store_slice(v)
+    .store_ref(bell_children)
+    .store_ref(bell_children)
+    .end_cell());
+}
+
+cell get_bell_code() {
+  return begin_cell().end_cell();
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_write_newline() method_id {
+  ~dump(4445);
+  ~dump(0);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_invalid_ident_timer_not_bell() method_id {
+  set_init_data(0);
+  
+  (_, tuple stack_proof) = invoke_method(store_ident_proof, [begin_cell(), get_bell_code()]);
+  throw_if(100, tuple_length(stack_proof) != 1);
+  
+  cell bell_ident_proof = first(stack_proof).end_cell();
+  
+  invoke_method_expect_fail(check_ident_proof_get_code, [my_address(), bell_ident_proof.begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_valid_ident_proof_timer() method_id {
+  set_init_data(0);
+  
+  cell timer_ident_proof = begin_cell().store_uint(0, 1).store_ref(get_bell_code()).end_cell();
+  
+  invoke_method(check_ident_proof_get_code, [my_address(), timer_ident_proof.begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_valid_ident_proof_bell() method_id {
+  set_init_data(0);
+  
+  (_, tuple stack_proof) = invoke_method(store_ident_proof, [begin_cell(), get_bell_code()]);
+  throw_if(100, tuple_length(stack_proof) != 1);
+  
+  slice bell_ident_proof = first(stack_proof).end_cell().begin_parse();
+  cell bell_contract_data = bell_ident_proof.preload_ref();
+  
+  builder addr = begin_cell()
+    .store_uint(1024, 11)
+    .store_uint(cell_hash(calc_bell_state_init_by_data(bell_contract_data,
+                                                       get_bell_code())), 256);
+  
+  invoke_method(check_ident_proof_get_code, [addr.end_cell().begin_parse(), bell_ident_proof]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_prove_ownership_no_content() method_id {
+  set_init_data(0);
+  
+  invoke_method(prove_ownership, [null_address(), begin_cell().end_cell(), 0]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_prove_ownership_with_content() method_id {
+  set_init_data(0);
+  
+  invoke_method(prove_ownership, [null_address(), begin_cell().end_cell(), -1]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_request_owner_no_content() method_id {
+  set_init_data(0);
+  
+  invoke_method(answer_request_owner, [
+    null_address(), begin_cell().end_cell(), 0, 0x98760123, null_address()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_request_owner_with_content() method_id {
+  set_init_data(0);
+  
+  invoke_method(answer_request_owner, [
+    null_address(), begin_cell().end_cell(), -1, 0x98760123, null_address()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_get_nft_data() method_id {
+  set_init_data(0);
+  
+  invoke_method(get_nft_data, []);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_invalid_ident_no_proof() method_id {
+  set_init_data(0);
+  
+  invoke_method_expect_fail(check_ident_proof_get_code, [null_address(), begin_cell().end_cell().begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_no_bell_no_proof() method_id {
+  set_init_data(0);
+  
+  invoke_method_expect_fail(bell, [null_address(), begin_cell().end_cell().begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_no_subbell_destroy_no_proof() method_id {
+  set_init_data(0);
+  
+  invoke_method_expect_fail(bell_destroyed, [null_address(), begin_cell().end_cell().begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_no_bell_invalid_ident_proof() method_id {
+  set_init_data(1966200528);
+  
+  builder msg = begin_cell().store_uint(0x733be087, 32);
+  (_, tuple stack_proof) = invoke_method(store_ident_proof, [msg, get_bell_code()]);
+  throw_if(100, tuple_length(stack_proof) != 1);
+  slice bell_ident_proof = first(stack_proof).end_cell().begin_parse();
+  
+  bell_ident_proof~load_uint(32);
+  
+  invoke_method_expect_fail(check_ident_proof_get_code, [my_address(), bell_ident_proof]);
+  invoke_method_expect_fail(bell, [my_address(), bell_ident_proof]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_no_bell_invalid_time() method_id {
+  set_init_data(1966200528);
+  
+  builder msg = begin_cell()
+    .store_uint(0x733be087, 32)
+    .store_uint(0, 1)
+    .store_ref(get_bell_code());
+  slice bell_ident_proof = msg.end_cell().begin_parse();
+  
+  bell_ident_proof~load_uint(32);
+  
+  invoke_method(check_ident_proof_get_code, [my_address(), bell_ident_proof]);
+  invoke_method_expect_fail(bell, [my_address(), bell_ident_proof]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_bell_at_valid_time() method_id {
+  set_init_data(1666200528);
+  
+  builder msg = begin_cell()
+    .store_uint(0x733be087, 32)
+    .store_uint(0, 1)
+    .store_ref(get_bell_code());
+  slice bell_ident_proof = msg.end_cell().begin_parse();
+  
+  bell_ident_proof~load_uint(32);
+  
+  invoke_method(check_ident_proof_get_code, [my_address(), bell_ident_proof]);
+  invoke_method(bell, [my_address(), bell_ident_proof]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_bell_code() method_id {
+  set_init_data(1666200528);
+  
+  (_, tuple stack) = invoke_method(get_bell_code, []);
+  cell code = stack.first();
+  
+  throw_if(100, is_null(code));
+  
+  slice code = code.begin_parse();
+  code~dump();
+  throw_unless(101, code.slice_bits());
+  throw_unless(102, code.slice_refs());
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_timer_init() method_id {
+  set_init_data(0);
+  
+  invoke_method(TIM::recv_external, []);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_timer_scheduler() method_id {
+  set_init_data(0);
+  
+  invoke_method(TIM::send_schedule_loop_msg, []);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+{-  timer-only
+() __test_create_bell() method_id {
+  set_init_data();
+  
+  invoke_method(create_bell, [
+    0x11111111, 0xFFFFFFFE, 0, begin_cell().end_cell().begin_parse(), begin_cell().end_cell()
+  ]);
+}
+-}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

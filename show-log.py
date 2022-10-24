@@ -44,6 +44,8 @@ with open(__file__ + '/../toncli.log', 'r', encoding='utf-8') as f:
                   .replace('9223372036854775807', 'UMAX')
                   .replace('[vm.cpp:558]', '[vm558]') + '\x1b[37m')
     
+    line = line.removeprefix('INFO: ')
+    
     for (code, desc) in exit_codes.items():
       c2 = int(code) + 200
       line = line.replace(f'code: [{code}]', f'code: [{code} | {desc}]')
@@ -73,6 +75,12 @@ with open(__file__ + '/../toncli.log', 'r', encoding='utf-8') as f:
       if 'SUCCESS' in line: color = '\x1b[32m'
       if 'FAIL' in line: color = '\x1b[33m'
       
+      line = (line
+        .replace('[SUCCESS] Test', 'OK,')
+        .replace('[FAIL]', 'RE')
+        .replace(' Total gas used (including testing code)', ', gas usage')
+      )
+      
       gas_usage = int(line[line.rfind('[')+1:line.rfind(']')])
       ton_usage = gas_usage * 10**-6
       if '_get]' in line:
@@ -81,7 +89,7 @@ with open(__file__ + '/../toncli.log', 'r', encoding='utf-8') as f:
         ton_s = ' (money transfer)'
       elif 'init_contract]' in line:
         ton_s = ' (one-time initialization)'
-      elif ton_usage > 0.001:
+      elif ton_usage > 0.01:
         ton_s = '\x1b[33m (%.5f TON == %.2f req/TON)' % (ton_usage, 1/ton_usage)
       else:
         ton_s = '\x1b[32m (%.5f TON == %.2f req/TON)' % (ton_usage, 1/ton_usage)

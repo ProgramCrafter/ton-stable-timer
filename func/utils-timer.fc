@@ -1,0 +1,325 @@
+#include "func/utils.fc";
+
+;; TIM::TIM::send_schedule_loop_msg
+() TIM::send_schedule_loop_msg() impure inline_ref {
+  ;; Instant Hypercube Routing is disabled
+  ;;   we are sending message to another shardchain
+  ;;   so bounce won't be received earlier than two blocks later,
+  ;;   effectively limiting TON spending
+  send_raw_message(
+     begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(unused_masterchain_address())
+    .store_coins(500000000)     {-  0.5 TON  -}
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
+    .end_cell(), 0);
+}
+
+;; TIM::TIM::check_ident_proof (impure because raises errors)
+slice TIM::check_ident_proof(slice source, slice proof) impure inline_ref {
+  if (proof~load_uint(1) == 0) {
+    throw(114);
+    return null();
+  } else {
+    throw_if(110, source~load_uint(11) != 1024);
+    
+    cell bell_init = proof~load_ref();
+    cell bell_code = proof~load_ref();
+    
+    slice own_data = get_data().begin_parse();
+    throw_unless(114, cell_hash(bell_code) != cell_hash(own_data~load_ref()));
+    
+    cell bell_state_init = calc_bell_state_init_by_data(bell_init, bell_code);
+    
+    throw_if(111, source~load_uint(256) != cell_hash(bell_state_init));
+    
+    slice bell_init = bell_init.begin_parse();  ;; BellContractData
+    bell_init~skip_bits(160);    ;;  \
+    bell_init~load_msg_addr();   ;;  |  BellDescriptor
+    bell_init~load_ref();        ;;  /
+    
+    throw_unless(112, equal_slices(bell_init~load_msg_addr(), load_core_address()));
+    
+    cell children = bell_init~load_ref();
+    cell init_children = bell_init~load_ref();
+    
+    throw_if(113, cell_hash(children) != cell_hash(init_children));
+    
+    slice children = children.begin_parse();  ;; BellInfoLR
+    if (children~load_uint(1)) {
+      children~load_msg_addr();
+      children~skip_bits(96);
+    }
+    if (children~load_uint(1)) {
+      children~load_msg_addr();
+      children~skip_bits(96);
+    }
+    
+    return proof;
+  }
+}
+
+;; TIM::TIM::store_ident_proof
+builder TIM::store_ident_proof(builder msg) inline_ref {
+  slice d = get_data().begin_parse();
+  return msg.store_uint(0, 1).store_ref(d~load_ref());
+}
+
+;; TIM::TIM::create_bell
+() TIM::create_bell(int priority, int time, int value, slice dest, cell fwd_body) impure inline_ref {
+  slice timer_old_data = get_data().begin_parse();
+  int old_lm_schedule = timer_old_data~load_uint(32);
+  int leftmost_schedule = min(old_lm_schedule, time);
+  
+  if (old_lm_schedule == 0xFFFFFFFF) {
+    TIM::send_schedule_loop_msg();
+  }
+  
+  cell bell_code = timer_old_data~load_ref();
+  builder timer_new_data = begin_cell().store_uint(leftmost_schedule, 32).store_uint(1, 1);
+  
+  if (timer_old_data~load_uint(1) == 1) {
+    slice root_addr = timer_old_data~load_msg_addr();
+    int root_priority = timer_old_data~load_uint(64);
+    
+    throw_if(300, priority == root_priority);
+    
+    if (root_priority > priority) {
+      timer_new_data~store_slice(root_addr);
+      timer_new_data~store_uint(root_priority, 64);
+      timer_new_data~store_slice(timer_old_data);    ;; any remaining bits
+      
+      send_raw_message(
+         begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(root_addr)
+        .store_coins(value + 100000000)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(op::retranslate_init, 32)
+        .store_uint(priority, 64)  ;;  \
+        .store_uint(time, 32)      ;;  |
+        .store_uint(value, 64)     ;;  |  BellDescriptor
+        .store_slice(dest)         ;;  |
+        .store_ref(fwd_body)       ;;  /
+        .TIM::store_ident_proof()
+        .end_cell(), 0);
+    } else {
+      builder bell_info_lr = begin_cell();
+      
+      int root_time = timer_old_data~load_uint(32);
+      if (root_time < time) {
+        bell_info_lr~store_uint(1, 1);
+        bell_info_lr~store_slice(root_addr);
+        bell_info_lr~store_uint(root_priority, 64);
+        bell_info_lr~store_uint(root_time, 32);
+        bell_info_lr~store_uint(0, 1);
+      } else {
+        bell_info_lr~store_uint(1, 2);
+        bell_info_lr~store_slice(root_addr);
+        bell_info_lr~store_uint(root_priority, 64);
+        bell_info_lr~store_uint(root_time, 32);
+      }
+      
+      timer_new_data~store_uint(1024, 11);
+      timer_new_data~store_uint(
+        init_bell_with_children(priority, time, value, dest, fwd_body,
+          my_address(), bell_info_lr.end_cell(), bell_code),
+        256);
+      timer_new_data~store_uint(priority, 64);
+      timer_new_data~store_uint(time, 32);
+    }
+  } else {
+    timer_new_data~store_uint(1024, 11);
+    timer_new_data~store_uint(
+      init_bell_no_children(priority, time, value, dest, fwd_body,
+        my_address(), bell_code),
+      256);
+    timer_new_data~store_uint(priority, 64);
+    timer_new_data~store_uint(time, 32);
+  }
+  
+  timer_new_data~store_ref(bell_code);
+  set_data(timer_new_data.end_cell());
+}
+
+;; NFT::get_nft_address_by_index (get-method)
+slice get_nft_address_by_index(int index) method_id {
+  return begin_cell().store_uint(1024, 11).store_uint(index, 256).end_cell().begin_parse();
+}
+
+;; NFT::get_nft_content (get-method)
+cell get_nft_content(int index, cell individual) method_id {
+  throw_unless(100, is_null(individual));
+  return begin_cell().store_uint(0, 2).store_dict(new_dict()).end_cell();
+}
+
+;; NFT::get_collection_data (get-method)
+(int, cell, slice) get_collection_data() method_id {
+  return (-1, get_nft_content(0, null()), null_address());
+}
+
+;; TIM::TIM::process_schedule (#_)
+() TIM::process_schedule() impure {
+  slice d = get_data().begin_parse();
+  int next = d~load_uint(32);
+  
+  if (next <= now()) {
+    throw_if(130, d~load_uint(1) == 0);
+    
+    send_raw_message(begin_cell()
+      .store_uint(0x18, 6)
+      .store_slice(d~load_msg_addr())
+      .store_coins(200000000)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(op::bell, 32)
+      .TIM::store_ident_proof()
+      .end_cell(), 0);
+  }
+  
+  if (next < 0xFFFFFFFF) {
+    TIM::send_schedule_loop_msg();
+  }
+}
+
+;; TIM::TIM::main
+() TIM::recv_internal(int coins, cell in_msg_full, slice in_msg) impure {
+  {------------------------------------------------------}
+  {-    Extracting source address from CommonMsgInfo    -}
+  {------------------------------------------------------}
+  
+  slice in_msg_full = in_msg_full.begin_parse();
+  int bounced = in_msg_full~load_uint(4);  ;; int_msg_info$0, ihr_disabled, bounce, bounced
+  
+  slice src = in_msg_full~load_msg_addr();
+  
+  {----------------------------------------------------}
+  {-    Messages from self for processing schedule    -}
+  {-    bounced from masterchain to slow down timer   -}
+  {-    [FASTPATH]                                    -}
+  {----------------------------------------------------}
+  if (equal_slices(src, unused_masterchain_address())) {
+    TIM::process_schedule();
+    
+    return ();
+  }
+  
+  
+  if (bounced & 1) {
+    return ();
+  }
+  
+  {----------------------------------------------------------}
+  {-    No message present - considering this a donation    -}
+  {----------------------------------------------------------}
+  if (in_msg.slice_bits() < 32) {
+    return ();
+  }
+  
+  {-------------------------------}
+  {-    Next bell time update    -}
+  {-------------------------------}
+  if (in_msg.preload_uint(32) == op::bell_destroyed_root) {
+    in_msg~load_uint(32);
+    in_msg = TIM::check_ident_proof(src, in_msg);
+    
+    slice old_timer_data = get_data().begin_parse();
+    
+    throw_if(120, old_timer_data~load_uint(32) != in_msg.preload_uint(32));
+    throw_if(121, old_timer_data~load_uint(1) == 0);
+    
+    int next_time = in_msg~load_uint(32);
+    
+    builder new_timer_data = begin_cell().store_uint(next_time, 32);
+    
+    slice root_addr = old_timer_data~load_msg_addr();
+    if (equal_slices(root_addr, src)) {
+      throw_if(122, next_time != 0xFFFFFFFF);
+      new_timer_data~store_uint(0, 1);
+      new_timer_data~store_ref(old_timer_data~load_ref());
+    } else {
+      new_timer_data~store_uint(1, 1);
+      new_timer_data~store_slice(root_addr);
+      new_timer_data~store_ref(old_timer_data~load_ref());
+      new_timer_data~store_slice(old_timer_data);
+    }
+  }
+  
+  {------------------------------------------------------}
+  {-    Owner can take TON obtained by this contract    -}
+  {------------------------------------------------------}
+  if (equal_slices(src, owner_address())) {
+    int request_nton = in_msg~load_uint(64);
+    
+    if (request_nton == 1) {
+      {--------------------------------------------------------------------}
+      {-    Too small values are not sensical so using them as opcodes    -}
+      {--------------------------------------------------------------------}
+      TIM::send_schedule_loop_msg();
+      return ();
+    }
+    
+    [int balance, _] = get_balance();
+    int time_to_unix_epoch_end = 4294967295 - now();
+    
+    ;; Cost of maintaining contract is equal to 13 TON/h = 3'611'111 nTON/s.
+    ;; This timer is able to work up to end of the Unix epoch (2**32 seconds - year 2106).
+    ;; Assuring that there will be always enough money to work.
+    
+    ;; 10M TON will be sufficient to provide service from 2022 to 2106 years.
+    ;; All excess money can be taken by me, author of the timer, for other purposes.
+    
+    throw_if(105, balance - request_nton < 3611111 * time_to_unix_epoch_end);
+    
+    send_raw_message(
+       begin_cell()
+      .store_uint(0x18, 6)
+      .store_slice(owner_address())
+      .store_coins(request_nton)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
+      .end_cell(), 0
+    );
+    
+    return ();
+  }
+  
+  {-------------------------------------------}
+  {-    Incoming message - maybe schedule    -}
+  {-------------------------------------------}
+  
+  throw_if(140, in_msg~load_uint(32) != op::schedule_msg);
+  
+  ;; Components of message scheduling cost
+  ;; 1. Forwarding TON amount           specified by user; not less than 0.01 TON
+  ;; 2. Price for keeping timer awake.  6.5 TON/h = 6'500'000'000 nTON/h = 1'805'556 nTON/s
+  ;; 3. Timer's profit.                 0.4 TON
+  
+  int forward_nton = in_msg~load_uint(64);
+  throw_if(100, forward_nton < 10000000);
+  
+  int schedule_at = in_msg~load_uint(32);
+  int timer_work_cost = 1805556 * max(0, schedule_at - now());
+  
+  throw_if(101, coins < timer_work_cost + forward_nton + 400000000);
+  
+  TIM::create_bell(random(), schedule_at, forward_nton,
+    in_msg~load_msg_addr(), in_msg~load_ref());
+  
+  send_raw_message(
+     begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(owner_address())
+    .store_coins(200000000)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
+    .end_cell(),
+    
+    1   {-  paying transfer fees separately so exactly 0.2 TON is delivered  -}
+  );
+}
+
+() TIM::recv_external() impure {
+  [int balance, _] = get_balance();
+  
+  if ((balance > 50000000) & (balance < 100000000)) {  ;; 0.05-0.10 TON
+    accept_message();
+  }
+}

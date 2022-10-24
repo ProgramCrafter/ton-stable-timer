@@ -1,0 +1,97 @@
+#include "stdlib-ext.fc";
+
+;; Constant definitions
+;; TODO: make opcodes less than 0x8000'0000
+
+const int op::direct_init = 0;
+const int op::retranslate_init = 0xfbffab22;
+const int op::bell = 0x733be087;
+const int op::bell_destroyed = 0xadc8652d;
+const int op::bell_destroyed_root = 0xfa6d6098;
+const int op::schedule_msg = 0xf5431aa5;
+
+;; Utility functions
+
+{-
+slice owner_address() asm "b{100} x{00} |+ x{dab812df8ae259099c63455c8d1c3775eed2622425532e2dd8a8a33be132a3f5} |+ PUSHSLICE";
+;;                           |      |        |
+;;                           |      |        -- address in binary form
+;;                           |      -- workchain tag
+;;                           -- MsgAddressInt tag
+-}
+
+;; testnet version
+slice owner_address() asm "b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE";
+
+slice unused_masterchain_address() asm "b{100} x{FF} |+ x{2210202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE";
+
+slice null_address() asm "b{00} PUSHSLICE";
+slice empty_slice() {
+  return begin_cell().end_cell().begin_parse();
+}
+
+cell calc_bell_state_init_by_data(cell bell_init_data, cell bell_code) inline_ref {
+  return begin_cell()
+    .store_uint(6, 5)  ;; no split_depth, no ticktock, ^code, ^data, no libraries
+    .store_ref(bell_code)
+    .store_ref(bell_init_data)
+  .end_cell();
+}
+
+int init_bell_with_children(int priority, int time, int value, slice dest, cell fwd_body,
+                            slice core_address, cell children, cell bell_code)
+                           impure inline_ref {
+  builder init_data = begin_cell()
+    .store_uint(priority, 64)
+    .store_uint(time, 32)
+    .store_uint(value, 64)
+    .store_slice(dest)
+    .store_ref(fwd_body)
+    .store_slice(core_address)
+    .store_ref(children)
+    .store_ref(children);
+  cell state_init = calc_bell_state_init_by_data(init_data.end_cell(), bell_code);
+  
+  send_raw_message(
+     begin_cell()
+    .store_uint(0x10, 6)  ;; non-bounceable internal message
+    .store_uint(1024, 11).store_uint(cell_hash(state_init), 256)
+    .store_coins(value + 100000000)
+    .store_uint(6, 1 + 4 + 4 + 64 + 32 + 2 + 1)  ;; no message body, but state init
+    .store_ref(state_init)
+    .end_cell(), 0);
+  
+  return cell_hash(state_init);
+}
+
+int init_bell_no_children(int priority, int time, int value, slice dest, cell fwd_body,
+                          slice core_address, cell bell_code) impure inline_ref {
+  return init_bell_with_children(priority, time, value, dest, fwd_body,
+    core_address, begin_cell().store_uint(0, 2).end_cell(), bell_code);
+}
+
+cell bell_info_lr_replace_left(int left_addr, int left_priority, int left_time,
+                               slice right_child) {
+  return begin_cell()
+    .store_uint(1, 1)
+    .store_uint(1024, 11).store_uint(left_addr, 256)
+    .store_uint(left_priority, 64)
+    .store_uint(left_time, 32)
+    .store_slice(right_child)
+    .end_cell();
+}
+cell bell_info_lr_replace_right(builder left_child,
+                                int right_addr, int right_priority, int right_time) {
+  return left_child
+    .store_uint(1, 1)
+    .store_uint(1024, 11).store_uint(right_addr, 256)
+    .store_uint(right_priority, 64)
+    .store_uint(right_time, 32)
+    .end_cell();
+}
+
+;; test-only
+
+() main() {
+  
+}

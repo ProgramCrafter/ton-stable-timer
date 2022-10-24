@@ -4,3 +4,16 @@ contract:
     - func/timer.fc
   tests:
     - tests/tests.fc
+
+multibell:
+  data: fift/data.fif
+  func:
+    - func/utils-bell.fc
+    - func/utils-timer.fc
+  tests:
+    - tests/tests-bell.fc
+
+ton-hack-challenge-bounces:
+  data: fift/data.fif
+  func:
+    - func/thc-bounces.fc

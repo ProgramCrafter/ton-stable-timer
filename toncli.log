@@ -1,15 +1,57 @@
 Loading private key from file build/contract.pk
 
-[ 3][t 0][2022-10-05 18:07:21.8781903][vm.cpp:558]	steps: 119 gas: used=8384, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-05 18:07:21.8783599][vm.cpp:558]	steps: 313 gas: used=18578, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-05 18:07:21.8784324][vm.cpp:558]	steps: 146 gas: used=10758, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-05 18:07:21.8784743][vm.cpp:558]	steps: 115 gas: used=8266, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-05 18:07:21.8785172][vm.cpp:558]	steps: 137 gas: used=9240, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-05 18:07:21.8785951][vm.cpp:558]	steps: 346 gas: used=20221, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7407626][vm.cpp:558]	steps: 119 gas: used=8384, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7409105][vm.cpp:558]	steps: 313 gas: used=18578, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7409621][vm.cpp:558]	steps: 146 gas: used=10758, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7410029][vm.cpp:558]	steps: 115 gas: used=8266, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7410457][vm.cpp:558]	steps: 137 gas: used=9240, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7411238][vm.cpp:558]	steps: 346 gas: used=20221, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_donation[0m] status: [[32mSUCCESS[0m] Test result: [[32m[ -145 ][0m] Total gas used (including testing code): [[32m8384[0m]
 INFO: Test [[32m__test_schedules[0m] status: [[32mSUCCESS[0m] Test result: [[32m[ [ -145 -145 ] ][0m] Total gas used (including testing code): [[32m18578[0m]
 INFO: Test [[32m__test_schedule_loop_start[0m] status: [[32mSUCCESS[0m] Test result: [[32m[ -145 ][0m] Total gas used (including testing code): [[32m10758[0m]
 INFO: Test [[32m__test_self_schedule_message_parsed[0m] status: [[32mSUCCESS[0m] Test result: [[32m[ -145 ][0m] Total gas used (including testing code): [[32m8266[0m]
 INFO: Test [[32m__test_pull_ton_failure[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m9240[0m]
 INFO: Test [[32m__test_schedule_and_loop[0m] status: [[32mSUCCESS[0m] Test result: [[32m[ -290 ][0m] Total gas used (including testing code): [[32m20221[0m]
+
+Loading private key from file build/contract.pk
+
+#DEBUG#: s0 = 4445
+#DEBUG#: s0 = 0
+[ 3][t 0][2022-10-24 16:25:23.7785921][vm.cpp:558]	steps: 10 gas: used=1131, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7787234][vm.cpp:558]	steps: 244 gas: used=13551, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7787788][vm.cpp:558]	steps: 143 gas: used=9650, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7788434][vm.cpp:558]	steps: 316 gas: used=17264, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7788982][vm.cpp:558]	steps: 158 gas: used=10092, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7789437][vm.cpp:558]	steps: 161 gas: used=10429, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7789885][vm.cpp:558]	steps: 162 gas: used=10180, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7790327][vm.cpp:558]	steps: 165 gas: used=10442, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7790744][vm.cpp:558]	steps: 122 gas: used=7704, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7800209][vm.cpp:558]	steps: 101 gas: used=7188, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7800778][vm.cpp:558]	steps: 102 gas: used=7305, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7801206][vm.cpp:558]	steps: 102 gas: used=7397, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7801876][vm.cpp:558]	steps: 343 gas: used=17360, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7802472][vm.cpp:558]	steps: 256 gas: used=13809, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7803164][vm.cpp:558]	steps: 393 gas: used=20842, max=1000000000, limit=1000000000, credit=0
+INFO: Test [[32m__test_write_newline[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m1131[0m]
+INFO: Test [[32m__test_invalid_ident_timer_not_bell[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m13551[0m]
+INFO: Test [[32m__test_valid_ident_proof_timer[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m9650[0m]
+INFO: Test [[32m__test_valid_ident_proof_bell[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m17264[0m]
+INFO: Test [[32m__test_prove_ownership_no_content[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m10092[0m]
+INFO: Test [[32m__test_prove_ownership_with_content[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m10429[0m]
+INFO: Test [[32m__test_request_owner_no_content[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m10180[0m]
+INFO: Test [[32m__test_request_owner_with_content[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m10442[0m]
+INFO: Test [[32m__test_get_nft_data[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m7704[0m]
+INFO: Test [[32m__test_invalid_ident_no_proof[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m7188[0m]
+INFO: Test [[32m__test_no_bell_no_proof[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m7305[0m]
+INFO: Test [[32m__test_no_subbell_destroy_no_proof[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m7397[0m]
+INFO: Test [[32m__test_no_bell_invalid_ident_proof[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m17360[0m]
+INFO: Test [[32m__test_no_bell_invalid_time[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m13809[0m]
+INFO: Test [[32m__test_bell_at_valid_time[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m20842[0m]
+#DEBUG#: s0 = CS{Cell{0000} bits: 0..0; refs: 0..0}
+[ 3][t 0][2022-10-24 16:25:23.7803736][vm.cpp:558]	steps: 109 gas: used=6853, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7804116][vm.cpp:558]	steps: 111 gas: used=6767, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-24 16:25:23.7805520][vm.cpp:558]	steps: 112 gas: used=7862, max=1000000000, limit=1000000000, credit=0
+INFO: Test [[32m__test_bell_code[0m] status: [[31mFAIL[0m], code: [[36m101[0m] Total gas used (including testing code): [[32m6853[0m]
+INFO: Test [[32m__test_timer_init[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m6767[0m]
+INFO: Test [[32m__test_timer_scheduler[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m7862[0m]
 
