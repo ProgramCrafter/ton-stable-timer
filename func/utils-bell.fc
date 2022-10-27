@@ -117,7 +117,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
     .store_coins(value)
     .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
     .store_ref(body)
-    .end_cell(), 1);
+    .end_cell(), 0);
   
   if (is_nonroot_bell) {
     ;; Notifying parent about having been destroyed.
@@ -128,8 +128,8 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
       .store_uint(op::hang_new_bell, 32)
       .store_ident_proof(bell_code)
-      .store_slice(children)  ;; left node has already been read out of that slice
-      .end_cell(), 224);
+      .store_slice(children)  ;; left node flag has already been read out of that slice
+      .end_cell(), 128 + 32);
   } else {
     ;; Notifying timer about having been destroyed.
     send_raw_message(begin_cell()
@@ -141,7 +141,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       .store_ident_proof(bell_code)
       .store_uint(time, 32)
       .store_uint(0xFFFFFFFF, 32)
-      .end_cell(), 224);
+      .end_cell(), 128 + 32);
   }
 }
 

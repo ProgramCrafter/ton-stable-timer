@@ -2251,7 +2251,7 @@ PROGRAM{
     DROP	//  source bell_init bell_code proof _27 _28
     HASHCU	//  source bell_init bell_code proof _27 _30
     NEQ	//  source bell_init bell_code proof _31
-    114 THROWIFNOT
+    114 THROWIF
     s2 s1 PUXC	//  source bell_init proof bell_init bell_code
     calc_bell_state_init_by_data INLINECALLDICT	//  source bell_init proof bell_state_init
     s0 s3 XCHG	//  bell_state_init bell_init proof source
@@ -2494,7 +2494,7 @@ PROGRAM{
       DROP	//  _21 _16=1933303943 _17=0 _22
       s1 s3 XCHG	//  _17=0 _16=1933303943 _21 _22
       STSLICER	//  _17=0 _16=1933303943 _24
-      200000000 PUSHINT	//  _17=0 _16=1933303943 _24 _25=200000000
+      100000000 PUSHINT	//  _17=0 _16=1933303943 _24 _25=100000000
       STVARUINT16	//  _17=0 _16=1933303943 _26
       s1 s2 XCHG	//  _16=1933303943 _17=0 _26
       107 STU	//  _16=1933303943 _40
@@ -2624,33 +2624,32 @@ PROGRAM{
     4114815653 PUSHINT	//  coins in_msg _132 _135=4114815653
     NEQ	//  coins in_msg _136
     140 THROWIF
-    64 LDU	//  coins forward_nton in_msg
+    32 LDU	//  coins schedule_at in_msg
+    64 LDU	//  coins schedule_at forward_nton in_msg
     OVER
-    10000000 PUSHINT	//  coins forward_nton in_msg forward_nton _143=10000000
-    LESS	//  coins forward_nton in_msg _144
+    10000000 PUSHINT	//  coins schedule_at forward_nton in_msg forward_nton _147=10000000
+    LESS	//  coins schedule_at forward_nton in_msg _148
     100 THROWIF
-    32 LDU	//  coins forward_nton schedule_at in_msg
-    1805556 PUSHINT	//  coins forward_nton schedule_at in_msg _151=1805556
-    0 PUSHINT	//  coins forward_nton schedule_at in_msg _151=1805556 _152=0
-    s3 PUSH
-    NOW	//  coins forward_nton schedule_at in_msg _151=1805556 _152=0 schedule_at _153
-    SUB	//  coins forward_nton schedule_at in_msg _151=1805556 _152=0 _154
-    MAX	//  coins forward_nton schedule_at in_msg _151=1805556 _155
-    MUL	//  coins forward_nton schedule_at in_msg timer_work_cost
-    s3 PUSH	//  coins forward_nton schedule_at in_msg timer_work_cost forward_nton
-    ADD	//  coins forward_nton schedule_at in_msg _158
-    400000000 PUSHINT	//  coins forward_nton schedule_at in_msg _158 _159=400000000
-    ADD	//  coins forward_nton schedule_at in_msg _160
-    s1 s4 XCHG	//  in_msg forward_nton schedule_at coins _160
-    LESS	//  in_msg forward_nton schedule_at _161
+    1805556 PUSHINT	//  coins schedule_at forward_nton in_msg _151=1805556
+    0 PUSHINT	//  coins schedule_at forward_nton in_msg _151=1805556 _152=0
+    s4 PUSH
+    NOW	//  coins schedule_at forward_nton in_msg _151=1805556 _152=0 schedule_at _153
+    SUB	//  coins schedule_at forward_nton in_msg _151=1805556 _152=0 _154
+    MAX	//  coins schedule_at forward_nton in_msg _151=1805556 _155
+    MUL	//  coins schedule_at forward_nton in_msg timer_work_cost
+    s2 PUSH	//  coins schedule_at forward_nton in_msg timer_work_cost forward_nton
+    ADD	//  coins schedule_at forward_nton in_msg _158
+    400000000 PUSHINT	//  coins schedule_at forward_nton in_msg _158 _159=400000000
+    ADD	//  coins schedule_at forward_nton in_msg _160
+    s1 s4 XCHG	//  in_msg schedule_at forward_nton coins _160
+    LESS	//  in_msg schedule_at forward_nton _161
     101 THROWIF
-    64 PUSHPOW2	//  in_msg forward_nton schedule_at _163=18446744073709551616
-    RAND	//  in_msg forward_nton schedule_at _164
-    s0 s3 XCHG	//  _164 forward_nton schedule_at in_msg
-    LDMSGADDR	//  _164 forward_nton schedule_at _165 in_msg
-    LDREF	//  _164 forward_nton schedule_at _165 _227 _226
-    DROP	//  _164 forward_nton schedule_at _165 _167
-    s2 s3 XCHG	//  _164 schedule_at forward_nton _165 _167
+    64 PUSHPOW2	//  in_msg schedule_at forward_nton _163=18446744073709551616
+    RAND	//  in_msg schedule_at forward_nton _164
+    s0 s3 XCHG	//  _164 schedule_at forward_nton in_msg
+    LDMSGADDR	//  _164 schedule_at forward_nton _165 in_msg
+    LDREF	//  _164 schedule_at forward_nton _165 _227 _226
+    DROP	//  _164 schedule_at forward_nton _165 _167
     TIM::create_bell INLINECALLDICT
     0 PUSHINT	//  _170=0
     24 PUSHINT	//  _170=0 _171=24
@@ -2739,13 +2738,13 @@ PROGRAM{
     ENDC	//  coins_1=100000000 coins_2=1000000000 half_full_msg
     NEWC	//  coins_1=100000000 coins_2=1000000000 half_full_msg _24
     ENDC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void
-    0 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0
-    500000000 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _29
-    4114815653 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _29 _30=4114815653
-    NEWC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _29 _30=4114815653 _31
-    32 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _29 _33
-    64 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _27=0 _35
-    32 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _37
+    500000000 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _28
+    0 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _28 _29=0
+    4114815653 PUSHINT	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _28 _29=0 _30=4114815653
+    NEWC	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _28 _29=0 _30=4114815653 _31
+    32 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _28 _29=0 _33
+    32 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _28 _35
+    64 STU	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _37
     MYADDR	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _37 _38
     STSLICER	//  coins_1=100000000 coins_2=1000000000 half_full_msg void _39
     STREF	//  coins_1=100000000 coins_2=1000000000 half_full_msg _40

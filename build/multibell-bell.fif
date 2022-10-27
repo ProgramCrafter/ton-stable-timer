@@ -493,9 +493,9 @@ PROGRAM{
     64 LDU	//  parent is_nonroot_bell bell_code time value d
     LDMSGADDR	//  parent is_nonroot_bell bell_code time value dest d
     LDREF	//  parent is_nonroot_bell bell_code time value dest body d
-    LDMSGADDR	//  parent is_nonroot_bell bell_code time value dest body _172 _171
+    LDMSGADDR	//  parent is_nonroot_bell bell_code time value dest body _176 _175
     NIP	//  parent is_nonroot_bell bell_code time value dest body d
-    LDREF	//  parent is_nonroot_bell bell_code time value dest body _174 _173
+    LDREF	//  parent is_nonroot_bell bell_code time value dest body _178 _177
     DROP	//  parent is_nonroot_bell bell_code time value dest body _31
     CTOS	//  parent is_nonroot_bell bell_code time value dest body children
     1 LDU	//  parent is_nonroot_bell bell_code time value dest body _34 children
@@ -511,7 +511,7 @@ PROGRAM{
       NEWC	//  bell_code children _39=1933303943 _40=0 _41=24 _42
       6 STU	//  bell_code children _39=1933303943 _40=0 _44
       s0 s3 XCHG	//  bell_code _44 _39=1933303943 _40=0 children
-      LDMSGADDR	//  bell_code _44 _39=1933303943 _40=0 _178 _177
+      LDMSGADDR	//  bell_code _44 _39=1933303943 _40=0 _182 _181
       DROP	//  bell_code _44 _39=1933303943 _40=0 _45
       s1 s3 XCHG	//  bell_code _40=0 _39=1933303943 _44 _45
       STSLICER	//  bell_code _40=0 _39=1933303943 _47
@@ -542,7 +542,7 @@ PROGRAM{
     107 STU	//  parent is_nonroot_bell bell_code time children body _94
     STREF	//  parent is_nonroot_bell bell_code time children _95
     ENDC	//  parent is_nonroot_bell bell_code time children _96
-    1 PUSHINT	//  parent is_nonroot_bell bell_code time children _96 _97=1
+    0 PUSHINT	//  parent is_nonroot_bell bell_code time children _96 _97=0
     SENDRAWMSG
     s0 s3 XCHG	//  parent children bell_code time is_nonroot_bell
     IF:<{	//  parent children bell_code time
@@ -565,30 +565,30 @@ PROGRAM{
       SWAP	//  _124 children
       STSLICER	//  _125
       ENDC	//  _126
-      224 PUSHINT	//  _126 _127=224
+      160 PUSHINT	//  _126 _129
       SENDRAWMSG
     }>ELSE<{	//  parent children bell_code time
       s2 POP	//  parent time bell_code
-      32 PUSHPOW2DEC	//  parent time bell_code _129=4294967295
-      132892869 PUSHINT	//  parent time bell_code _129=4294967295 _130=132892869
-      0 PUSHINT	//  parent time bell_code _129=4294967295 _130=132892869 _131=0
-      16 PUSHINT	//  parent time bell_code _129=4294967295 _130=132892869 _131=0 _132=16
-      NEWC	//  parent time bell_code _129=4294967295 _130=132892869 _131=0 _132=16 _133
-      6 STU	//  parent time bell_code _129=4294967295 _130=132892869 _131=0 _135
-      s0 s6 XCHG2	//  _131=0 time bell_code _129=4294967295 _130=132892869 _135 parent
-      STSLICER	//  _131=0 time bell_code _129=4294967295 _130=132892869 _136
-      s5 PUSH	//  _131=0 time bell_code _129=4294967295 _130=132892869 _136 _137=0
-      STVARUINT16	//  _131=0 time bell_code _129=4294967295 _130=132892869 _138
-      s1 s5 XCHG	//  _130=132892869 time bell_code _129=4294967295 _131=0 _138
-      107 STU	//  _130=132892869 time bell_code _129=4294967295 _152
-      s1 s4 XCHG	//  _129=4294967295 time bell_code _130=132892869 _152
-      32 STU	//  _129=4294967295 time bell_code _154
-      SWAP	//  _129=4294967295 time _154 bell_code
-      store_ident_proof INLINECALLDICT	//  _129=4294967295 time _155
-      32 STU	//  _129=4294967295 _157
-      32 STU	//  _159
-      ENDC	//  _160
-      224 PUSHINT	//  _160 _161=224
+      32 PUSHPOW2DEC	//  parent time bell_code _131=4294967295
+      132892869 PUSHINT	//  parent time bell_code _131=4294967295 _132=132892869
+      0 PUSHINT	//  parent time bell_code _131=4294967295 _132=132892869 _133=0
+      16 PUSHINT	//  parent time bell_code _131=4294967295 _132=132892869 _133=0 _134=16
+      NEWC	//  parent time bell_code _131=4294967295 _132=132892869 _133=0 _134=16 _135
+      6 STU	//  parent time bell_code _131=4294967295 _132=132892869 _133=0 _137
+      s0 s6 XCHG2	//  _133=0 time bell_code _131=4294967295 _132=132892869 _137 parent
+      STSLICER	//  _133=0 time bell_code _131=4294967295 _132=132892869 _138
+      s5 PUSH	//  _133=0 time bell_code _131=4294967295 _132=132892869 _138 _139=0
+      STVARUINT16	//  _133=0 time bell_code _131=4294967295 _132=132892869 _140
+      s1 s5 XCHG	//  _132=132892869 time bell_code _131=4294967295 _133=0 _140
+      107 STU	//  _132=132892869 time bell_code _131=4294967295 _154
+      s1 s4 XCHG	//  _131=4294967295 time bell_code _132=132892869 _154
+      32 STU	//  _131=4294967295 time bell_code _156
+      SWAP	//  _131=4294967295 time _156 bell_code
+      store_ident_proof INLINECALLDICT	//  _131=4294967295 time _157
+      32 STU	//  _131=4294967295 _159
+      32 STU	//  _161
+      ENDC	//  _162
+      160 PUSHINT	//  _162 _165
       SENDRAWMSG
     }>
   }>

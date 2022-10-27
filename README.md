@@ -41,7 +41,7 @@ update_next_wakeup#07ebc8c5 proof:IdentProof bell_time:uint32 bell_rtime:uint32 
 tick#_ = TimerInboundMsg;
 pull_ton_out#_ (nanoton >= 1) nanoton:uint64 = TimerInboundMsg;
 restart_loop#0000000000000001 = TimerInboundMsg;
-schedule_msg#f5431aa5 value:uint64 time:uint32 destination:MsgAddressInt body:^Any =
+schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^Any =
   TimerInboundMsg;
 ```
 | type                   | bits | refs |

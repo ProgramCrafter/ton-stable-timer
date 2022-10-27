@@ -40,8 +40,8 @@
   cell void = begin_cell().end_cell();
   cell body = begin_cell()
     .store_uint(op::schedule_msg, 32)
-    .store_uint(coins_2 / 2, 64)
     .store_uint(0, 32)
+    .store_uint(coins_2 / 2, 64)
     .store_slice(my_address())
     .store_ref(void)
     .end_cell();

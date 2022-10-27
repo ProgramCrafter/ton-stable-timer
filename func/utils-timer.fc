@@ -27,7 +27,7 @@ slice TIM::check_ident_proof(slice source, slice proof) impure inline_ref {
     cell bell_code = proof~load_ref();
     
     slice own_data = get_data().begin_parse();
-    throw_unless(114, cell_hash(bell_code) != cell_hash(own_data~load_ref()));
+    throw_if(114, cell_hash(bell_code) != cell_hash(own_data~load_ref()));
     
     cell bell_state_init = calc_bell_state_init_by_data(bell_init, bell_code);
     
@@ -169,7 +169,7 @@ cell get_nft_content(int index, cell individual) method_id {
     send_raw_message(begin_cell()
       .store_uint(0x18, 6)
       .store_slice(d~load_msg_addr())
-      .store_coins(200000000)
+      .store_coins(100000000)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
       .store_uint(op::bell, 32)
       .TIM::store_ident_proof()

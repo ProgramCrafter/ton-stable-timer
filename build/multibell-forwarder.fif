@@ -404,7 +404,7 @@ PROGRAM{
     DROP	//  source bell_init bell_code proof _27 _28
     HASHCU	//  source bell_init bell_code proof _27 _30
     NEQ	//  source bell_init bell_code proof _31
-    114 THROWIFNOT
+    114 THROWIF
     s2 s1 PUXC	//  source bell_init proof bell_init bell_code
     calc_bell_state_init_by_data INLINECALLDICT	//  source bell_init proof bell_state_init
     s0 s3 XCHG	//  bell_state_init bell_init proof source
@@ -647,7 +647,7 @@ PROGRAM{
       DROP	//  _21 _16=1933303943 _17=0 _22
       s1 s3 XCHG	//  _17=0 _16=1933303943 _21 _22
       STSLICER	//  _17=0 _16=1933303943 _24
-      200000000 PUSHINT	//  _17=0 _16=1933303943 _24 _25=200000000
+      100000000 PUSHINT	//  _17=0 _16=1933303943 _24 _25=100000000
       STVARUINT16	//  _17=0 _16=1933303943 _26
       s1 s2 XCHG	//  _16=1933303943 _17=0 _26
       107 STU	//  _16=1933303943 _40
