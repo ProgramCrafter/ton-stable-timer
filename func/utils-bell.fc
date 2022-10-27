@@ -1,4 +1,4 @@
-#include "func/utils.fc";
+#include "utils.fc";
 
 ;; TIM::BEL::load_core_address
 slice load_core_address() {

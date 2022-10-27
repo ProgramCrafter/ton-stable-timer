@@ -36,7 +36,6 @@ int equal_slices(slice a, slice b) asm "SDEQ";
   cell previous = actions~load_ref();
   
   int action_id = actions~load_uint(32);
-  action_id~dump();
   
   if (action_id == 0x0ec3c86d) {
     ~dump(4445);
@@ -57,6 +56,8 @@ int equal_slices(slice a, slice b) asm "SDEQ";
     ~dump(actions~load_uint(8));
     ~dump(actions~load_dict());
   } else {
+    action_id~dump();
+    
     throw(100);
   }
   

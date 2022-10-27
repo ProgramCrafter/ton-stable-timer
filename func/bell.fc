@@ -1,0 +1,9 @@
+;; Bell smart-contract for a single scheduled message.
+;; (c) ProgramCrafter, 2022
+
+#include "func/utils-bell.fc";
+
+;; TIM::BEL::main
+() recv_internal(int coins, cell in_msg_full, slice in_msg) impure {
+  throw(200);
+}

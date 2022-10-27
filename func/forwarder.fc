@@ -1,0 +1,18 @@
+;; Forwarder contract for TON Timer system.
+;; Used to stop messages scheduled by users breaking invariants of contracts structure,
+;;   as this contract is not trusted address neither for timer nor a bell.
+;; (c) ProgramCrafter, 2022
+
+#include "func/utils-timer.fc";
+
+() recv_internal(cell in_msg_full, slice in_msg_body) impure {
+  slice in_msg_full = in_msg_full.begin_parse();
+  
+  if (in_msg_full~load_uint(4) & 1) {
+    return ();
+  }
+  
+  in_msg_body = TIM::check_ident_proof(in_msg_full~load_msg_addr(), in_msg_body);
+  
+  send_raw_message(in_msg_body~load_ref(), 64);
+}

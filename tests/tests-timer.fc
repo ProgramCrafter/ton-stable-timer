@@ -1,0 +1,175 @@
+;; New-style tests
+
+#include "func/stdlib-ext.fc";
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() set_init_data() impure {
+  cell v = begin_cell().end_cell();
+  
+  set_data(begin_cell().store_uint(0xFFFFFFFF << 1, 33).store_ref(v).end_cell());
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_donation() method_id {
+  set_init_data();
+  
+  int coins = 10000000000;    ;; 10 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0, 2).end_cell();
+  cell body = begin_cell().end_cell();
+  
+  invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_schedules() method_id {
+  set_init_data();
+  
+  int coins_1 = 100000000;    ;; 0.1 TON
+  int coins_2 = 1000000000;   ;; 1 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0x33333333333333333333333333333333, 128)
+    .store_uint(0, 2).end_cell();
+  
+  cell void = begin_cell().end_cell();
+  cell body = begin_cell()
+    .store_uint(op::schedule_msg, 32)
+    .store_uint(coins_2 / 2, 64)
+    .store_uint(0, 32)
+    .store_slice(my_address())
+    .store_ref(void)
+    .end_cell();
+  
+  invoke_method_expect_fail(recv_internal, [coins_1, half_full_msg, body.begin_parse()]);
+  invoke_method(recv_internal, [coins_2, half_full_msg, body.begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_self_tick_parsed_no_new() method_id {
+  set_init_data();
+  
+  int coins = 500000000;   ;; 0.5 TON
+  cell half_full_msg = begin_cell()
+    .store_uint(7, 4)
+    .store_slice(unused_masterchain_address())
+    .store_uint(0, 2)
+    .end_cell();
+  
+  cell body = begin_cell().end_cell();
+  
+  invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  invoke_method_expect_fail(parse_one_action, [get_c5().begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_self_tick_parsed_with_next_tick() method_id {
+  cell v = begin_cell().end_cell();
+  
+  set_data(begin_cell().store_uint(0xFFFFFFEE << 1, 33).store_ref(v).end_cell());
+  
+  int coins = 500000000;   ;; 0.5 TON
+  cell half_full_msg = begin_cell()
+    .store_uint(7, 4)
+    .store_slice(unused_masterchain_address())
+    .store_uint(0, 2)
+    .end_cell();
+  
+  cell body = begin_cell().end_cell();
+  
+  invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  invoke_method(parse_one_action, [get_c5().begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_tick_requires_bell() method_id {
+  cell v = begin_cell().end_cell();
+  
+  set_data(begin_cell().store_uint(0x00FFFFEE << 1, 33).store_ref(v).end_cell());
+  
+  int coins = 500000000;   ;; 0.5 TON
+  cell half_full_msg = begin_cell()
+    .store_uint(7, 4)
+    .store_slice(unused_masterchain_address())
+    .store_uint(0, 2)
+    .end_cell();
+  
+  cell body = begin_cell().end_cell();
+  
+  invoke_method_expect_fail(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_tick_rings_bell() method_id {
+  cell v = begin_cell().end_cell();
+  
+  set_data(begin_cell()
+          .store_uint(0x00FFFFEE, 32)
+          .store_uint(1, 1)
+          .store_slice(my_address())
+          .store_uint(0, 96)
+          .store_ref(v).end_cell());
+  
+  int coins = 500000000;   ;; 0.5 TON
+  cell half_full_msg = begin_cell()
+    .store_uint(7, 4)
+    .store_slice(unused_masterchain_address())
+    .store_uint(0, 2)
+    .end_cell();
+  
+  cell body = begin_cell().end_cell();
+  
+  invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+  
+  slice s = get_c5().begin_parse();
+  (_, tuple stack) = invoke_method(parse_one_action, [s]);
+  s = first(stack);
+  invoke_method(parse_one_action, [s]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_pull_ton_failure() method_id {
+  ;; pulling TON can lead to timer unexpectedly stopping, so this test must fail
+  
+  set_init_data();
+  
+  int coins = 10000000;   ;; 0.01 TON
+  cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
+    .store_uint(0x15be3c3171911009bbcc473d07d8fc2b, 128)
+    .store_uint(0xcc0c7192fed2237719da256e07fa7948, 128)
+    .store_uint(0, 2).end_cell();
+  
+  cell body = begin_cell().store_uint(500000000, 64).end_cell();
+  
+  invoke_method_expect_fail(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_timer_init() method_id {
+  set_init_data();
+  
+  invoke_method(recv_external, []);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_timer_scheduler() method_id {
+  set_init_data();
+  
+  invoke_method(TIM::send_schedule_loop_msg, []);
+  invoke_method(parse_one_action, [get_c5().begin_parse()]);
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

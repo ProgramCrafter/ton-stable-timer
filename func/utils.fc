@@ -89,9 +89,3 @@ cell bell_info_lr_replace_right(builder left_child,
     .store_uint(right_time, 32)
     .end_cell();
 }
-
-;; test-only
-
-() main() {
-  
-}

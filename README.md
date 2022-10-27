@@ -39,7 +39,7 @@ bell_destroyed#adc8652d proof:IdentProof right_node:(Maybe BellInfo) = BellInbou
 
 bell_destroyed_root#fa6d6098 proof:IdentProof bell_time:uint32 bell_rtime:uint32 = TimerInboundMsg;
 tick#_ = TimerInboundMsg;
-pull_ton_out#_ (n >= 1) nanoton:uint64 = TimerInboundMsg;
+pull_ton_out#_ (nanoton >= 1) nanoton:uint64 = TimerInboundMsg;
 restart_loop#0000000000000001 = TimerInboundMsg;
 schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^Any =
   TimerInboundMsg;

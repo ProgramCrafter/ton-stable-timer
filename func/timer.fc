@@ -1,102 +1,9 @@
 ;; Timer smart-contract for scheduling messages.
 ;; (c) ProgramCrafter, 2022
 
-{-
-slice owner_address() asm "b{100} x{00} |+ x{dab812df8ae259099c63455c8d1c3775eed2622425532e2dd8a8a33be132a3f5} |+ PUSHSLICE";
-;;                           |      |        |
-;;                           |      |        -- address in binary form
-;;                           |      -- workchain tag
-;;                           -- MsgAddressInt tag
--}
+#include "func/utils-timer.fc";
 
-;; testnet version
-slice owner_address() asm "b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE";
-
-slice unused_masterchain_address() asm "b{100} x{FF} |+ x{0310202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE";
-
-
-() send_schedule_loop_msg() impure inline_ref {
-  ;; Instant Hypercube Routing is disabled
-  ;;   we are sending message to another shardchain
-  ;;   so bounce won't be received earlier than two blocks later,
-  ;;   effectively limiting TON spending
-  send_raw_message(
-     begin_cell()
-    .store_uint(0x18, 6)
-    .store_slice(unused_masterchain_address())
-    .store_coins(500000000)     {-  0.5 TON  -}
-    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-    .end_cell(), 0);
-}
-
-
-int continue_parsing(int success, int scheduled_at, int current_time) inline_ref {
-  ;; lazy evaluation required, because `scheduled_at` is nullable
-  if (~ success) {
-    return 0;
-  }
-  return current_time >= scheduled_at;
-}
-() process_schedule() impure inline_ref {
-  (_, cell scheduled) = get_data().begin_parse().load_dict();
-  
-  int current_time = now();
-  
-  (int scheduled_at, slice scheduled_msg, int success) = udict_get_min?(scheduled, 32);
-  while (continue_parsing(success, scheduled_at, current_time)) {
-    cell addr = scheduled_msg~load_ref();
-    cell body = scheduled_msg~load_ref();
-    
-    send_raw_message(
-       begin_cell()
-      .store_uint(0x18, 6)
-      .store_slice(addr.begin_parse())
-      .store_coins(scheduled_msg~load_uint(64))     {-  returning some TON as requested   -}
-      .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  message body stored in reference  -}
-      .store_ref(body)
-      .end_cell(), 0);
-    
-    int t = scheduled~udict_delete?(32, scheduled_at);
-    (scheduled_at, scheduled_msg, success) = udict_get_min?(scheduled, 32);
-  }
-  
-  set_data(begin_cell().store_dict(scheduled).end_cell());
-  
-  if (~ dict_empty?(scheduled)) {
-    send_schedule_loop_msg();
-  }
-}
-
-
-() put_scheduled(int schedule_at, int forward_nton, slice in_msg) impure inline_ref {
-  schedule_at += rand(16);      {-  The Open Network doesn't support precision higher than 5s  -}
-                                {-  avoiding collisions near beautiful numbers  -}
-  
-  (_, cell scheduled) = get_data().begin_parse().load_dict();
-  
-  if (~ dict_empty?(scheduled)) {
-    send_schedule_loop_msg();
-  }
-  
-  (slice old_schedule_here, int old_schedule_exist) = udict_get?(scheduled, 32, schedule_at);
-  throw_if(102, old_schedule_exist);
-  
-  cell schedule_to = in_msg~load_ref();
-  cell body = in_msg~load_ref();
-  
-  scheduled~udict_set_builder(32, schedule_at, begin_cell().store_uint(forward_nton, 64).store_ref(schedule_to).store_ref(body));
-  
-  set_data(begin_cell().store_dict(scheduled).end_cell());
-}
-
-
-;;    ========================================================    ;;
-;;    \\      ||                                    ||      //    ;;
-;;     XX     ||    Processing incoming messages    ||     XX     ;;
-;;    //      ||                                    ||      \\    ;;
-;;    ========================================================    ;;
-
-
+;; TIM::TIM::main
 () recv_internal(int coins, cell in_msg_full, slice in_msg) impure {
   {------------------------------------------------------}
   {-    Extracting source address from CommonMsgInfo    -}
@@ -106,15 +13,14 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
   int bounced = in_msg_full~load_uint(4);  ;; int_msg_info$0, ihr_disabled, bounce, bounced
   
   slice src = in_msg_full~load_msg_addr();
-  int src_hash = slice_hash(src);
   
   {----------------------------------------------------}
   {-    Messages from self for processing schedule    -}
   {-    bounced from masterchain to slow down timer   -}
   {-    [FASTPATH]                                    -}
   {----------------------------------------------------}
-  if (src_hash == slice_hash(unused_masterchain_address())) {
-    process_schedule();
+  if (equal_slices(src, unused_masterchain_address())) {
+    TIM::process_schedule();
     
     return ();
   }
@@ -131,17 +37,48 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
     return ();
   }
   
+  {-------------------------------}
+  {-    Next bell time update    -}
+  {-------------------------------}
+  if (in_msg.preload_uint(32) == op::bell_destroyed_root) {
+    in_msg~load_uint(32);
+    in_msg = TIM::check_ident_proof(src, in_msg);
+    
+    slice old_timer_data = get_data().begin_parse();
+    
+    throw_if(120, old_timer_data~load_uint(32) != in_msg.preload_uint(32));
+    throw_if(121, old_timer_data~load_uint(1) == 0);
+    
+    int next_time = in_msg~load_uint(32);
+    
+    builder new_timer_data = begin_cell().store_uint(next_time, 32);
+    
+    slice root_addr = old_timer_data~load_msg_addr();
+    if (equal_slices(root_addr, src)) {
+      throw_if(122, next_time != 0xFFFFFFFF);
+      new_timer_data~store_uint(0, 1);
+      new_timer_data~store_ref(old_timer_data~load_ref());
+    } else {
+      new_timer_data~store_uint(1, 1);
+      new_timer_data~store_slice(root_addr);
+      new_timer_data~store_ref(old_timer_data~load_ref());
+      new_timer_data~store_slice(old_timer_data);
+    }
+    
+    return ();
+  }
+  
   {------------------------------------------------------}
   {-    Owner can take TON obtained by this contract    -}
   {------------------------------------------------------}
-  if (src_hash == slice_hash(owner_address())) {
-    var request_nton = in_msg~load_uint(64);
+  if (equal_slices(src, owner_address())) {
+    int request_nton = in_msg~load_uint(64);
     
     if (request_nton == 1) {
       {--------------------------------------------------------------------}
       {-    Too small values are not sensical so using them as opcodes    -}
       {--------------------------------------------------------------------}
-      send_schedule_loop_msg();
+      TIM::send_schedule_loop_msg();
       return ();
     }
     
@@ -173,6 +110,8 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
   {-    Incoming message - maybe schedule    -}
   {-------------------------------------------}
   
+  throw_if(140, in_msg~load_uint(32) != op::schedule_msg);
+  
   ;; Components of message scheduling cost
   ;; 1. Forwarding TON amount           specified by user; not less than 0.01 TON
   ;; 2. Price for keeping timer awake.  6.5 TON/h = 6'500'000'000 nTON/h = 1'805'556 nTON/s
@@ -186,7 +125,9 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
   
   throw_if(101, coins < timer_work_cost + forward_nton + 400000000);
   
-  put_scheduled(schedule_at, forward_nton, in_msg);
+  TIM::create_bell(rand(18446744073709551616), schedule_at, forward_nton,
+    in_msg~load_msg_addr(), in_msg~load_ref());
+  
   send_raw_message(
      begin_cell()
     .store_uint(0x18, 6)
@@ -199,10 +140,11 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline_ref
   );
 }
 
+;; TIM::TIM::recv_external
 () recv_external() impure {
   [int balance, _] = get_balance();
   
-  if (balance < 100000000) {  ;; 0.1 TON
+  if ((balance > 50000000) & (balance < 100000000)) {  ;; 0.05-0.10 TON
     accept_message();
   }
 }
