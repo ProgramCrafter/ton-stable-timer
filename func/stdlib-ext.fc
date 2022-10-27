@@ -13,7 +13,7 @@ forall X -> tuple force_cast_to_tuple(X x) asm "NOP";
 forall X -> X tuple_index_var(tuple t, int index) asm "INDEXVAR";
 forall X -> tuple tuple_set_index(tuple t, X value, int index) asm "SETINDEXVAR";
 
-forall X -> (tuple, X) swap_remove(tuple t, int index)  method_id {
+forall X -> (tuple, X) swap_remove(tuple t, int index) {
   int l = t.tuple_length() - 1;
   if (index == l) {
     X value = t~tpop();
@@ -32,7 +32,7 @@ builder store_vu16(builder b, int x) asm "STVARUINT16";
 
 int equal_slices(slice a, slice b) asm "SDEQ";
 
-(slice, ()) parse_one_action(slice actions) impure method_id {
+(slice, ()) parse_one_action(slice actions) impure {
   cell previous = actions~load_ref();
   
   int action_id = actions~load_uint(32);

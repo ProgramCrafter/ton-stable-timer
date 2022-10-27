@@ -5,5 +5,30 @@
 
 ;; TIM::BEL::main
 () recv_internal(int coins, cell in_msg_full, slice in_msg) impure {
-  throw(200);
+  if (in_msg.slice_empty?()) {
+    return ();
+  }
+  
+  slice in_msg_full = in_msg_full.begin_parse();
+  if (in_msg_full~load_uint(4) & 1) {  ;; bounced
+    return ();
+  }
+  
+  int opcode = in_msg~load_uint(32);
+  if (opcode == op::bell) {
+    bell(in_msg_full~load_msg_addr(), in_msg);
+  } elseif (opcode == op::retranslate_init) {
+    int priority = in_msg~load_uint(64);
+    int time = in_msg~load_uint(32);
+    int value = in_msg~load_uint(64);
+    slice dest = in_msg~load_msg_addr();
+    cell body = in_msg~load_ref();
+    
+    create_bell(in_msg_full~load_msg_addr(), in_msg,
+                priority, time, value, dest, body);
+  } elseif (opcode == op::hang_new_bell) {
+    hang_new_bell(in_msg_full~load_msg_addr(), in_msg);
+  } else {
+    throw(404);
+  }
 }

@@ -127,31 +127,6 @@
           }});
       }
       
-      function dump_stores(bits) {
-        let s = '';
-        while (bits.length >= 256) {
-          s += '.store_uint(0x' + tonweb.utils.bytesToHex(bits.array.slice(0, 32)) + ', 256)';
-          bits.array = bits.array.slice(32);
-          bits.length -= 256;
-        }
-        s += '.store_uint(0x' + tonweb.utils.bytesToHex(bits.array) + ' >> ' +
-          (bits.length - bits.cursor % 256) + ', ' + bits.cursor % 256 + ')';
-        return s;
-      }
-      
-      function dump_cell(cell, i = 1, s = '') {
-        let orig = i;
-        s += '  var b' + i + ' = begin_cell()' + dump_stores(cell.bits) + ';\n';
-        
-        for (let j = 0; j < cell.refs.length; j++) {
-          let k = ++i;
-          [i, s] = dump_cell(cell.refs[j], i, s);
-          s += '  b' + orig + ' = b' + orig + '.store_ref(b' + k + '.end_cell());\n';
-        }
-        
-        return [i, s];
-      }
-      
       // timer.deploy().then(console.log)
       
       function _promise_recalc_schedule_link(resolve, reject) {

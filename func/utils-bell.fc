@@ -13,8 +13,8 @@ slice load_core_address() {
   return d~load_msg_addr();
 }
 
-;; TIM::BEL::check_ident_proof (get-method; impure because raises errors)
-cell check_ident_proof_get_code(slice source, slice proof) impure inline_ref method_id {
+;; TIM::BEL::check_ident_proof (impure because raises errors)
+cell check_ident_proof_get_code(slice source, slice proof) impure inline_ref {
   if (proof~load_uint(1) == 0) {
     throw_unless(114, equal_slices(source, load_core_address()));
     
@@ -55,7 +55,7 @@ cell check_ident_proof_get_code(slice source, slice proof) impure inline_ref met
 }
 
 ;; TIM::BEL::store_ident_proof
-builder store_ident_proof(builder msg, cell bell_code) inline_ref method_id {
+builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   msg~store_uint(1, 1);
   
   slice bell_current_data = get_data().begin_parse();
@@ -79,6 +79,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref method_id {
 () bell(slice parent, slice proof) impure method_id {
   ;; We have to maintain invariants of treap.
   ;; That's why bell signal can be sent only by some parent bell or timer contract.
+  int is_nonroot_bell = proof.preload_uint(1);
   cell bell_code = check_ident_proof_get_code(parent, proof);
   
   slice d = get_data().begin_parse();
@@ -100,7 +101,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref method_id {
       .store_slice(children~load_msg_addr())
       .store_coins(0)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-      .store_uint(0x733be087, 32)
+      .store_uint(op::bell, 32)
       .store_ident_proof(bell_code)
       .end_cell(), 64);
     
@@ -116,51 +117,69 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref method_id {
     .store_coins(value)
     .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
     .store_ref(body)
-    .end_cell(), 0);
+    .end_cell(), 1);
   
-  ;; Notifying parent about having destroyed.
-  send_raw_message(begin_cell()
-    .store_uint(0x10, 6)
-    .store_slice(parent)
-    .store_coins(50000000)  ;; 0.05 TON
-    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-    .store_uint(0xadc8652d, 32)
-    .store_ident_proof(bell_code)
-    .store_slice(children)  ;; left node has already been read out of that slice
-    .end_cell(), 0);
-  
-  int rtime = 0xFFFFFFFF;
-  if (children~load_uint(1)) {
-    children~load_msg_addr();
-    children~skip_bits(64);
-    rtime = children~load_uint(32);
+  if (is_nonroot_bell) {
+    ;; Notifying parent about having been destroyed.
+    send_raw_message(begin_cell()
+      .store_uint(0x10, 6)
+      .store_slice(parent)
+      .store_coins(0)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(op::hang_new_bell, 32)
+      .store_ident_proof(bell_code)
+      .store_slice(children)  ;; left node has already been read out of that slice
+      .end_cell(), 224);
+  } else {
+    ;; Notifying timer about having been destroyed.
+    send_raw_message(begin_cell()
+      .store_uint(0x10, 6)
+      .store_slice(parent)
+      .store_coins(0)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(op::update_next_wakeup, 32)
+      .store_ident_proof(bell_code)
+      .store_uint(time, 32)
+      .store_uint(0xFFFFFFFF, 32)
+      .end_cell(), 224);
   }
-  
-  ;; Notifying timer root node.
-  send_raw_message(begin_cell()
-    .store_uint(0x10, 6)
-    .store_slice(core)
-    .store_coins(0)
-    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-    .store_uint(0xfa6d6098, 32)
-    .store_ident_proof(bell_code)
-    .store_uint(time, 32)
-    .store_uint(rtime, 32)
-    .end_cell(), 160);  ;; destroying contract, moving all of its funds into timer root
 }
 
-;; TIM::BEL::bell_destroyed (#adc8652d)
-() bell_destroyed(slice parent, slice body) impure method_id {
-  check_ident_proof_get_code(parent, body);
+;; TIM::BEL::hang_new_bell (#96f5c875)
+() hang_new_bell(slice parent, slice body) impure method_id {
+  cell bell_code = check_ident_proof_get_code(parent, body);
   
   ;; skipping IdentProof
-  if (body~load_uint(1)) {
-    body~load_ref();
-  }
+  throw_unless(402, body~load_uint(1));
+  slice old_lbell_data = body~load_ref().begin_parse();
   body~load_ref();
   
   slice old_data = get_data().begin_parse();
   builder new_data = begin_cell();
+  
+  {--}  ;; Notifying timer root contract
+  {--}  slice body_cp = body;
+  {--}  
+  {--}  ;; getting old time
+  {--}  int time = old_lbell_data.preload_uint(96) & ((1 << 32) - 1);
+  {--}  int rtime = old_data.preload_uint(96) & ((1 << 32) - 1);
+  {--}  if (body_cp~load_uint(1)) {
+  {--}    body_cp~load_msg_addr();
+  {--}    body_cp~skip_bits(64);
+  {--}    throw_if(403, rtime < body_cp.preload_uint(32));
+  {--}    rtime = body_cp.preload_uint(32);
+  {--}  }
+  {--}  
+  {--}  send_raw_message(begin_cell()
+  {--}    .store_uint(0x10, 6)
+  {--}    .store_slice(load_core_address())
+  {--}    .store_coins(0)
+  {--}    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+  {--}    .store_uint(op::update_next_wakeup, 32)
+  {--}    .store_ident_proof(bell_code)
+  {--}    .store_uint(time, 32)
+  {--}    .store_uint(rtime, 32)
+  {--}    .end_cell(), 0);
   
   ;; copying BellDescriptor
   new_data~store_uint(old_data~load_uint(160), 160);
@@ -187,7 +206,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref method_id {
 
 ;; TIM::BEL::retranslate_init (#fbffab22)
 () create_bell(slice parent, slice proof, int priority, int time, int value,
-               slice dest, cell fwd_body, cell bell_code) impure inline_ref method_id {
+               slice dest, cell fwd_body) impure inline_ref method_id {
   cell bell_code = check_ident_proof_get_code(parent, proof);
   
   slice d = get_data().begin_parse();

@@ -40,7 +40,7 @@
   {-------------------------------}
   {-    Next bell time update    -}
   {-------------------------------}
-  if (in_msg.preload_uint(32) == op::bell_destroyed_root) {
+  if (in_msg.preload_uint(32) == op::update_next_wakeup) {
     in_msg~load_uint(32);
     in_msg = TIM::check_ident_proof(src, in_msg);
     
@@ -63,6 +63,8 @@
       new_timer_data~store_slice(root_addr);
       new_timer_data~store_ref(old_timer_data~load_ref());
       new_timer_data~store_slice(old_timer_data);
+      
+      TIM::send_schedule_loop_msg();
     }
     
     return ();

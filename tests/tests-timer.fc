@@ -127,13 +127,8 @@
     .end_cell();
   
   cell body = begin_cell().end_cell();
-  
   invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
-  
-  slice s = get_c5().begin_parse();
-  (_, tuple stack) = invoke_method(parse_one_action, [s]);
-  s = first(stack);
-  invoke_method(parse_one_action, [s]);
+  invoke_method(parse_one_action, [get_c5().begin_parse()]);
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

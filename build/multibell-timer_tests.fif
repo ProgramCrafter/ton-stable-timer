@@ -61,8 +61,8 @@ PROGRAM{
   103208 DECLMETHOD snake_concat
   DECLPROC snake_concat_tagged
   DECLPROC snake_equal?
-  97986 DECLMETHOD swap_remove
-  80537 DECLMETHOD parse_one_action
+  DECLPROC swap_remove
+  DECLPROC parse_one_action
   DECLPROC empty_slice
   DECLPROC calc_bell_state_init_by_data
   DECLPROC init_bell_with_children
@@ -2137,42 +2137,37 @@ PROGRAM{
     64 STU	//  bell_code time value dest fwd_body core_address children _11
     s1 s6 XCHG	//  bell_code children value dest fwd_body core_address time _11
     32 STU	//  bell_code children value dest fwd_body core_address _13
-    s4 s(-1) PUXC	//  bell_code children value dest fwd_body core_address value _13
-    64 STU	//  bell_code children value dest fwd_body core_address _15
-    s0 s3 XCHG2	//  bell_code children value core_address fwd_body _15 dest
-    STSLICER	//  bell_code children value core_address fwd_body _16
-    STREF	//  bell_code children value core_address _17
-    SWAP	//  bell_code children value _17 core_address
-    STSLICER	//  bell_code children value _18
-    s2 s(-1) PUXC	//  bell_code children value children _18
-    STREF	//  bell_code children value _19
-    s1 s2 XCHG	//  bell_code value children _19
-    STREF	//  bell_code value init_data
-    ENDC	//  bell_code value _22
-    ROT	//  value _22 bell_code
-    calc_bell_state_init_by_data INLINECALLDICT	//  value state_init
-    6 PUSHINT	//  value state_init _24=6
-    OVER	//  value state_init _24=6 state_init
-    HASHCU	//  value state_init _24=6 _25
-    10 PUSHPOW2	//  value state_init _24=6 _25 _26=1024
-    16 PUSHINT	//  value state_init _24=6 _25 _26=1024 _27=16
-    NEWC	//  value state_init _24=6 _25 _26=1024 _27=16 _28
-    6 STU	//  value state_init _24=6 _25 _26=1024 _30
-    11 STU	//  value state_init _24=6 _25 _32
-    256 STU	//  value state_init _24=6 _34
-    s0 s3 XCHG
-    100000000 PUSHINT	//  _34 state_init _24=6 value _35=100000000
-    ADD	//  _34 state_init _24=6 _36
-    s1 s3 XCHG	//  _24=6 state_init _34 _36
-    STVARUINT16	//  _24=6 state_init _37
-    s1 s2 XCHG	//  state_init _24=6 _37
-    108 STU	//  state_init _51
-    s1 s(-1) PUXC	//  state_init state_init _51
-    STREF	//  state_init _52
-    ENDC	//  state_init _53
-    0 PUSHINT	//  state_init _53 _54=0
+    s1 s4 XCHG	//  bell_code children core_address dest fwd_body value _13
+    64 STU	//  bell_code children core_address dest fwd_body _15
+    ROT	//  bell_code children core_address fwd_body _15 dest
+    STSLICER	//  bell_code children core_address fwd_body _16
+    STREF	//  bell_code children core_address _17
+    SWAP	//  bell_code children _17 core_address
+    STSLICER	//  bell_code children _18
+    s1 s(-1) PUXC	//  bell_code children children _18
+    STREF	//  bell_code children _19
+    STREF	//  bell_code init_data
+    ENDC	//  bell_code _22
+    SWAP	//  _22 bell_code
+    calc_bell_state_init_by_data INLINECALLDICT	//  state_init
+    6 PUSHINT	//  state_init _24=6
+    OVER	//  state_init _24=6 state_init
+    HASHCU	//  state_init _24=6 _25
+    10 PUSHPOW2	//  state_init _24=6 _25 _26=1024
+    16 PUSHINT	//  state_init _24=6 _25 _26=1024 _27=16
+    NEWC	//  state_init _24=6 _25 _26=1024 _27=16 _28
+    6 STU	//  state_init _24=6 _25 _26=1024 _30
+    11 STU	//  state_init _24=6 _25 _32
+    256 STU	//  state_init _24=6 _34
+    0 PUSHINT	//  state_init _24=6 _34 _35=0
+    STVARUINT16	//  state_init _24=6 _36
+    108 STU	//  state_init _50
+    s1 s(-1) PUXC	//  state_init state_init _50
+    STREF	//  state_init _51
+    ENDC	//  state_init _52
+    64 PUSHINT	//  state_init _52 _53=64
     SENDRAWMSG
-    HASHCU	//  _56
+    HASHCU	//  _55
   }>
   init_bell_no_children PROCREF:<{
     //  priority time value dest fwd_body core_address bell_code
@@ -2358,68 +2353,66 @@ PROGRAM{
         6 STU	//  priority time value dest fwd_body root_addr bell_code timer_new_data _50=4227836706 _51=0 _55
         s0 s5 XCHG2	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _55 root_addr
         STSLICER	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56
-        s7 PUSH
-        100000000 PUSHINT	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56 value _57=100000000
-        ADD	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56 _58
-        STVARUINT16	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _59
-        s1 s4 XCHG	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _51=0 _59
-        107 STU	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _73
-        s1 s3 XCHG	//  priority time value dest fwd_body timer_new_data bell_code _50=4227836706 _73
-        32 STU	//  priority time value dest fwd_body timer_new_data bell_code _75
-        s1 s7 XCHG	//  bell_code time value dest fwd_body timer_new_data priority _75
-        64 STU	//  bell_code time value dest fwd_body timer_new_data _77
-        s1 s5 XCHG	//  bell_code timer_new_data value dest fwd_body time _77
-        32 STU	//  bell_code timer_new_data value dest fwd_body _79
-        s1 s3 XCHG	//  bell_code timer_new_data fwd_body dest value _79
-        64 STU	//  bell_code timer_new_data fwd_body dest _81
-        SWAP	//  bell_code timer_new_data fwd_body _81 dest
-        STSLICER	//  bell_code timer_new_data fwd_body _82
-        STREF	//  bell_code timer_new_data _83
-        TIM::store_ident_proof INLINECALLDICT	//  bell_code timer_new_data _84
-        ENDC	//  bell_code timer_new_data _85
-        0 PUSHINT	//  bell_code timer_new_data _85 _86=0
+        s4 PUSH	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56 _57=0
+        STVARUINT16	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _58
+        s1 s4 XCHG	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _51=0 _58
+        107 STU	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _72
+        s1 s3 XCHG	//  priority time value dest fwd_body timer_new_data bell_code _50=4227836706 _72
+        32 STU	//  priority time value dest fwd_body timer_new_data bell_code _74
+        s1 s7 XCHG	//  bell_code time value dest fwd_body timer_new_data priority _74
+        64 STU	//  bell_code time value dest fwd_body timer_new_data _76
+        s1 s5 XCHG	//  bell_code timer_new_data value dest fwd_body time _76
+        32 STU	//  bell_code timer_new_data value dest fwd_body _78
+        s1 s3 XCHG	//  bell_code timer_new_data fwd_body dest value _78
+        64 STU	//  bell_code timer_new_data fwd_body dest _80
+        SWAP	//  bell_code timer_new_data fwd_body _80 dest
+        STSLICER	//  bell_code timer_new_data fwd_body _81
+        STREF	//  bell_code timer_new_data _82
+        TIM::store_ident_proof INLINECALLDICT	//  bell_code timer_new_data _83
+        ENDC	//  bell_code timer_new_data _84
+        64 PUSHINT	//  bell_code timer_new_data _84 _85=64
         SENDRAWMSG
       }>ELSE<{	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority timer_old_data
         NEWC	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority timer_old_data bell_info_lr
         SWAP	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr timer_old_data
-        32 LDU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr _169 _168
+        32 LDU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr _168 _167
         DROP	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time
         s0 s9 PUSH2	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time root_time time
-        LESS	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time _94
+        LESS	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time _93
         IF:<{	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time
           1 PUSHINT
-          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _96=1 bell_info_lr
+          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _95=1 bell_info_lr
           1 STU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time bell_info_lr
           s0 s3 XCHG2	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr root_addr
           STSLICER	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr
           64 STU	//  priority time value dest fwd_body timer_new_data bell_code root_time bell_info_lr
           32 STU	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr
-          0 PUSHINT	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _108=0
-          SWAP	//  priority time value dest fwd_body timer_new_data bell_code _108=0 bell_info_lr
+          0 PUSHINT	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _107=0
+          SWAP	//  priority time value dest fwd_body timer_new_data bell_code _107=0 bell_info_lr
           1 STU	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr
         }>ELSE<{	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time
           1 PUSHINT
-          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _112=1 bell_info_lr
+          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _111=1 bell_info_lr
           2 STU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time bell_info_lr
           s0 s3 XCHG2	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr root_addr
           STSLICER	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr
           64 STU	//  priority time value dest fwd_body timer_new_data bell_code root_time bell_info_lr
           32 STU	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr
         }>
-        10 PUSHPOW2	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _124=1024
-        s0 s3 XCHG2	//  priority time value dest fwd_body bell_info_lr bell_code _124=1024 timer_new_data
+        10 PUSHPOW2	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _123=1024
+        s0 s3 XCHG2	//  priority time value dest fwd_body bell_info_lr bell_code _123=1024 timer_new_data
         11 STU	//  priority time value dest fwd_body bell_info_lr bell_code timer_new_data
-        MYADDR	//  priority time value dest fwd_body bell_info_lr bell_code timer_new_data _128
-        s0 s3 XCHG	//  priority time value dest fwd_body _128 bell_code timer_new_data bell_info_lr
-        ENDC	//  priority time value dest fwd_body _128 bell_code timer_new_data _129
+        MYADDR	//  priority time value dest fwd_body bell_info_lr bell_code timer_new_data _127
+        s0 s3 XCHG	//  priority time value dest fwd_body _127 bell_code timer_new_data bell_info_lr
+        ENDC	//  priority time value dest fwd_body _127 bell_code timer_new_data _128
         s8 PUSH
         s5 s8 XCPU
         s0 s5 XCHG
         s4 s8 XCHG
         s3 s7 XCHG
-        s0 s2 s8 XC2PU	//  priority time bell_code timer_new_data priority time value dest fwd_body _128 _129 bell_code
-        init_bell_with_children INLINECALLDICT	//  priority time bell_code timer_new_data _130
-        SWAP	//  priority time bell_code _130 timer_new_data
+        s0 s2 s8 XC2PU	//  priority time bell_code timer_new_data priority time value dest fwd_body _127 _128 bell_code
+        init_bell_with_children INLINECALLDICT	//  priority time bell_code timer_new_data _129
+        SWAP	//  priority time bell_code _129 timer_new_data
         256 STU	//  priority time bell_code timer_new_data
         s1 s3 XCHG	//  bell_code time priority timer_new_data
         64 STU	//  bell_code time timer_new_data
@@ -2428,24 +2421,24 @@ PROGRAM{
     }>ELSE<{	//  priority time value dest fwd_body timer_new_data bell_code timer_old_data
       DROP	//  priority time value dest fwd_body timer_new_data bell_code
       10 PUSHPOW2
-      ROT	//  priority time value dest fwd_body bell_code _140=1024 timer_new_data
+      ROT	//  priority time value dest fwd_body bell_code _139=1024 timer_new_data
       11 STU	//  priority time value dest fwd_body bell_code timer_new_data
-      MYADDR	//  priority time value dest fwd_body bell_code timer_new_data _144
+      MYADDR	//  priority time value dest fwd_body bell_code timer_new_data _143
       s7 PUSH
       s4 s7 XCPU
       s0 s4 XCHG
       s3 s7 XCHG
       s6 s1 s6 XCHG3
-      s6 PUSH	//  priority time timer_new_data bell_code priority time value dest fwd_body _144 bell_code
-      init_bell_no_children INLINECALLDICT	//  priority time timer_new_data bell_code _145
-      ROT	//  priority time bell_code _145 timer_new_data
+      s6 PUSH	//  priority time timer_new_data bell_code priority time value dest fwd_body _143 bell_code
+      init_bell_no_children INLINECALLDICT	//  priority time timer_new_data bell_code _144
+      ROT	//  priority time bell_code _144 timer_new_data
       256 STU	//  priority time bell_code timer_new_data
       s1 s3 XCHG	//  bell_code time priority timer_new_data
       64 STU	//  bell_code time timer_new_data
       32 STU	//  bell_code timer_new_data
     }>
     STREF	//  timer_new_data
-    ENDC	//  _156
+    ENDC	//  _155
     c4 POP
   }>
   get_nft_address_by_index PROC:<{
@@ -2486,44 +2479,48 @@ PROGRAM{
     NOW	//  next d next _7
     LEQ	//  next d _8
     IF:<{	//  next d
-      1 LDU	//  next _10 d
-      SWAP	//  next d _10
-      0 EQINT	//  next d _14
+      NIP	//  d
+      1 LDU	//  _10 d
+      SWAP	//  d _10
+      0 EQINT	//  d _14
       130 THROWIF
-      1933303943 PUSHINT	//  next d _16=1933303943
-      0 PUSHINT	//  next d _16=1933303943 _17=0
-      24 PUSHINT	//  next d _16=1933303943 _17=0 _18=24
-      NEWC	//  next d _16=1933303943 _17=0 _18=24 _19
-      6 STU	//  next d _16=1933303943 _17=0 _21
-      s0 s3 XCHG	//  next _21 _16=1933303943 _17=0 d
-      LDMSGADDR	//  next _21 _16=1933303943 _17=0 _55 _54
-      DROP	//  next _21 _16=1933303943 _17=0 _22
-      s1 s3 XCHG	//  next _17=0 _16=1933303943 _21 _22
-      STSLICER	//  next _17=0 _16=1933303943 _24
-      200000000 PUSHINT	//  next _17=0 _16=1933303943 _24 _25=200000000
-      STVARUINT16	//  next _17=0 _16=1933303943 _26
-      s1 s2 XCHG	//  next _16=1933303943 _17=0 _26
-      107 STU	//  next _16=1933303943 _40
-      32 STU	//  next _42
-      TIM::store_ident_proof INLINECALLDICT	//  next _43
-      ENDC	//  next _44
-      0 PUSHINT	//  next _44 _45=0
+      1933303943 PUSHINT	//  d _16=1933303943
+      0 PUSHINT	//  d _16=1933303943 _17=0
+      24 PUSHINT	//  d _16=1933303943 _17=0 _18=24
+      NEWC	//  d _16=1933303943 _17=0 _18=24 _19
+      6 STU	//  d _16=1933303943 _17=0 _21
+      s0 s3 XCHG	//  _21 _16=1933303943 _17=0 d
+      LDMSGADDR	//  _21 _16=1933303943 _17=0 _57 _56
+      DROP	//  _21 _16=1933303943 _17=0 _22
+      s1 s3 XCHG	//  _17=0 _16=1933303943 _21 _22
+      STSLICER	//  _17=0 _16=1933303943 _24
+      200000000 PUSHINT	//  _17=0 _16=1933303943 _24 _25=200000000
+      STVARUINT16	//  _17=0 _16=1933303943 _26
+      s1 s2 XCHG	//  _16=1933303943 _17=0 _26
+      107 STU	//  _16=1933303943 _40
+      32 STU	//  _42
+      TIM::store_ident_proof INLINECALLDICT	//  _43
+      ENDC	//  _44
+      0 PUSHINT	//  _44 _45=0
       SENDRAWMSG
-    }>ELSE<{
+    }>ELSE<{	//  next d
       DROP	//  next
+      32 PUSHPOW2DEC	//  next _47=4294967295
+      LESS	//  _48
+      IF:<{	// 
+        TIM::send_schedule_loop_msg INLINECALLDICT
+      }>	// 
     }>
-    32 PUSHPOW2DEC	//  next _47=4294967295
-    LESS	//  _48
-    IF:<{	// 
-      TIM::send_schedule_loop_msg INLINECALLDICT
-    }>	// 
+    180 PUSHINT	//  _50=180
+    s0 DUMP	//  _51
+    DROP	// 
   }>
   recv_internal PROC:<{
     //  coins in_msg_full in_msg
     SWAP	//  coins in_msg in_msg_full
     CTOS	//  coins in_msg in_msg_full
     4 LDU	//  coins in_msg bounced in_msg_full
-    LDMSGADDR	//  coins in_msg bounced _198 _197
+    LDMSGADDR	//  coins in_msg bounced _199 _198
     DROP	//  coins in_msg bounced src
     b{100} x{FF} |+ x{2210202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE	//  coins in_msg bounced src _12
     s1 s(-1) PUXC	//  coins in_msg bounced src src _12
@@ -2546,11 +2543,11 @@ PROGRAM{
     }>	//  coins in_msg src
     OVER	//  coins in_msg src in_msg
     32 PLDU	//  coins in_msg src _21
-    4201472152 PUSHINT	//  coins in_msg src _21 _22=4201472152
+    132892869 PUSHINT	//  coins in_msg src _21 _22=132892869
     EQUAL	//  coins in_msg src _23
     IFJMP:<{	//  coins in_msg src
       s2 POP	//  src in_msg
-      32 LDU	//  src _200 _199
+      32 LDU	//  src _201 _200
       NIP	//  src in_msg
       s1 s(-1) PUXC	//  src src in_msg
       TIM::check_ident_proof INLINECALLDICT	//  src in_msg
@@ -2567,10 +2564,10 @@ PROGRAM{
       0 EQINT	//  src in_msg old_timer_data _44
       121 THROWIF
       SWAP	//  src old_timer_data in_msg
-      32 LDU	//  src old_timer_data _206 _205
+      32 LDU	//  src old_timer_data _207 _206
       DROP	//  src old_timer_data next_time
       SWAP	//  src next_time old_timer_data
-      LDMSGADDR	//  src next_time _208 _207
+      LDMSGADDR	//  src next_time _209 _208
       DROP	//  src next_time root_addr
       s0 s2 PUXC	//  root_addr next_time root_addr src
       SDEQ	//  root_addr next_time _57
@@ -2581,90 +2578,91 @@ PROGRAM{
         122 THROWIF
       }>ELSE<{	//  next_time
         DROP	// 
+        TIM::send_schedule_loop_msg INLINECALLDICT
       }>
     }>	//  coins in_msg src
-    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src _82
-    SDEQ	//  coins in_msg _83
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  coins in_msg src _83
+    SDEQ	//  coins in_msg _84
     IFJMP:<{	//  coins in_msg
       NIP	//  in_msg
-      64 LDU	//  _214 _213
+      64 LDU	//  _215 _214
       DROP	//  request_nton
       DUP	//  request_nton request_nton
-      1 EQINT	//  request_nton _89
+      1 EQINT	//  request_nton _90
       IFJMP:<{	//  request_nton
         DROP	// 
         TIM::send_schedule_loop_msg INLINECALLDICT
       }>	//  request_nton
-      BALANCE	//  request_nton _93
-      UNPAIR	//  request_nton _215 _216
+      BALANCE	//  request_nton _94
+      UNPAIR	//  request_nton _216 _217
       DROP	//  request_nton balance
-      32 PUSHPOW2DEC	//  request_nton balance _96=4294967295
-      NOW	//  request_nton balance _96=4294967295 _97
+      32 PUSHPOW2DEC	//  request_nton balance _97=4294967295
+      NOW	//  request_nton balance _97=4294967295 _98
       SUB	//  request_nton balance time_to_unix_epoch_end
       s1 s2 XCPU	//  request_nton time_to_unix_epoch_end balance request_nton
-      SUB	//  request_nton time_to_unix_epoch_end _100
+      SUB	//  request_nton time_to_unix_epoch_end _101
       3611111 PUSHINT
-      ROT	//  request_nton _100 _101=3611111 time_to_unix_epoch_end
-      MUL	//  request_nton _100 _102
-      LESS	//  request_nton _103
+      ROT	//  request_nton _101 _102=3611111 time_to_unix_epoch_end
+      MUL	//  request_nton _101 _103
+      LESS	//  request_nton _104
       105 THROWIF
-      0 PUSHINT	//  request_nton _105=0
-      24 PUSHINT	//  request_nton _105=0 _106=24
-      NEWC	//  request_nton _105=0 _106=24 _107
-      6 STU	//  request_nton _105=0 _109
-      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _105=0 _109 _110
-      STSLICER	//  request_nton _105=0 _111
-      ROT	//  _105=0 _111 request_nton
-      STVARUINT16	//  _105=0 _112
-      107 STU	//  _126
-      ENDC	//  _127
-      0 PUSHINT	//  _127 _128=0
+      0 PUSHINT	//  request_nton _106=0
+      24 PUSHINT	//  request_nton _106=0 _107=24
+      NEWC	//  request_nton _106=0 _107=24 _108
+      6 STU	//  request_nton _106=0 _110
+      b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  request_nton _106=0 _110 _111
+      STSLICER	//  request_nton _106=0 _112
+      ROT	//  _106=0 _112 request_nton
+      STVARUINT16	//  _106=0 _113
+      107 STU	//  _127
+      ENDC	//  _128
+      0 PUSHINT	//  _128 _129=0
       SENDRAWMSG
     }>	//  coins in_msg
-    32 LDU	//  coins _131 in_msg
+    32 LDU	//  coins _132 in_msg
     SWAP
-    4114815653 PUSHINT	//  coins in_msg _131 _134=4114815653
-    NEQ	//  coins in_msg _135
+    4114815653 PUSHINT	//  coins in_msg _132 _135=4114815653
+    NEQ	//  coins in_msg _136
     140 THROWIF
     64 LDU	//  coins forward_nton in_msg
     OVER
-    10000000 PUSHINT	//  coins forward_nton in_msg forward_nton _142=10000000
-    LESS	//  coins forward_nton in_msg _143
+    10000000 PUSHINT	//  coins forward_nton in_msg forward_nton _143=10000000
+    LESS	//  coins forward_nton in_msg _144
     100 THROWIF
     32 LDU	//  coins forward_nton schedule_at in_msg
-    1805556 PUSHINT	//  coins forward_nton schedule_at in_msg _150=1805556
-    0 PUSHINT	//  coins forward_nton schedule_at in_msg _150=1805556 _151=0
+    1805556 PUSHINT	//  coins forward_nton schedule_at in_msg _151=1805556
+    0 PUSHINT	//  coins forward_nton schedule_at in_msg _151=1805556 _152=0
     s3 PUSH
-    NOW	//  coins forward_nton schedule_at in_msg _150=1805556 _151=0 schedule_at _152
-    SUB	//  coins forward_nton schedule_at in_msg _150=1805556 _151=0 _153
-    MAX	//  coins forward_nton schedule_at in_msg _150=1805556 _154
+    NOW	//  coins forward_nton schedule_at in_msg _151=1805556 _152=0 schedule_at _153
+    SUB	//  coins forward_nton schedule_at in_msg _151=1805556 _152=0 _154
+    MAX	//  coins forward_nton schedule_at in_msg _151=1805556 _155
     MUL	//  coins forward_nton schedule_at in_msg timer_work_cost
     s3 PUSH	//  coins forward_nton schedule_at in_msg timer_work_cost forward_nton
-    ADD	//  coins forward_nton schedule_at in_msg _157
-    400000000 PUSHINT	//  coins forward_nton schedule_at in_msg _157 _158=400000000
-    ADD	//  coins forward_nton schedule_at in_msg _159
-    s1 s4 XCHG	//  in_msg forward_nton schedule_at coins _159
-    LESS	//  in_msg forward_nton schedule_at _160
+    ADD	//  coins forward_nton schedule_at in_msg _158
+    400000000 PUSHINT	//  coins forward_nton schedule_at in_msg _158 _159=400000000
+    ADD	//  coins forward_nton schedule_at in_msg _160
+    s1 s4 XCHG	//  in_msg forward_nton schedule_at coins _160
+    LESS	//  in_msg forward_nton schedule_at _161
     101 THROWIF
-    64 PUSHPOW2	//  in_msg forward_nton schedule_at _162=18446744073709551616
-    RAND	//  in_msg forward_nton schedule_at _163
-    s0 s3 XCHG	//  _163 forward_nton schedule_at in_msg
-    LDMSGADDR	//  _163 forward_nton schedule_at _164 in_msg
-    LDREF	//  _163 forward_nton schedule_at _164 _226 _225
-    DROP	//  _163 forward_nton schedule_at _164 _166
-    s2 s3 XCHG	//  _163 schedule_at forward_nton _164 _166
+    64 PUSHPOW2	//  in_msg forward_nton schedule_at _163=18446744073709551616
+    RAND	//  in_msg forward_nton schedule_at _164
+    s0 s3 XCHG	//  _164 forward_nton schedule_at in_msg
+    LDMSGADDR	//  _164 forward_nton schedule_at _165 in_msg
+    LDREF	//  _164 forward_nton schedule_at _165 _227 _226
+    DROP	//  _164 forward_nton schedule_at _165 _167
+    s2 s3 XCHG	//  _164 schedule_at forward_nton _165 _167
     TIM::create_bell INLINECALLDICT
-    0 PUSHINT	//  _169=0
-    24 PUSHINT	//  _169=0 _170=24
-    NEWC	//  _169=0 _170=24 _171
-    6 STU	//  _169=0 _173
-    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  _169=0 _173 _174
-    STSLICER	//  _169=0 _175
-    200000000 PUSHINT	//  _169=0 _175 _176=200000000
-    STVARUINT16	//  _169=0 _177
-    107 STU	//  _191
-    ENDC	//  _192
-    1 PUSHINT	//  _192 _193=1
+    0 PUSHINT	//  _170=0
+    24 PUSHINT	//  _170=0 _171=24
+    NEWC	//  _170=0 _171=24 _172
+    6 STU	//  _170=0 _174
+    b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0c7192fed2237719da256e07fa7948} |+ PUSHSLICE	//  _170=0 _174 _175
+    STSLICER	//  _170=0 _176
+    200000000 PUSHINT	//  _170=0 _176 _177=200000000
+    STVARUINT16	//  _170=0 _178
+    107 STU	//  _192
+    ENDC	//  _193
+    1 PUSHINT	//  _193 _194=1
     SENDRAWMSG
   }>
   recv_external PROC:<{
@@ -2907,24 +2905,15 @@ PROGRAM{
     CTOS	//  coins=500000000 half_full_msg _34 _36
     s3 s3 s0 XCHG3	//  _34 coins=500000000 half_full_msg _36
     TRIPLE	//  _34 _35
-    invoke_method CALLDICT	//  _50 _51
+    invoke_method CALLDICT	//  _43 _44
     2DROP	// 
-    c5 PUSH	//  _39
-    CTOS	//  s
     CONT:<{
       parse_one_action CALLDICT
-    }>	//  s _43
-    SWAP	//  _43 s
-    SINGLE	//  _43 _44
-    invoke_method CALLDICT	//  _52 _53
-    NIP	//  stack
-    FIRST	//  s
-    CONT:<{
-      parse_one_action CALLDICT
-    }>	//  s _47
-    SWAP	//  _47 s
-    SINGLE	//  _47 _48
-    invoke_method CALLDICT	//  _54 _55
+    }>	//  _38
+    c5 PUSH	//  _38 _40
+    CTOS	//  _38 _41
+    SINGLE	//  _38 _39
+    invoke_method CALLDICT	//  _45 _46
     2DROP	// 
   }>
   __test_pull_ton_failure PROC:<{

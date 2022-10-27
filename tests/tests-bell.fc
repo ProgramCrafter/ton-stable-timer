@@ -141,7 +141,7 @@ cell get_bell_code() {
 () __test_no_subbell_destroy_no_proof() method_id {
   set_init_data(0);
   
-  invoke_method_expect_fail(bell_destroyed, [null_address(), begin_cell().end_cell().begin_parse()]);
+  invoke_method_expect_fail(hang_new_bell, [null_address(), begin_cell().end_cell().begin_parse()]);
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -6,8 +6,8 @@
 const int op::direct_init = 0;
 const int op::retranslate_init = 0xfbffab22;
 const int op::bell = 0x733be087;
-const int op::bell_destroyed = 0xadc8652d;
-const int op::bell_destroyed_root = 0xfa6d6098;
+const int op::hang_new_bell = 0x96f5c875;
+const int op::update_next_wakeup = 0x07ebc8c5;
 const int op::schedule_msg = 0xf5431aa5;
 
 ;; Utility functions
@@ -56,10 +56,10 @@ int init_bell_with_children(int priority, int time, int value, slice dest, cell 
      begin_cell()
     .store_uint(0x10, 6)  ;; non-bounceable internal message
     .store_uint(1024, 11).store_uint(cell_hash(state_init), 256)
-    .store_coins(value + 100000000)
+    .store_coins(0)
     .store_uint(6, 1 + 4 + 4 + 64 + 32 + 2 + 1)  ;; no message body, but state init
     .store_ref(state_init)
-    .end_cell(), 0);
+    .end_cell(), 64);
   
   return cell_hash(state_init);
 }

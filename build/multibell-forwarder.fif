@@ -6,8 +6,8 @@ PROGRAM{
   DECLPROC avg
   DECLPROC exp
   DECLPROC log2
-  97986 DECLMETHOD swap_remove
-  80537 DECLMETHOD parse_one_action
+  DECLPROC swap_remove
+  DECLPROC parse_one_action
   DECLPROC empty_slice
   DECLPROC calc_bell_state_init_by_data
   DECLPROC init_bell_with_children
@@ -290,42 +290,37 @@ PROGRAM{
     64 STU	//  bell_code time value dest fwd_body core_address children _11
     s1 s6 XCHG	//  bell_code children value dest fwd_body core_address time _11
     32 STU	//  bell_code children value dest fwd_body core_address _13
-    s4 s(-1) PUXC	//  bell_code children value dest fwd_body core_address value _13
-    64 STU	//  bell_code children value dest fwd_body core_address _15
-    s0 s3 XCHG2	//  bell_code children value core_address fwd_body _15 dest
-    STSLICER	//  bell_code children value core_address fwd_body _16
-    STREF	//  bell_code children value core_address _17
-    SWAP	//  bell_code children value _17 core_address
-    STSLICER	//  bell_code children value _18
-    s2 s(-1) PUXC	//  bell_code children value children _18
-    STREF	//  bell_code children value _19
-    s1 s2 XCHG	//  bell_code value children _19
-    STREF	//  bell_code value init_data
-    ENDC	//  bell_code value _22
-    ROT	//  value _22 bell_code
-    calc_bell_state_init_by_data INLINECALLDICT	//  value state_init
-    6 PUSHINT	//  value state_init _24=6
-    OVER	//  value state_init _24=6 state_init
-    HASHCU	//  value state_init _24=6 _25
-    10 PUSHPOW2	//  value state_init _24=6 _25 _26=1024
-    16 PUSHINT	//  value state_init _24=6 _25 _26=1024 _27=16
-    NEWC	//  value state_init _24=6 _25 _26=1024 _27=16 _28
-    6 STU	//  value state_init _24=6 _25 _26=1024 _30
-    11 STU	//  value state_init _24=6 _25 _32
-    256 STU	//  value state_init _24=6 _34
-    s0 s3 XCHG
-    100000000 PUSHINT	//  _34 state_init _24=6 value _35=100000000
-    ADD	//  _34 state_init _24=6 _36
-    s1 s3 XCHG	//  _24=6 state_init _34 _36
-    STVARUINT16	//  _24=6 state_init _37
-    s1 s2 XCHG	//  state_init _24=6 _37
-    108 STU	//  state_init _51
-    s1 s(-1) PUXC	//  state_init state_init _51
-    STREF	//  state_init _52
-    ENDC	//  state_init _53
-    0 PUSHINT	//  state_init _53 _54=0
+    s1 s4 XCHG	//  bell_code children core_address dest fwd_body value _13
+    64 STU	//  bell_code children core_address dest fwd_body _15
+    ROT	//  bell_code children core_address fwd_body _15 dest
+    STSLICER	//  bell_code children core_address fwd_body _16
+    STREF	//  bell_code children core_address _17
+    SWAP	//  bell_code children _17 core_address
+    STSLICER	//  bell_code children _18
+    s1 s(-1) PUXC	//  bell_code children children _18
+    STREF	//  bell_code children _19
+    STREF	//  bell_code init_data
+    ENDC	//  bell_code _22
+    SWAP	//  _22 bell_code
+    calc_bell_state_init_by_data INLINECALLDICT	//  state_init
+    6 PUSHINT	//  state_init _24=6
+    OVER	//  state_init _24=6 state_init
+    HASHCU	//  state_init _24=6 _25
+    10 PUSHPOW2	//  state_init _24=6 _25 _26=1024
+    16 PUSHINT	//  state_init _24=6 _25 _26=1024 _27=16
+    NEWC	//  state_init _24=6 _25 _26=1024 _27=16 _28
+    6 STU	//  state_init _24=6 _25 _26=1024 _30
+    11 STU	//  state_init _24=6 _25 _32
+    256 STU	//  state_init _24=6 _34
+    0 PUSHINT	//  state_init _24=6 _34 _35=0
+    STVARUINT16	//  state_init _24=6 _36
+    108 STU	//  state_init _50
+    s1 s(-1) PUXC	//  state_init state_init _50
+    STREF	//  state_init _51
+    ENDC	//  state_init _52
+    64 PUSHINT	//  state_init _52 _53=64
     SENDRAWMSG
-    HASHCU	//  _56
+    HASHCU	//  _55
   }>
   init_bell_no_children PROCREF:<{
     //  priority time value dest fwd_body core_address bell_code
@@ -511,68 +506,66 @@ PROGRAM{
         6 STU	//  priority time value dest fwd_body root_addr bell_code timer_new_data _50=4227836706 _51=0 _55
         s0 s5 XCHG2	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _55 root_addr
         STSLICER	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56
-        s7 PUSH
-        100000000 PUSHINT	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56 value _57=100000000
-        ADD	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56 _58
-        STVARUINT16	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _59
-        s1 s4 XCHG	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _51=0 _59
-        107 STU	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _73
-        s1 s3 XCHG	//  priority time value dest fwd_body timer_new_data bell_code _50=4227836706 _73
-        32 STU	//  priority time value dest fwd_body timer_new_data bell_code _75
-        s1 s7 XCHG	//  bell_code time value dest fwd_body timer_new_data priority _75
-        64 STU	//  bell_code time value dest fwd_body timer_new_data _77
-        s1 s5 XCHG	//  bell_code timer_new_data value dest fwd_body time _77
-        32 STU	//  bell_code timer_new_data value dest fwd_body _79
-        s1 s3 XCHG	//  bell_code timer_new_data fwd_body dest value _79
-        64 STU	//  bell_code timer_new_data fwd_body dest _81
-        SWAP	//  bell_code timer_new_data fwd_body _81 dest
-        STSLICER	//  bell_code timer_new_data fwd_body _82
-        STREF	//  bell_code timer_new_data _83
-        TIM::store_ident_proof INLINECALLDICT	//  bell_code timer_new_data _84
-        ENDC	//  bell_code timer_new_data _85
-        0 PUSHINT	//  bell_code timer_new_data _85 _86=0
+        s4 PUSH	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _56 _57=0
+        STVARUINT16	//  priority time value dest fwd_body _51=0 bell_code timer_new_data _50=4227836706 _58
+        s1 s4 XCHG	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _51=0 _58
+        107 STU	//  priority time value dest fwd_body _50=4227836706 bell_code timer_new_data _72
+        s1 s3 XCHG	//  priority time value dest fwd_body timer_new_data bell_code _50=4227836706 _72
+        32 STU	//  priority time value dest fwd_body timer_new_data bell_code _74
+        s1 s7 XCHG	//  bell_code time value dest fwd_body timer_new_data priority _74
+        64 STU	//  bell_code time value dest fwd_body timer_new_data _76
+        s1 s5 XCHG	//  bell_code timer_new_data value dest fwd_body time _76
+        32 STU	//  bell_code timer_new_data value dest fwd_body _78
+        s1 s3 XCHG	//  bell_code timer_new_data fwd_body dest value _78
+        64 STU	//  bell_code timer_new_data fwd_body dest _80
+        SWAP	//  bell_code timer_new_data fwd_body _80 dest
+        STSLICER	//  bell_code timer_new_data fwd_body _81
+        STREF	//  bell_code timer_new_data _82
+        TIM::store_ident_proof INLINECALLDICT	//  bell_code timer_new_data _83
+        ENDC	//  bell_code timer_new_data _84
+        64 PUSHINT	//  bell_code timer_new_data _84 _85=64
         SENDRAWMSG
       }>ELSE<{	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority timer_old_data
         NEWC	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority timer_old_data bell_info_lr
         SWAP	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr timer_old_data
-        32 LDU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr _169 _168
+        32 LDU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr _168 _167
         DROP	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time
         s0 s9 PUSH2	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time root_time time
-        LESS	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time _94
+        LESS	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time _93
         IF:<{	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time
           1 PUSHINT
-          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _96=1 bell_info_lr
+          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _95=1 bell_info_lr
           1 STU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time bell_info_lr
           s0 s3 XCHG2	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr root_addr
           STSLICER	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr
           64 STU	//  priority time value dest fwd_body timer_new_data bell_code root_time bell_info_lr
           32 STU	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr
-          0 PUSHINT	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _108=0
-          SWAP	//  priority time value dest fwd_body timer_new_data bell_code _108=0 bell_info_lr
+          0 PUSHINT	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _107=0
+          SWAP	//  priority time value dest fwd_body timer_new_data bell_code _107=0 bell_info_lr
           1 STU	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr
         }>ELSE<{	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority bell_info_lr root_time
           1 PUSHINT
-          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _112=1 bell_info_lr
+          ROT	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time _111=1 bell_info_lr
           2 STU	//  priority time value dest fwd_body timer_new_data bell_code root_addr root_priority root_time bell_info_lr
           s0 s3 XCHG2	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr root_addr
           STSLICER	//  priority time value dest fwd_body timer_new_data bell_code root_time root_priority bell_info_lr
           64 STU	//  priority time value dest fwd_body timer_new_data bell_code root_time bell_info_lr
           32 STU	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr
         }>
-        10 PUSHPOW2	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _124=1024
-        s0 s3 XCHG2	//  priority time value dest fwd_body bell_info_lr bell_code _124=1024 timer_new_data
+        10 PUSHPOW2	//  priority time value dest fwd_body timer_new_data bell_code bell_info_lr _123=1024
+        s0 s3 XCHG2	//  priority time value dest fwd_body bell_info_lr bell_code _123=1024 timer_new_data
         11 STU	//  priority time value dest fwd_body bell_info_lr bell_code timer_new_data
-        MYADDR	//  priority time value dest fwd_body bell_info_lr bell_code timer_new_data _128
-        s0 s3 XCHG	//  priority time value dest fwd_body _128 bell_code timer_new_data bell_info_lr
-        ENDC	//  priority time value dest fwd_body _128 bell_code timer_new_data _129
+        MYADDR	//  priority time value dest fwd_body bell_info_lr bell_code timer_new_data _127
+        s0 s3 XCHG	//  priority time value dest fwd_body _127 bell_code timer_new_data bell_info_lr
+        ENDC	//  priority time value dest fwd_body _127 bell_code timer_new_data _128
         s8 PUSH
         s5 s8 XCPU
         s0 s5 XCHG
         s4 s8 XCHG
         s3 s7 XCHG
-        s0 s2 s8 XC2PU	//  priority time bell_code timer_new_data priority time value dest fwd_body _128 _129 bell_code
-        init_bell_with_children INLINECALLDICT	//  priority time bell_code timer_new_data _130
-        SWAP	//  priority time bell_code _130 timer_new_data
+        s0 s2 s8 XC2PU	//  priority time bell_code timer_new_data priority time value dest fwd_body _127 _128 bell_code
+        init_bell_with_children INLINECALLDICT	//  priority time bell_code timer_new_data _129
+        SWAP	//  priority time bell_code _129 timer_new_data
         256 STU	//  priority time bell_code timer_new_data
         s1 s3 XCHG	//  bell_code time priority timer_new_data
         64 STU	//  bell_code time timer_new_data
@@ -581,24 +574,24 @@ PROGRAM{
     }>ELSE<{	//  priority time value dest fwd_body timer_new_data bell_code timer_old_data
       DROP	//  priority time value dest fwd_body timer_new_data bell_code
       10 PUSHPOW2
-      ROT	//  priority time value dest fwd_body bell_code _140=1024 timer_new_data
+      ROT	//  priority time value dest fwd_body bell_code _139=1024 timer_new_data
       11 STU	//  priority time value dest fwd_body bell_code timer_new_data
-      MYADDR	//  priority time value dest fwd_body bell_code timer_new_data _144
+      MYADDR	//  priority time value dest fwd_body bell_code timer_new_data _143
       s7 PUSH
       s4 s7 XCPU
       s0 s4 XCHG
       s3 s7 XCHG
       s6 s1 s6 XCHG3
-      s6 PUSH	//  priority time timer_new_data bell_code priority time value dest fwd_body _144 bell_code
-      init_bell_no_children INLINECALLDICT	//  priority time timer_new_data bell_code _145
-      ROT	//  priority time bell_code _145 timer_new_data
+      s6 PUSH	//  priority time timer_new_data bell_code priority time value dest fwd_body _143 bell_code
+      init_bell_no_children INLINECALLDICT	//  priority time timer_new_data bell_code _144
+      ROT	//  priority time bell_code _144 timer_new_data
       256 STU	//  priority time bell_code timer_new_data
       s1 s3 XCHG	//  bell_code time priority timer_new_data
       64 STU	//  bell_code time timer_new_data
       32 STU	//  bell_code timer_new_data
     }>
     STREF	//  timer_new_data
-    ENDC	//  _156
+    ENDC	//  _155
     c4 POP
   }>
   get_nft_address_by_index PROC:<{
@@ -639,37 +632,41 @@ PROGRAM{
     NOW	//  next d next _7
     LEQ	//  next d _8
     IF:<{	//  next d
-      1 LDU	//  next _10 d
-      SWAP	//  next d _10
-      0 EQINT	//  next d _14
+      NIP	//  d
+      1 LDU	//  _10 d
+      SWAP	//  d _10
+      0 EQINT	//  d _14
       130 THROWIF
-      1933303943 PUSHINT	//  next d _16=1933303943
-      0 PUSHINT	//  next d _16=1933303943 _17=0
-      24 PUSHINT	//  next d _16=1933303943 _17=0 _18=24
-      NEWC	//  next d _16=1933303943 _17=0 _18=24 _19
-      6 STU	//  next d _16=1933303943 _17=0 _21
-      s0 s3 XCHG	//  next _21 _16=1933303943 _17=0 d
-      LDMSGADDR	//  next _21 _16=1933303943 _17=0 _55 _54
-      DROP	//  next _21 _16=1933303943 _17=0 _22
-      s1 s3 XCHG	//  next _17=0 _16=1933303943 _21 _22
-      STSLICER	//  next _17=0 _16=1933303943 _24
-      200000000 PUSHINT	//  next _17=0 _16=1933303943 _24 _25=200000000
-      STVARUINT16	//  next _17=0 _16=1933303943 _26
-      s1 s2 XCHG	//  next _16=1933303943 _17=0 _26
-      107 STU	//  next _16=1933303943 _40
-      32 STU	//  next _42
-      TIM::store_ident_proof INLINECALLDICT	//  next _43
-      ENDC	//  next _44
-      0 PUSHINT	//  next _44 _45=0
+      1933303943 PUSHINT	//  d _16=1933303943
+      0 PUSHINT	//  d _16=1933303943 _17=0
+      24 PUSHINT	//  d _16=1933303943 _17=0 _18=24
+      NEWC	//  d _16=1933303943 _17=0 _18=24 _19
+      6 STU	//  d _16=1933303943 _17=0 _21
+      s0 s3 XCHG	//  _21 _16=1933303943 _17=0 d
+      LDMSGADDR	//  _21 _16=1933303943 _17=0 _57 _56
+      DROP	//  _21 _16=1933303943 _17=0 _22
+      s1 s3 XCHG	//  _17=0 _16=1933303943 _21 _22
+      STSLICER	//  _17=0 _16=1933303943 _24
+      200000000 PUSHINT	//  _17=0 _16=1933303943 _24 _25=200000000
+      STVARUINT16	//  _17=0 _16=1933303943 _26
+      s1 s2 XCHG	//  _16=1933303943 _17=0 _26
+      107 STU	//  _16=1933303943 _40
+      32 STU	//  _42
+      TIM::store_ident_proof INLINECALLDICT	//  _43
+      ENDC	//  _44
+      0 PUSHINT	//  _44 _45=0
       SENDRAWMSG
-    }>ELSE<{
+    }>ELSE<{	//  next d
       DROP	//  next
+      32 PUSHPOW2DEC	//  next _47=4294967295
+      LESS	//  _48
+      IF:<{	// 
+        TIM::send_schedule_loop_msg INLINECALLDICT
+      }>	// 
     }>
-    32 PUSHPOW2DEC	//  next _47=4294967295
-    LESS	//  _48
-    IF:<{	// 
-      TIM::send_schedule_loop_msg INLINECALLDICT
-    }>	// 
+    180 PUSHINT	//  _50=180
+    s0 DUMP	//  _51
+    DROP	// 
   }>
   recv_internal PROC:<{
     //  in_msg_full in_msg_body

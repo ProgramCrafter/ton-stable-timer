@@ -34,14 +34,14 @@ proof_bell$1 init:^BellContractData code:^Code = IdentProof;
 
 direct_init#_ = BellInboundMsg;
 retranslate_init#fbffab22 data:BellDescriptor proof:IdentProof = BellInboundMsg;
-bell#733be087 proof:IdentProof = BellInboundMsg;
-bell_destroyed#adc8652d proof:IdentProof right_node:(Maybe BellInfo) = BellInboundMsg;
+bell#733be087 proof:IdentProof [TODO/forwarder:MsgAddressInt] = BellInboundMsg;
+hang_new_bell#96f5c875 proof:IdentProof right_node:(Maybe BellInfo) = BellInboundMsg;
 
-bell_destroyed_root#fa6d6098 proof:IdentProof bell_time:uint32 bell_rtime:uint32 = TimerInboundMsg;
+update_next_wakeup#07ebc8c5 proof:IdentProof bell_time:uint32 bell_rtime:uint32 = TimerInboundMsg;
 tick#_ = TimerInboundMsg;
 pull_ton_out#_ (nanoton >= 1) nanoton:uint64 = TimerInboundMsg;
 restart_loop#0000000000000001 = TimerInboundMsg;
-schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^Any =
+schedule_msg#f5431aa5 value:uint64 time:uint32 destination:MsgAddressInt body:^Any =
   TimerInboundMsg;
 ```
 | type                   | bits | refs |

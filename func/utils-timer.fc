@@ -93,7 +93,7 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
          begin_cell()
         .store_uint(0x18, 6)
         .store_slice(root_addr)
-        .store_coins(value + 100000000)
+        .store_coins(0)
         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_uint(op::retranslate_init, 32)
         .store_uint(priority, 64)  ;;  \
@@ -102,7 +102,7 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
         .store_slice(dest)         ;;  |
         .store_ref(fwd_body)       ;;  /
         .TIM::store_ident_proof()
-        .end_cell(), 0);
+        .end_cell(), 64);
     } else {
       builder bell_info_lr = begin_cell();
       
@@ -174,9 +174,8 @@ cell get_nft_content(int index, cell individual) method_id {
       .store_uint(op::bell, 32)
       .TIM::store_ident_proof()
       .end_cell(), 0);
-  }
-  
-  if (next < 0xFFFFFFFF) {
+  } elseif (next < 0xFFFFFFFF) {
     TIM::send_schedule_loop_msg();
   }
+  ~dump(180);
 }
