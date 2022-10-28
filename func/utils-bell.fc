@@ -49,6 +49,7 @@ cell check_ident_proof_get_code(slice source, slice proof) impure inline_ref {
       children~load_msg_addr();
       children~skip_bits(96);
     }
+    children~impure_touch();
     
     return bell_code;
   }
@@ -137,10 +138,9 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       .store_slice(parent)
       .store_coins(0)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-      .store_uint(op::update_next_wakeup, 32)
+      .store_uint(op::root_update_next_wakeup, 32)
       .store_ident_proof(bell_code)
-      .store_uint(time, 32)
-      .store_uint(0xFFFFFFFF, 32)
+      .store_slice(children)
       .end_cell(), 128 + 32);
   }
 }
@@ -331,6 +331,15 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   }
 }
 
+;; TIM::BEL::get_bell_data (get-method)
+;;   time, value, dest, body, core, children
+(int, int, slice, cell, slice, cell) get_bell_data() method_id {
+  slice d = get_data().begin_parse();
+  d~skip_bits(64);
+  return (d~load_uint(32), d~load_uint(64), d~load_msg_addr(), d~load_ref(),
+          d~load_msg_addr(), d~load_ref());
+}
+
 ;; SBT::prove_ownership (#04ded148)
 () prove_ownership(slice dest, cell fwd_body, int include_content) impure inline_ref method_id {
   (_, int id) = parse_std_addr(my_address());
@@ -349,7 +358,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   
   if (include_content) {
     msg~store_uint(1, 1);
-    msg = msg.store_ref(get_data());
+    msg~store_ref(get_data());
   } else {
     msg~store_uint(0, 1);
   }

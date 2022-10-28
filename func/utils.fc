@@ -7,6 +7,7 @@ const int op::direct_init = 0;
 const int op::retranslate_init = 0xfbffab22;
 const int op::bell = 0x733be087;
 const int op::hang_new_bell = 0x96f5c875;
+const int op::root_update_next_wakeup = 0xd416dc0f;
 const int op::update_next_wakeup = 0x07ebc8c5;
 const int op::schedule_msg = 0xf5431aa5;
 
@@ -26,9 +27,7 @@ slice owner_address() asm "b{100} x{00} |+ x{15be3c3171911009bbcc473d07d8fc2bcc0
 slice unused_masterchain_address() asm "b{100} x{FF} |+ x{2210202200000000000000000000000000000000000000000000000000000001} |+ PUSHSLICE";
 
 slice null_address() asm "b{00} PUSHSLICE";
-slice empty_slice() {
-  return begin_cell().end_cell().begin_parse();
-}
+slice empty_slice() asm "x{1_} PUSHSLICE";
 
 cell calc_bell_state_init_by_data(cell bell_init_data, cell bell_code) inline_ref {
   return begin_cell()

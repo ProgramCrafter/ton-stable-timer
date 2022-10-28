@@ -54,6 +54,7 @@ slice TIM::check_ident_proof(slice source, slice proof) impure inline_ref {
       children~load_msg_addr();
       children~skip_bits(96);
     }
+    children~impure_touch();
     
     return proof;
   }
@@ -140,6 +141,17 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
   
   timer_new_data~store_ref(bell_code);
   set_data(timer_new_data.end_cell());
+}
+
+;; TIM::TIM::get_root_bell (get-method)
+slice get_root_bell() method_id {
+  slice d = get_data().begin_parse();
+  d~skip_bits(32);
+  if (d~load_uint(1)) {
+    return d~load_msg_addr();
+  } else {
+    return null();
+  }
 }
 
 ;; NFT::get_nft_address_by_index (get-method)

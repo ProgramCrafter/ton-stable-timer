@@ -131,6 +131,47 @@
   invoke_method(parse_one_action, [get_c5().begin_parse()]);
 }
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+() __test_next_wakeup() method_id {
+  cell v = begin_cell().end_cell();
+  cell elr = begin_cell().store_uint(0, 2).end_cell();
+  
+  cell bell_init_data = begin_cell()
+    .store_uint(0, 160)
+    .store_uint(0, 2)
+    .store_ref(v)
+    .store_slice(my_address())
+    .store_ref(elr)
+    .store_ref(elr)
+    .end_cell();
+  
+  int bell_hash = cell_hash(calc_bell_state_init_by_data(bell_init_data, v));
+  
+  set_data(begin_cell()
+          .store_uint(0, 32)
+          .store_uint(1, 1)
+          .store_uint(1024, 11).store_uint(bell_hash, 256)
+          .store_uint(0, 96)
+          .store_ref(v).end_cell());
+  
+  int coins = 500000000;   ;; 0.5 TON
+  cell half_full_msg = begin_cell()
+    .store_uint(7, 4)
+    .store_uint(1024, 11).store_uint(bell_hash, 256)
+    .store_uint(0, 2)
+    .end_cell();
+  
+  cell body = begin_cell()
+    .store_uint(0x07ebc8c5, 32)
+    .store_uint(1, 1).store_ref(bell_init_data).store_ref(v)
+    .store_uint(0, 32)
+    .store_uint(0xFFFFFFFF, 32)
+    .end_cell();
+  
+  invoke_method(recv_internal, [coins, half_full_msg, body.begin_parse()]);
+}
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 () __test_pull_ton_failure() method_id {
@@ -165,6 +206,3 @@
   invoke_method(TIM::send_schedule_loop_msg, []);
   invoke_method(parse_one_action, [get_c5().begin_parse()]);
 }
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-

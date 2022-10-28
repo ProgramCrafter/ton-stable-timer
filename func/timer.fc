@@ -37,11 +37,12 @@
     return ();
   }
   
+  int opcode = in_msg~load_uint(32);
+  
   {-------------------------------}
   {-    Next bell time update    -}
   {-------------------------------}
-  if (in_msg.preload_uint(32) == op::update_next_wakeup) {
-    in_msg~load_uint(32);
+  if (opcode == op::update_next_wakeup) {
     in_msg = TIM::check_ident_proof(src, in_msg);
     
     slice old_timer_data = get_data().begin_parse();
@@ -54,18 +55,42 @@
     builder new_timer_data = begin_cell().store_uint(next_time, 32);
     
     slice root_addr = old_timer_data~load_msg_addr();
-    if (equal_slices(root_addr, src)) {
-      throw_if(122, next_time != 0xFFFFFFFF);
-      new_timer_data~store_uint(0, 1);
-      new_timer_data~store_ref(old_timer_data~load_ref());
-    } else {
-      new_timer_data~store_uint(1, 1);
-      new_timer_data~store_slice(root_addr);
-      new_timer_data~store_ref(old_timer_data~load_ref());
-      new_timer_data~store_slice(old_timer_data);
+    throw_if(122, equal_slices(root_addr, src));
+    new_timer_data~store_slice(root_addr);
+    new_timer_data~store_ref(old_timer_data~load_ref());
+    new_timer_data~store_slice(old_timer_data);
+    set_data(new_timer_data.end_cell());
+    
+    TIM::send_schedule_loop_msg();
+    
+    return ();
+  }
+  if (opcode == op::root_update_next_wakeup) {
+    in_msg = TIM::check_ident_proof(src, in_msg);
+    
+    slice old_timer_data = get_data().begin_parse();
+    old_timer_data~skip_bits(32);
+    throw_unless(126, old_timer_data~load_uint(1));
+    
+    slice root_addr = old_timer_data~load_msg_addr();
+    throw_unless(127, equal_slices(root_addr, src));
+    
+    slice in_msg_copy = in_msg;
+    int next_time = 0xFFFFFFFF;
+    if (in_msg_copy~load_uint(1)) {
+      in_msg_copy~load_msg_addr();
+      in_msg_copy~skip_bits(64);
+      next_time = in_msg_copy~load_uint(32);
       
       TIM::send_schedule_loop_msg();
     }
+    
+    builder new_timer_data = begin_cell()
+      .store_uint(next_time, 32)
+      .store_slice(in_msg)
+      .store_ref(old_timer_data~load_ref());
+    
+    set_data(new_timer_data.end_cell());
     
     return ();
   }
@@ -74,7 +99,7 @@
   {-    Owner can take TON obtained by this contract    -}
   {------------------------------------------------------}
   if (equal_slices(src, owner_address())) {
-    int request_nton = in_msg~load_uint(64);
+    int request_nton = (opcode << 32) + in_msg~load_uint(32);
     
     if (request_nton == 1) {
       {--------------------------------------------------------------------}
@@ -112,7 +137,7 @@
   {-    Incoming message - maybe schedule    -}
   {-------------------------------------------}
   
-  throw_if(140, in_msg~load_uint(32) != op::schedule_msg);
+  throw_if(140, opcode != op::schedule_msg);
   
   ;; Components of message scheduling cost
   ;; 1. Forwarding TON amount           specified by user; not less than 0.01 TON
@@ -142,11 +167,6 @@
   );
 }
 
-;; TIM::TIM::recv_external
-() recv_external() impure {
-  [int balance, _] = get_balance();
+() recv_external() {
   
-  if ((balance > 50000000) & (balance < 100000000)) {  ;; 0.05-0.10 TON
-    accept_message();
-  }
 }

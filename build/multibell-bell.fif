@@ -8,7 +8,6 @@ PROGRAM{
   DECLPROC log2
   DECLPROC swap_remove
   DECLPROC parse_one_action
-  DECLPROC empty_slice
   DECLPROC calc_bell_state_init_by_data
   DECLPROC init_bell_with_children
   DECLPROC init_bell_no_children
@@ -20,6 +19,7 @@ PROGRAM{
   75596 DECLMETHOD bell
   110962 DECLMETHOD hang_new_bell
   122085 DECLMETHOD create_bell
+  123774 DECLMETHOD get_bell_data
   91783 DECLMETHOD prove_ownership
   70993 DECLMETHOD answer_request_owner
   102351 DECLMETHOD get_nft_data
@@ -270,12 +270,6 @@ PROGRAM{
     }>
     CTOS	//  _47
   }>
-  empty_slice PROC:<{
-    // 
-    NEWC	//  _0
-    ENDC	//  _1
-    CTOS	//  _2
-  }>
   calc_bell_state_init_by_data PROCREF:<{
     //  bell_init_data bell_code
     6 PUSHINT	//  bell_init_data bell_code _2=6
@@ -386,7 +380,7 @@ PROGRAM{
       s1 s2 XCHG	//  proof source _8
       SDEQ	//  proof _9
       114 THROWIFNOT
-      LDREF	//  _82 _81
+      LDREF	//  _84 _83
       DROP	//  _11
     }>	//  source proof
     SWAP	//  proof source
@@ -397,12 +391,12 @@ PROGRAM{
     110 THROWIF
     SWAP	//  source proof
     LDREF	//  source bell_init proof
-    LDREF	//  source bell_init _88 _87
+    LDREF	//  source bell_init _90 _89
     DROP	//  source bell_init bell_code
     2DUP	//  source bell_init bell_code bell_init bell_code
     calc_bell_state_init_by_data INLINECALLDICT	//  source bell_init bell_code bell_state_init
     s0 s3 XCHG	//  bell_state_init bell_init bell_code source
-    256 LDU	//  bell_state_init bell_init bell_code _90 _89
+    256 LDU	//  bell_state_init bell_init bell_code _92 _91
     DROP	//  bell_state_init bell_init bell_code _29
     s0 s3 XCHG	//  _29 bell_init bell_code bell_state_init
     HASHCU	//  _29 bell_init bell_code _32
@@ -412,9 +406,9 @@ PROGRAM{
     CTOS	//  bell_code bell_init
     160 PUSHINT	//  bell_code bell_init _38=160
     SDSKIPFIRST	//  bell_code bell_init
-    LDMSGADDR	//  bell_code _92 _91
+    LDMSGADDR	//  bell_code _94 _93
     NIP	//  bell_code bell_init
-    LDREF	//  bell_code _94 _93
+    LDREF	//  bell_code _96 _95
     NIP	//  bell_code bell_init
     LDMSGADDR	//  bell_code _45 bell_init
     load_core_address CALLDICT	//  bell_code _45 bell_init _47
@@ -422,7 +416,7 @@ PROGRAM{
     SDEQ	//  bell_code bell_init _48
     112 THROWIFNOT
     LDREF	//  bell_code children bell_init
-    LDREF	//  bell_code children _100 _99
+    LDREF	//  bell_code children _102 _101
     DROP	//  bell_code children init_children
     OVER	//  bell_code children init_children children
     HASHCU	//  bell_code children init_children _57
@@ -434,15 +428,20 @@ PROGRAM{
     1 LDU	//  bell_code _63 children
     SWAP	//  bell_code children _63
     IF:<{	//  bell_code children
-      LDMSGADDR	//  bell_code _104 _103
+      LDMSGADDR	//  bell_code _106 _105
       NIP	//  bell_code children
       96 PUSHINT	//  bell_code children _69=96
       SDSKIPFIRST	//  bell_code children
     }>	//  bell_code children
-    1 LDU	//  bell_code _106 _105
-    DROP	//  bell_code _71
-    IF:<{	//  bell_code
-    }>	//  bell_code
+    1 LDU	//  bell_code _71 children
+    SWAP	//  bell_code children _71
+    IF:<{	//  bell_code children
+      LDMSGADDR	//  bell_code _110 _109
+      NIP	//  bell_code children
+      96 PUSHINT	//  bell_code children _77=96
+      SDSKIPFIRST	//  bell_code children
+    }>	//  bell_code _80
+    DROP	//  bell_code
   }>
   store_ident_proof PROCREF:<{
     //  msg bell_code
@@ -493,9 +492,9 @@ PROGRAM{
     64 LDU	//  parent is_nonroot_bell bell_code time value d
     LDMSGADDR	//  parent is_nonroot_bell bell_code time value dest d
     LDREF	//  parent is_nonroot_bell bell_code time value dest body d
-    LDMSGADDR	//  parent is_nonroot_bell bell_code time value dest body _176 _175
+    LDMSGADDR	//  parent is_nonroot_bell bell_code time value dest body _172 _171
     NIP	//  parent is_nonroot_bell bell_code time value dest body d
-    LDREF	//  parent is_nonroot_bell bell_code time value dest body _178 _177
+    LDREF	//  parent is_nonroot_bell bell_code time value dest body _174 _173
     DROP	//  parent is_nonroot_bell bell_code time value dest body _31
     CTOS	//  parent is_nonroot_bell bell_code time value dest body children
     1 LDU	//  parent is_nonroot_bell bell_code time value dest body _34 children
@@ -511,7 +510,7 @@ PROGRAM{
       NEWC	//  bell_code children _39=1933303943 _40=0 _41=24 _42
       6 STU	//  bell_code children _39=1933303943 _40=0 _44
       s0 s3 XCHG	//  bell_code _44 _39=1933303943 _40=0 children
-      LDMSGADDR	//  bell_code _44 _39=1933303943 _40=0 _182 _181
+      LDMSGADDR	//  bell_code _44 _39=1933303943 _40=0 _178 _177
       DROP	//  bell_code _44 _39=1933303943 _40=0 _45
       s1 s3 XCHG	//  bell_code _40=0 _39=1933303943 _44 _45
       STSLICER	//  bell_code _40=0 _39=1933303943 _47
@@ -527,26 +526,24 @@ PROGRAM{
       SENDRAWMSG
     }>	//  parent is_nonroot_bell bell_code time value dest body children
     NOW	//  parent is_nonroot_bell bell_code time value dest body children _71
-    s5 PUSH	//  parent is_nonroot_bell bell_code time value dest body children _71 time
-    LEQ	//  parent is_nonroot_bell bell_code time value dest body children _72
+    s0 s5 XCHG2	//  parent is_nonroot_bell bell_code children value dest body _71 time
+    LEQ	//  parent is_nonroot_bell bell_code children value dest body _72
     100 THROWIF
-    1 PUSHINT	//  parent is_nonroot_bell bell_code time value dest body children _74=1
-    16 PUSHINT	//  parent is_nonroot_bell bell_code time value dest body children _74=1 _75=16
-    NEWC	//  parent is_nonroot_bell bell_code time value dest body children _74=1 _75=16 _76
-    6 STU	//  parent is_nonroot_bell bell_code time value dest body children _74=1 _78
-    s0 s4 XCHG2	//  parent is_nonroot_bell bell_code time value _74=1 body children _78 dest
-    STSLICER	//  parent is_nonroot_bell bell_code time value _74=1 body children _79
-    s0 s4 XCHG2	//  parent is_nonroot_bell bell_code time children _74=1 body _79 value
-    STVARUINT16	//  parent is_nonroot_bell bell_code time children _74=1 body _80
-    s1 s2 XCHG	//  parent is_nonroot_bell bell_code time children body _74=1 _80
-    107 STU	//  parent is_nonroot_bell bell_code time children body _94
-    STREF	//  parent is_nonroot_bell bell_code time children _95
-    ENDC	//  parent is_nonroot_bell bell_code time children _96
-    0 PUSHINT	//  parent is_nonroot_bell bell_code time children _96 _97=0
+    1 PUSHINT	//  parent is_nonroot_bell bell_code children value dest body _74=1
+    16 PUSHINT	//  parent is_nonroot_bell bell_code children value dest body _74=1 _75=16
+    NEWC	//  parent is_nonroot_bell bell_code children value dest body _74=1 _75=16 _76
+    6 STU	//  parent is_nonroot_bell bell_code children value dest body _74=1 _78
+    s0 s3 XCHG2	//  parent is_nonroot_bell bell_code children value _74=1 body _78 dest
+    STSLICER	//  parent is_nonroot_bell bell_code children value _74=1 body _79
+    s0 s3 XCHG2	//  parent is_nonroot_bell bell_code children body _74=1 _79 value
+    STVARUINT16	//  parent is_nonroot_bell bell_code children body _74=1 _80
+    107 STU	//  parent is_nonroot_bell bell_code children body _94
+    STREF	//  parent is_nonroot_bell bell_code children _95
+    ENDC	//  parent is_nonroot_bell bell_code children _96
+    0 PUSHINT	//  parent is_nonroot_bell bell_code children _96 _97=0
     SENDRAWMSG
-    s0 s3 XCHG	//  parent children bell_code time is_nonroot_bell
-    IF:<{	//  parent children bell_code time
-      DROP	//  parent children bell_code
+    s0 s2 XCHG	//  parent children bell_code is_nonroot_bell
+    IF:<{	//  parent children bell_code
       2532690037 PUSHINT	//  parent children bell_code _99=2532690037
       0 PUSHINT	//  parent children bell_code _99=2532690037 _100=0
       16 PUSHINT	//  parent children bell_code _99=2532690037 _100=0 _101=16
@@ -567,28 +564,26 @@ PROGRAM{
       ENDC	//  _126
       160 PUSHINT	//  _126 _129
       SENDRAWMSG
-    }>ELSE<{	//  parent children bell_code time
-      s2 POP	//  parent time bell_code
-      32 PUSHPOW2DEC	//  parent time bell_code _131=4294967295
-      132892869 PUSHINT	//  parent time bell_code _131=4294967295 _132=132892869
-      0 PUSHINT	//  parent time bell_code _131=4294967295 _132=132892869 _133=0
-      16 PUSHINT	//  parent time bell_code _131=4294967295 _132=132892869 _133=0 _134=16
-      NEWC	//  parent time bell_code _131=4294967295 _132=132892869 _133=0 _134=16 _135
-      6 STU	//  parent time bell_code _131=4294967295 _132=132892869 _133=0 _137
-      s0 s6 XCHG2	//  _133=0 time bell_code _131=4294967295 _132=132892869 _137 parent
-      STSLICER	//  _133=0 time bell_code _131=4294967295 _132=132892869 _138
-      s5 PUSH	//  _133=0 time bell_code _131=4294967295 _132=132892869 _138 _139=0
-      STVARUINT16	//  _133=0 time bell_code _131=4294967295 _132=132892869 _140
-      s1 s5 XCHG	//  _132=132892869 time bell_code _131=4294967295 _133=0 _140
-      107 STU	//  _132=132892869 time bell_code _131=4294967295 _154
-      s1 s4 XCHG	//  _131=4294967295 time bell_code _132=132892869 _154
-      32 STU	//  _131=4294967295 time bell_code _156
-      SWAP	//  _131=4294967295 time _156 bell_code
-      store_ident_proof INLINECALLDICT	//  _131=4294967295 time _157
-      32 STU	//  _131=4294967295 _159
-      32 STU	//  _161
-      ENDC	//  _162
-      160 PUSHINT	//  _162 _165
+    }>ELSE<{	//  parent children bell_code
+      3558267919 PUSHINT	//  parent children bell_code _131=3558267919
+      0 PUSHINT	//  parent children bell_code _131=3558267919 _132=0
+      16 PUSHINT	//  parent children bell_code _131=3558267919 _132=0 _133=16
+      NEWC	//  parent children bell_code _131=3558267919 _132=0 _133=16 _134
+      6 STU	//  parent children bell_code _131=3558267919 _132=0 _136
+      s0 s5 XCHG2	//  _132=0 children bell_code _131=3558267919 _136 parent
+      STSLICER	//  _132=0 children bell_code _131=3558267919 _137
+      s4 PUSH	//  _132=0 children bell_code _131=3558267919 _137 _138=0
+      STVARUINT16	//  _132=0 children bell_code _131=3558267919 _139
+      s1 s4 XCHG	//  _131=3558267919 children bell_code _132=0 _139
+      107 STU	//  _131=3558267919 children bell_code _153
+      s1 s3 XCHG	//  bell_code children _131=3558267919 _153
+      32 STU	//  bell_code children _155
+      ROT	//  children _155 bell_code
+      store_ident_proof INLINECALLDICT	//  children _156
+      SWAP	//  _156 children
+      STSLICER	//  _157
+      ENDC	//  _158
+      160 PUSHINT	//  _158 _161
       SENDRAWMSG
     }>
   }>
@@ -667,8 +662,8 @@ PROGRAM{
     STSLICER	//  old_data body new_data
     s0 s2 XCHG	//  new_data body old_data
     LDREF	//  new_data body _99 old_data
-    s0 s3 XCHG	//  old_data body _99 new_data
-    STREF	//  old_data body new_data
+    s3 s3 XCHG2	//  old_data body new_data _99
+    STREFR	//  old_data body new_data
     s0 s2 XCHG	//  new_data body old_data
     LDMSGADDR	//  new_data body _103 old_data
     s3 s3 XCHG2	//  old_data body new_data _103
@@ -691,13 +686,12 @@ PROGRAM{
     ROT	//  new_data old_data new_children old_children
     STSLICER	//  new_data old_data new_children
     ENDC	//  new_data old_data _125
-    ROT	//  old_data _125 new_data
-    STREF	//  old_data new_data
+    s1 s2 XCHG	//  old_data new_data _125
+    STREFR	//  old_data new_data
     SWAP	//  new_data old_data
     LDREF	//  new_data _158 _157
     DROP	//  new_data _128
-    SWAP	//  _128 new_data
-    STREF	//  new_data
+    STREFR	//  new_data
     ENDC	//  _131
     c4 POP
   }>
@@ -977,10 +971,24 @@ PROGRAM{
       DROP	// 
     }>
   }>
+  get_bell_data PROC:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  d
+    64 PUSHINT	//  d _4=64
+    SDSKIPFIRST	//  d
+    32 LDU	//  _6 d
+    64 LDU	//  _6 _9 d
+    LDMSGADDR	//  _6 _9 _12 d
+    LDREF	//  _6 _9 _12 _14 d
+    LDMSGADDR	//  _6 _9 _12 _14 _16 d
+    LDREF	//  _6 _9 _12 _14 _16 _31 _30
+    DROP	//  _6 _9 _12 _14 _16 _18
+  }>
   prove_ownership PROCREF:<{
     //  dest fwd_body include_content
     MYADDR	//  dest fwd_body include_content _5
-    REWRITESTDADDR	//  dest fwd_body include_content _57 _58
+    REWRITESTDADDR	//  dest fwd_body include_content _58 _59
     NIP	//  dest fwd_body include_content id
     0 PUSHINT	//  dest fwd_body include_content id _8=0
     573776435 PUSHINT	//  dest fwd_body include_content id _8=0 _9=573776435
@@ -1011,16 +1019,15 @@ PROGRAM{
       1 PUSHINT	//  msg _45=1
       SWAP	//  _45=1 msg
       1 STU	//  msg
-      c4 PUSH	//  msg _48
-      SWAP	//  _48 msg
-      STREF	//  msg
+      c4 PUSH	//  msg _49
+      STREFR	//  msg
     }>ELSE<{	//  msg
-      0 PUSHINT	//  msg _51=0
-      SWAP	//  _51=0 msg
+      0 PUSHINT	//  msg _52=0
+      SWAP	//  _52=0 msg
       1 STU	//  msg
     }>
-    ENDC	//  _54
-    64 PUSHINT	//  _54 _55=64
+    ENDC	//  _55
+    64 PUSHINT	//  _55 _56=64
     SENDRAWMSG
   }>
   answer_request_owner PROCREF:<{

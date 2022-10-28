@@ -37,6 +37,7 @@ retranslate_init#fbffab22 data:BellDescriptor proof:IdentProof = BellInboundMsg;
 bell#733be087 proof:IdentProof [TODO/forwarder:MsgAddressInt] = BellInboundMsg;
 hang_new_bell#96f5c875 proof:IdentProof right_node:(Maybe BellInfo) = BellInboundMsg;
 
+root_update_next_wakeup#d416dc0f proof:IdentProof right_child:(Maybe BellInfo) = TimerInboundMsg;
 update_next_wakeup#07ebc8c5 proof:IdentProof bell_time:uint32 bell_rtime:uint32 = TimerInboundMsg;
 tick#_ = TimerInboundMsg;
 pull_ton_out#_ (nanoton >= 1) nanoton:uint64 = TimerInboundMsg;
@@ -49,6 +50,9 @@ schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^A
 | BellDescriptor         | 427  | 1    |
 | BellInfo               | 363  | 0    |
 | BellInfoLR             | 728  | 0    |
+
+| needs recalculation    | TODO | TODO |
+| ====================== | ==== | ==== |
 | TimerContractData      | 299  | 0    |
 | BellContractData       | 694  | 3    |
 | IdentProof$..core      | 1    | 1    |
@@ -57,10 +61,11 @@ schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^A
 | BellInboundMsg         | 460  | 3    |
 | TimerInboundMsg        | 65   | 2    |
 
+TODO: update this doc too
 | source     | destination   | purpose               | scheme                 |
 | ===        | ===           | ===                   | ===                    |
-| timer/bell | existing bell | initializing new bell | BellRetranslateInitMsg |
-| timer/bell | new bell      | initializing new bell | BellInitMsg            |
+| timer/bell | existing bell | initializing new bell | retranslate_init       |
+| timer/bell | new bell      | initializing new bell | direct_init            |
 
 # Pricing
 The timer uses TON coins to keep working. So, scheduling messages has its price: 6.5 TON/h (more precisely, 1805556 nanoTON/s).
@@ -70,8 +75,7 @@ Price of scheduling message can be calculated as **0.4 TON** *(timer's profit)* 
 As timer aims to provide service to a lot of people, there will be lots of overlapping messages, and this allows to make prices lower than self-hosted timer would cost.
 
 # Errors
-Messages with insufficient value will be rejected with exit code **101**; if requested forward TON amount is unreasonably small (less than 0.01 TON), scheduling will fail with exit code **100**.  
-As well, the timer does not support scheduling multiple messages to the same moment. It adds random value between 0 and 16 (creating delay up to 15s) to avoid multiple schedules at round numbers of seconds. If the timer finds out that the time is already taken, there will be failure with exit code **102**.
+Messages with insufficient value will be rejected with exit code **101**; if requested forward TON amount is unreasonably small (less than 0.01 TON), scheduling will fail with exit code **100**.
 
 # Special details
 (\*)  

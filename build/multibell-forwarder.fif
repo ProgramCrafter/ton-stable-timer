@@ -8,7 +8,6 @@ PROGRAM{
   DECLPROC log2
   DECLPROC swap_remove
   DECLPROC parse_one_action
-  DECLPROC empty_slice
   DECLPROC calc_bell_state_init_by_data
   DECLPROC init_bell_with_children
   DECLPROC init_bell_no_children
@@ -18,6 +17,7 @@ PROGRAM{
   DECLPROC TIM::check_ident_proof
   DECLPROC TIM::store_ident_proof
   DECLPROC TIM::create_bell
+  85654 DECLMETHOD get_root_bell
   92067 DECLMETHOD get_nft_address_by_index
   68445 DECLMETHOD get_nft_content
   102491 DECLMETHOD get_collection_data
@@ -268,12 +268,6 @@ PROGRAM{
     }>
     CTOS	//  _47
   }>
-  empty_slice PROC:<{
-    // 
-    NEWC	//  _0
-    ENDC	//  _1
-    CTOS	//  _2
-  }>
   calc_bell_state_init_by_data PROCREF:<{
     //  bell_init_data bell_code
     6 PUSHINT	//  bell_init_data bell_code _2=6
@@ -400,7 +394,7 @@ PROGRAM{
     s2 PUSH	//  source bell_init bell_code proof own_data bell_code
     HASHCU	//  source bell_init bell_code proof own_data _27
     SWAP	//  source bell_init bell_code proof _27 own_data
-    LDREF	//  source bell_init bell_code proof _27 _95 _94
+    LDREF	//  source bell_init bell_code proof _27 _97 _96
     DROP	//  source bell_init bell_code proof _27 _28
     HASHCU	//  source bell_init bell_code proof _27 _30
     NEQ	//  source bell_init bell_code proof _31
@@ -408,7 +402,7 @@ PROGRAM{
     s2 s1 PUXC	//  source bell_init proof bell_init bell_code
     calc_bell_state_init_by_data INLINECALLDICT	//  source bell_init proof bell_state_init
     s0 s3 XCHG	//  bell_state_init bell_init proof source
-    256 LDU	//  bell_state_init bell_init proof _97 _96
+    256 LDU	//  bell_state_init bell_init proof _99 _98
     DROP	//  bell_state_init bell_init proof _36
     s0 s3 XCHG	//  _36 bell_init proof bell_state_init
     HASHCU	//  _36 bell_init proof _39
@@ -418,9 +412,9 @@ PROGRAM{
     CTOS	//  proof bell_init
     160 PUSHINT	//  proof bell_init _45=160
     SDSKIPFIRST	//  proof bell_init
-    LDMSGADDR	//  proof _99 _98
+    LDMSGADDR	//  proof _101 _100
     NIP	//  proof bell_init
-    LDREF	//  proof _101 _100
+    LDREF	//  proof _103 _102
     NIP	//  proof bell_init
     LDMSGADDR	//  proof _52 bell_init
     MYADDR	//  proof _52 bell_init _54
@@ -428,7 +422,7 @@ PROGRAM{
     SDEQ	//  proof bell_init _55
     112 THROWIFNOT
     LDREF	//  proof children bell_init
-    LDREF	//  proof children _107 _106
+    LDREF	//  proof children _109 _108
     DROP	//  proof children init_children
     OVER	//  proof children init_children children
     HASHCU	//  proof children init_children _64
@@ -440,15 +434,20 @@ PROGRAM{
     1 LDU	//  proof _70 children
     SWAP	//  proof children _70
     IF:<{	//  proof children
-      LDMSGADDR	//  proof _111 _110
+      LDMSGADDR	//  proof _113 _112
       NIP	//  proof children
       96 PUSHINT	//  proof children _76=96
       SDSKIPFIRST	//  proof children
     }>	//  proof children
-    1 LDU	//  proof _113 _112
-    DROP	//  proof _78
-    IF:<{	//  proof
-    }>	//  proof
+    1 LDU	//  proof _78 children
+    SWAP	//  proof children _78
+    IF:<{	//  proof children
+      LDMSGADDR	//  proof _117 _116
+      NIP	//  proof children
+      96 PUSHINT	//  proof children _84=96
+      SDSKIPFIRST	//  proof children
+    }>	//  proof _87
+    DROP	//  proof
   }>
   TIM::store_ident_proof PROCREF:<{
     //  msg
@@ -590,9 +589,25 @@ PROGRAM{
       64 STU	//  bell_code time timer_new_data
       32 STU	//  bell_code timer_new_data
     }>
-    STREF	//  timer_new_data
+    SWAP	//  timer_new_data bell_code
+    STREFR	//  timer_new_data
     ENDC	//  _155
     c4 POP
+  }>
+  get_root_bell PROC:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  d
+    32 PUSHINT	//  d _4=32
+    SDSKIPFIRST	//  d
+    1 LDU	//  _6 d
+    SWAP	//  d _6
+    IFJMP:<{	//  d
+      LDMSGADDR	//  _15 _14
+      DROP	//  _9
+    }>	//  d
+    DROP	// 
+    PUSHNULL	//  _11
   }>
   get_nft_address_by_index PROC:<{
     //  index
