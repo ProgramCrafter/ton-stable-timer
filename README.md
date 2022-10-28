@@ -102,7 +102,8 @@ Messages with insufficient value will be rejected with exit code **101**; if req
 So, only and if only there is too much money (more than 10M), I'll be able to extract excesses for other purposes.
 
 # TODO
-[ ]. Create forwarder contract that will not be trusted by timer-bells structure (so user-provided messages could not break its invariants) and will be trusted by users instead of bells with address unknown till schedule is done.
-[ ]. Add opcodes to owner operations.
-[ ]. Make forwarder and timer address config parameters.
-[ ]. Make price configurable by TON validators.
+[ ]. Create forwarder contract that will not be trusted by timer-bells structure (so user-provided messages could not break its invariants) and will be trusted by users instead of bells with address unknown till schedule is done.  
+[ ]. Add opcodes to owner operations.  
+[ ]. Make forwarder and timer address config parameters.  
+[ ]. Make price configurable by TON validators.  
+[ ]. Consider sending messages from bells with mode=1 (message forwarding fees are paid by bell, not by final contract).

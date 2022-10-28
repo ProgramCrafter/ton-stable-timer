@@ -1,17 +1,17 @@
-[ 3][t 0][2022-10-28 17:26:44.2195629][vm.cpp:558]	steps: 120 gas: used=7991, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2197170][vm.cpp:558]	steps: 422 gas: used=22305, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6978713][vm.cpp:558]	steps: 120 gas: used=7991, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6980322][vm.cpp:558]	steps: 422 gas: used=22305, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_donation[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m7991[0m]
 INFO: Test [[32m__test_schedules[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m22305[0m]
 #DEBUG#: s0 = 180
-[ 3][t 0][2022-10-28 17:26:44.2198245][vm.cpp:558]	steps: 190 gas: used=11512, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6981411][vm.cpp:558]	steps: 190 gas: used=11512, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_self_tick_parsed_no_new[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m11512[0m]
 #DEBUG#: s0 = 180
 #DEBUG#: s0 = 4445
 #DEBUG#: s0 = 1397050948
 #DEBUG#: s0 = 0
 #DEBUG#: s0 = C{D46D4BFF0BEF016D6406A9DD91BF8FF017C061D9DB1CD2AEBCFF79068CD651DE}
-[ 3][t 0][2022-10-28 17:26:44.2199039][vm.cpp:558]	steps: 229 gas: used=12994, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2200455][vm.cpp:558]	steps: 112 gas: used=8281, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6982219][vm.cpp:558]	steps: 229 gas: used=12994, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6983646][vm.cpp:558]	steps: 112 gas: used=8281, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_self_tick_parsed_with_next_tick[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m12994[0m]
 INFO: Test [[32m__test_tick_requires_bell[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m8281[0m]
 #DEBUG#: s0 = 180
@@ -19,10 +19,10 @@ INFO: Test [[32m__test_tick_requires_bell[0m] status: [[32mSUCCESS[0m] Test 
 #DEBUG#: s0 = 1397050948
 #DEBUG#: s0 = 0
 #DEBUG#: s0 = C{58DB060C381B0364C03F1282AE07E2EC1687E4F6803493E587249217993287EB}
-[ 3][t 0][2022-10-28 17:26:44.2201989][vm.cpp:558]	steps: 248 gas: used=13274, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2202429][vm.cpp:558]	steps: 159 gas: used=9908, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2202890][vm.cpp:558]	steps: 153 gas: used=8849, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2203261][vm.cpp:558]	steps: 83 gas: used=5612, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6984398][vm.cpp:558]	steps: 248 gas: used=13274, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6984840][vm.cpp:558]	steps: 159 gas: used=9908, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6985356][vm.cpp:558]	steps: 153 gas: used=8849, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6985740][vm.cpp:558]	steps: 83 gas: used=5612, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_tick_rings_bell[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m13274[0m]
 INFO: Test [[32m__test_next_wakeup[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m9908[0m]
 INFO: Test [[32m__test_pull_ton_failure[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m8849[0m]
@@ -31,7 +31,7 @@ INFO: Test [[32m__test_timer_init[0m] status: [[32mSUCCESS[0m] Test result: 
 #DEBUG#: s0 = 1397050948
 #DEBUG#: s0 = 0
 #DEBUG#: s0 = C{D46D4BFF0BEF016D6406A9DD91BF8FF017C061D9DB1CD2AEBCFF79068CD651DE}
-[ 3][t 0][2022-10-28 17:26:44.2203899][vm.cpp:558]	steps: 184 gas: used=10574, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.6986409][vm.cpp:558]	steps: 184 gas: used=10574, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_timer_scheduler[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m10574[0m]
 
 #DEBUG#: s0 = 4445
@@ -40,22 +40,22 @@ INFO: Test [[32m__test_timer_scheduler[0m] status: [[32mSUCCESS[0m] Test res
 #DEBUG#: s0 = 312954511015273968129107
 #DEBUG#: s0 = 4445
 #DEBUG#: s0 = 0
-[ 3][t 0][2022-10-28 17:26:44.2559483][vm.cpp:558]	steps: 22 gas: used=1216, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2561888][vm.cpp:558]	steps: 245 gas: used=14067, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2562446][vm.cpp:558]	steps: 146 gas: used=9882, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2563108][vm.cpp:558]	steps: 325 gas: used=18081, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2563634][vm.cpp:558]	steps: 158 gas: used=9942, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2564088][vm.cpp:558]	steps: 160 gas: used=10269, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2564541][vm.cpp:558]	steps: 162 gas: used=10030, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2564985][vm.cpp:558]	steps: 165 gas: used=10492, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2565401][vm.cpp:558]	steps: 122 gas: used=7454, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2566141][vm.cpp:558]	steps: 99 gas: used=7197, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2566570][vm.cpp:558]	steps: 101 gas: used=7379, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2566975][vm.cpp:558]	steps: 102 gas: used=7397, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2567639][vm.cpp:558]	steps: 346 gas: used=17853, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2568216][vm.cpp:558]	steps: 262 gas: used=14194, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2568849][vm.cpp:558]	steps: 341 gas: used=18276, max=1000000000, limit=1000000000, credit=0
-[ 3][t 0][2022-10-28 17:26:44.2569238][vm.cpp:558]	steps: 113 gas: used=7496, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7345216][vm.cpp:558]	steps: 22 gas: used=1216, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7347513][vm.cpp:558]	steps: 245 gas: used=14067, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7348096][vm.cpp:558]	steps: 146 gas: used=9882, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7348782][vm.cpp:558]	steps: 325 gas: used=18081, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7349326][vm.cpp:558]	steps: 158 gas: used=9942, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7349789][vm.cpp:558]	steps: 160 gas: used=10269, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7350266][vm.cpp:558]	steps: 162 gas: used=10030, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7350715][vm.cpp:558]	steps: 165 gas: used=10492, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7351143][vm.cpp:558]	steps: 122 gas: used=7454, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7351838][vm.cpp:558]	steps: 99 gas: used=7197, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7352294][vm.cpp:558]	steps: 101 gas: used=7379, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7352730][vm.cpp:558]	steps: 102 gas: used=7397, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7353434][vm.cpp:558]	steps: 346 gas: used=17853, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7354047][vm.cpp:558]	steps: 262 gas: used=14194, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7354721][vm.cpp:558]	steps: 341 gas: used=18276, max=1000000000, limit=1000000000, credit=0
+[ 3][t 0][2022-10-28 18:37:48.7355147][vm.cpp:558]	steps: 113 gas: used=7496, max=1000000000, limit=1000000000, credit=0
 INFO: Test [[32m__test_write_newline_bell[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m1216[0m]
 INFO: Test [[32m__test_invalid_ident_timer_not_bell[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m14067[0m]
 INFO: Test [[32m__test_valid_ident_proof_timer[0m] status: [[32mSUCCESS[0m] Test result: [[32m[][0m] Total gas used (including testing code): [[32m9882[0m]
