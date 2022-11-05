@@ -94,7 +94,7 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
          begin_cell()
         .store_uint(0x18, 6)
         .store_slice(root_addr)
-        .store_coins(0)
+        .store_coins(value + 700000000)
         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_uint(op::retranslate_init, 32)
         .store_uint(priority, 64)  ;;  \
@@ -103,7 +103,7 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
         .store_slice(dest)         ;;  |
         .store_ref(fwd_body)       ;;  /
         .TIM::store_ident_proof()
-        .end_cell(), 64);
+        .end_cell(), 0);
     } else {
       builder bell_info_lr = begin_cell();
       
@@ -124,7 +124,7 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
       timer_new_data~store_uint(1024, 11);
       timer_new_data~store_uint(
         init_bell_with_children(priority, time, value, dest, fwd_body,
-          my_address(), bell_info_lr.end_cell(), bell_code),
+          my_address(), bell_info_lr.end_cell(), bell_code, -1),
         256);
       timer_new_data~store_uint(priority, 64);
       timer_new_data~store_uint(time, 32);
@@ -133,7 +133,7 @@ builder TIM::store_ident_proof(builder msg) inline_ref {
     timer_new_data~store_uint(1024, 11);
     timer_new_data~store_uint(
       init_bell_no_children(priority, time, value, dest, fwd_body,
-        my_address(), bell_code),
+        my_address(), bell_code, -1),
       256);
     timer_new_data~store_uint(priority, 64);
     timer_new_data~store_uint(time, 32);

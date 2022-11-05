@@ -28,6 +28,17 @@
                 priority, time, value, dest, body);
   } elseif (opcode == op::hang_new_bell) {
     hang_new_bell(in_msg_full~load_msg_addr(), in_msg);
+  } elseif (opcode == op::sbt::prove_ownership) {
+    int qid = in_msg~load_uint(64);
+    prove_ownership(in_msg~load_msg_addr(), in_msg~load_ref(),
+      in_msg~load_uint(1), qid);
+  } elseif (opcode == op::sbt::request_owner) {
+    int qid = in_msg~load_uint(64);
+    answer_request_owner(in_msg~load_msg_addr(), in_msg~load_ref(),
+      in_msg~load_uint(1), qid, in_msg_full~load_msg_addr());
+  } elseif (opcode == op::nft::answer_static_data) {
+    int qid = in_msg~load_uint(64);
+    answer_static_data(in_msg_full~load_msg_addr(), qid);
   } else {
     throw(404);
   }

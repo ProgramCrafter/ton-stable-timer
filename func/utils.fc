@@ -11,6 +11,10 @@ const int op::root_update_next_wakeup = 0xd416dc0f;
 const int op::update_next_wakeup = 0x07ebc8c5;
 const int op::schedule_msg = 0xf5431aa5;
 
+const int op::sbt::prove_ownership = 0x04ded148;
+const int op::sbt::request_owner = 0xd0c3bfea;
+const int op::nft::answer_static_data = 0x2fcb26a2;
+
 ;; Utility functions
 
 {-
@@ -38,7 +42,7 @@ cell calc_bell_state_init_by_data(cell bell_init_data, cell bell_code) inline_re
 }
 
 int init_bell_with_children(int priority, int time, int value, slice dest, cell fwd_body,
-                            slice core_address, cell children, cell bell_code)
+                            slice core_address, cell children, cell bell_code, int root)
                            impure inline_ref {
   builder init_data = begin_cell()
     .store_uint(priority, 64)
@@ -55,18 +59,18 @@ int init_bell_with_children(int priority, int time, int value, slice dest, cell 
      begin_cell()
     .store_uint(0x10, 6)  ;; non-bounceable internal message
     .store_uint(1024, 11).store_uint(cell_hash(state_init), 256)
-    .store_coins(0)
+    .store_coins((value + 600000000) & root)
     .store_uint(6, 1 + 4 + 4 + 64 + 32 + 2 + 1)  ;; no message body, but state init
     .store_ref(state_init)
-    .end_cell(), 64);
+    .end_cell(), 64 & (~ root));
   
   return cell_hash(state_init);
 }
 
 int init_bell_no_children(int priority, int time, int value, slice dest, cell fwd_body,
-                          slice core_address, cell bell_code) impure inline_ref {
+                          slice core_address, cell bell_code, int root) impure inline_ref {
   return init_bell_with_children(priority, time, value, dest, fwd_body,
-    core_address, begin_cell().store_uint(0, 2).end_cell(), bell_code);
+    core_address, begin_cell().store_uint(0, 2).end_cell(), bell_code, root);
 }
 
 cell bell_info_lr_replace_left(int left_addr, int left_priority, int left_time,

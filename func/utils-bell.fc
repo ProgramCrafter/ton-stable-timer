@@ -109,7 +109,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
     return ();
   }
   
-  throw_if(100, now() <= time);
+  throw_if(100, now() < time);
   
   ;; OK, the time has come. Destroying the bell.
   send_raw_message(begin_cell()
@@ -213,6 +213,9 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   throw_if(100, priority > d~load_uint(64));
   throw_if(101, time < now());
   
+  ;; Skipping forward message body.
+  d~load_ref();
+  
   cell new_children = null();
   
   slice children = d~load_ref().begin_parse();
@@ -220,7 +223,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
     if (children~load_uint(1) == 0) {
       new_children = bell_info_lr_replace_left(
         init_bell_no_children(priority, time, value, dest, fwd_body,
-                              load_core_address(), bell_code),
+                              load_core_address(), bell_code, 0),
         priority, time, {- only right child remaining -} children
       );
     } else {
@@ -240,14 +243,14 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
         
         new_children = bell_info_lr_replace_left(
           init_bell_with_children(priority, time, value, dest, fwd_body,
-            load_core_address(), subbell_children, bell_code),
+            load_core_address(), subbell_children, bell_code, 0),
           priority, time, children
         );
       } else {
         send_raw_message(begin_cell()
           .store_uint(0x10, 6)
           .store_slice(child_addr)
-          .store_coins(value + 100000000)
+          .store_coins(0)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
           .store_uint(op::retranslate_init, 32)
           .store_uint(priority, 64)  ;;  \
@@ -256,7 +259,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
           .store_slice(dest)         ;;  |
           .store_ref(fwd_body)       ;;  /
           .store_ident_proof(bell_code)
-          .end_cell(), 0);
+          .end_cell(), 64);
       }
     }
   } else {
@@ -273,7 +276,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       new_children = bell_info_lr_replace_right(
         left_child,
         init_bell_no_children(priority, time, value, dest, fwd_body,
-                              load_core_address(), bell_code),
+                              load_core_address(), bell_code, 0),
         priority, time
       );
     } else {
@@ -294,14 +297,14 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
         new_children = bell_info_lr_replace_right(
           left_child,
           init_bell_with_children(priority, time, value, dest, fwd_body,
-            load_core_address(), subbell_children, bell_code),
+            load_core_address(), subbell_children, bell_code, 0),
           priority, time
         );
       } else {
         send_raw_message(begin_cell()
           .store_uint(0x10, 6)
           .store_slice(child_addr)
-          .store_coins(value + 100000000)
+          .store_coins(0)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
           .store_uint(op::retranslate_init, 32)
           .store_uint(priority, 64)  ;;  \
@@ -310,7 +313,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
           .store_slice(dest)         ;;  |
           .store_ref(fwd_body)       ;;  /
           .store_ident_proof(bell_code)
-          .end_cell(), 0);
+          .end_cell(), 64);
       }
     }
   }
@@ -332,16 +335,31 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
 }
 
 ;; TIM::BEL::get_bell_data (get-method)
-;;   time, value, dest, body, core, children
-(int, int, slice, cell, slice, cell) get_bell_data() method_id {
+;;   time, value, dest, body, core, child_left, child_right
+(int, int, slice, cell, slice, slice, slice) get_bell_data() method_id {
   slice d = get_data().begin_parse();
   d~skip_bits(64);
-  return (d~load_uint(32), d~load_uint(64), d~load_msg_addr(), d~load_ref(),
-          d~load_msg_addr(), d~load_ref());
+  
+  cell body = d~load_ref();
+  
+  slice children = d~load_ref().begin_parse();
+  slice child_left = null_address();
+  slice child_right = null_address();
+  if (children~load_uint(1)) {
+    child_left = children~load_msg_addr();
+    children~skip_bits(96);
+  }
+  if (children~load_uint(1)) {
+    child_right = children~load_msg_addr();
+  }
+  
+  return (d~load_uint(32), d~load_uint(64), d~load_msg_addr(), body,
+          d~load_msg_addr(), child_left, child_right);
 }
 
 ;; SBT::prove_ownership (#04ded148)
-() prove_ownership(slice dest, cell fwd_body, int include_content) impure inline_ref method_id {
+() prove_ownership(slice dest, cell fwd_body, int include_content,
+    int qid) impure inline_ref method_id {
   (_, int id) = parse_std_addr(my_address());
   
   builder msg = begin_cell()
@@ -350,7 +368,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
     .store_coins(0)
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
     .store_uint(0x0f24c7ae, 32)
-    .store_uint(0x22332233, 64)
+    .store_uint(qid, 64)
     .store_uint(id, 256)
     .store_slice(load_core_address())
     .store_ref(fwd_body)

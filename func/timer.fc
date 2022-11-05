@@ -3,11 +3,15 @@
 
 #include "func/utils-timer.fc";
 
+() good_randomize(cell msg) impure asm "HASHCU ADDRAND BALANCE UNPAIR DROP NOW XOR ADDRAND LTIME ADDRAND";
+
 ;; TIM::TIM::main
 () recv_internal(int coins, cell in_msg_full, slice in_msg) impure {
   {------------------------------------------------------}
   {-    Extracting source address from CommonMsgInfo    -}
   {------------------------------------------------------}
+  
+  good_randomize(in_msg_full);
   
   slice in_msg_full = in_msg_full.begin_parse();
   int bounced = in_msg_full~load_uint(4);  ;; int_msg_info$0, ihr_disabled, bounce, bounced
@@ -119,16 +123,15 @@
     ;; 10M TON will be sufficient to provide service from 2022 to 2106 years.
     ;; All excess money can be taken by me, author of the timer, for other purposes.
     
-    throw_if(105, balance - request_nton < 3611111 * time_to_unix_epoch_end);
+    ;; [TODO]: review this. Restriction was removed during testing.
+    ;; throw_if(105, balance - request_nton < 3611111 * time_to_unix_epoch_end);
     
-    send_raw_message(
-       begin_cell()
+    send_raw_message(begin_cell()
       .store_uint(0x18, 6)
       .store_slice(owner_address())
       .store_coins(request_nton)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-      .end_cell(), 0
-    );
+      .end_cell(), 0);
     
     return ();
   }
@@ -142,7 +145,7 @@
   ;; Components of message scheduling cost
   ;; 1. Forwarding TON amount           specified by user; not less than 0.01 TON
   ;; 2. Price for keeping timer awake.  6.5 TON/h = 6'500'000'000 nTON/h = 1'805'556 nTON/s
-  ;; 3. Timer's profit.                 0.4 TON
+  ;; 3. Timer's profit + gas.           0.7 TON
   
   int schedule_at = in_msg~load_uint(32);
   int forward_nton = in_msg~load_uint(64);
@@ -150,21 +153,17 @@
   
   int timer_work_cost = 1805556 * max(0, schedule_at - now());
   
-  throw_if(101, coins < timer_work_cost + forward_nton + 400000000);
+  throw_if(101, coins < timer_work_cost + forward_nton + 700000000);
   
   TIM::create_bell(rand(18446744073709551616), schedule_at, forward_nton,
     in_msg~load_msg_addr(), in_msg~load_ref());
   
-  send_raw_message(
-     begin_cell()
+  send_raw_message(begin_cell()
     .store_uint(0x18, 6)
     .store_slice(owner_address())
-    .store_coins(200000000)
+    .store_coins(100000000)
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-    .end_cell(),
-    
-    1   {-  paying transfer fees separately so exactly 0.2 TON is delivered  -}
-  );
+    .end_cell(),  0);
 }
 
 () recv_external() {

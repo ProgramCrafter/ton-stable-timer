@@ -31,7 +31,7 @@
   set_init_data();
   
   int coins_1 = 100000000;    ;; 0.1 TON
-  int coins_2 = 1000000000;   ;; 1 TON
+  int coins_2 = 2000000000;   ;; 2 TON
   cell half_full_msg = begin_cell().store_uint(6, 4).store_uint(1024, 11)
     .store_uint(0x33333333333333333333333333333333, 128)
     .store_uint(0x33333333333333333333333333333333, 128)

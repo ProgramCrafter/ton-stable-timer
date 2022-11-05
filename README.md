@@ -90,7 +90,7 @@ schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^A
 # Pricing
 The timer uses TON coins to keep working. So, scheduling messages has its price: 6.5 TON/h (more precisely, 1805556 nanoTON/s).
 
-Price of scheduling message can be calculated as **0.4 TON** *(timer's profit)* + **6.5 TON/h \* \<scheduling time in hours>** *(cost of keeping timer awake)* + **\<requested value to forward>**.
+Price of scheduling message can be calculated as **0.7 TON** *(timer's profit and gas for bells)* + **6.5 TON/h \* \<scheduling time in hours>** *(cost of keeping timer awake)* + **\<requested value to forward>**.
 
 As timer aims to provide service to a lot of people, there will be lots of overlapping messages, and this allows to make prices lower than self-hosted timer would cost.
 

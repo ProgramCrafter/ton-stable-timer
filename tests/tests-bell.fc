@@ -83,7 +83,7 @@ cell get_bell_code() {
 () __test_prove_ownership_no_content() method_id {
   set_init_data(0);
   
-  invoke_method(prove_ownership, [null_address(), begin_cell().end_cell(), 0]);
+  invoke_method(prove_ownership, [null_address(), begin_cell().end_cell(), 0, 0x22223322]);
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -91,7 +91,7 @@ cell get_bell_code() {
 () __test_prove_ownership_with_content() method_id {
   set_init_data(0);
   
-  invoke_method(prove_ownership, [null_address(), begin_cell().end_cell(), -1]);
+  invoke_method(prove_ownership, [null_address(), begin_cell().end_cell(), 1, 0x33222232]);
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
