@@ -846,7 +846,7 @@ PROGRAM{
       STVARUINT16	//  _136=0 _143
       107 STU	//  _157
       ENDC	//  _158
-      0 PUSHINT	//  _158 _159=0
+      64 PUSHINT	//  _158 _159=64
       SENDRAWMSG
     }>	//  coins in_msg opcode
     4114815653 PUSHINT	//  coins in_msg opcode _162=4114815653

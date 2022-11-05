@@ -131,7 +131,7 @@
       .store_slice(owner_address())
       .store_coins(request_nton)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-      .end_cell(), 0);
+      .end_cell(), 64);
     
     return ();
   }

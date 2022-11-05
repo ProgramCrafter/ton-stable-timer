@@ -179,7 +179,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   {--}    .store_ident_proof(bell_code)
   {--}    .store_uint(time, 32)
   {--}    .store_uint(rtime, 32)
-  {--}    .end_cell(), 0);
+  {--}    .end_cell(), 64);
   
   ;; copying BellDescriptor
   new_data~store_uint(old_data~load_uint(160), 160);

@@ -662,7 +662,7 @@ PROGRAM{
     s1 s3 XCHG	//  new_data old_data body rtime _82
     32 STU	//  new_data old_data body _84
     ENDC	//  new_data old_data body _85
-    0 PUSHINT	//  new_data old_data body _85 _86=0
+    64 PUSHINT	//  new_data old_data body _85 _86=64
     SENDRAWMSG
     SWAP	//  new_data body old_data
     160 LDU	//  new_data body _89 old_data
