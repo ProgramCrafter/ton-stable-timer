@@ -230,13 +230,14 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       slice child_addr = children~load_msg_addr();
       if (priority > children.preload_uint(64)) {
         builder subbell_children = begin_cell();
-        if (time <= children.preload_uint(96) & 4294967295) {
+        int child_time = children.preload_uint(96) & 4294967295;
+        if (time <= child_time) {
           subbell_children~store_uint(0, 1);
         }
         subbell_children~store_uint(1, 1);
         subbell_children~store_slice(child_addr);
         subbell_children~store_uint(children~load_uint(96), 96);
-        if (time > children.preload_uint(96) & 4294967295) {
+        if (time > child_time) {
           subbell_children~store_uint(0, 1);
         }
         cell subbell_children = subbell_children.end_cell();
@@ -283,13 +284,14 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       slice child_addr = children~load_msg_addr();
       if (priority > children.preload_uint(64)) {
         builder subbell_children = begin_cell();
-        if (time <= children.preload_uint(96) & 4294967295) {
+        int child_time = children.preload_uint(96) & 4294967295;
+        if (time <= child_time) {
           subbell_children~store_uint(0, 1);
         }
         subbell_children~store_uint(1, 1);
         subbell_children~store_slice(child_addr);
         subbell_children~store_uint(children~load_uint(96), 96);
-        if (time > children.preload_uint(96) & 4294967295) {
+        if (time > child_time) {
           subbell_children~store_uint(0, 1);
         }
         cell subbell_children = subbell_children.end_cell();

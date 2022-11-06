@@ -721,14 +721,14 @@ PROGRAM{
     NOW	//  dest fwd_body priority time value bell_code d time _19
     LESS	//  dest fwd_body priority time value bell_code d _20
     101 THROWIF
-    LDREF	//  dest fwd_body priority time value bell_code _262 _261
+    LDREF	//  dest fwd_body priority time value bell_code _256 _255
     PUSHNULL
     s2 POP	//  dest fwd_body priority time value bell_code new_children d
     LDREF	//  dest fwd_body priority time value bell_code new_children _27 d
     SWAP	//  dest fwd_body priority time value bell_code new_children d _27
     CTOS	//  dest fwd_body priority time value bell_code new_children d children
     SWAP	//  dest fwd_body priority time value bell_code new_children children d
-    32 LDU	//  dest fwd_body priority time value bell_code new_children children _266 _265
+    32 LDU	//  dest fwd_body priority time value bell_code new_children children _260 _259
     DROP	//  dest fwd_body priority time value bell_code new_children children _30
     s5 s(-1) PUXC	//  dest fwd_body priority time value bell_code new_children children time _30
     LESS	//  dest fwd_body priority time value bell_code new_children children _33
@@ -760,227 +760,222 @@ PROGRAM{
           s2 POP	//  dest fwd_body priority time value bell_code children child_addr
           NEWC	//  dest fwd_body priority time value bell_code children child_addr subbell_children
           s2 PUSH	//  dest fwd_body priority time value bell_code children child_addr subbell_children children
-          96 PLDU	//  dest fwd_body priority time value bell_code children child_addr subbell_children _52
-          32 PUSHPOW2DEC	//  dest fwd_body priority time value bell_code children child_addr subbell_children _52 _53=4294967295
-          AND	//  dest fwd_body priority time value bell_code children child_addr subbell_children _54
-          s6 s(-1) PUXC	//  dest fwd_body priority time value bell_code children child_addr subbell_children time _54
-          LEQ	//  dest fwd_body priority time value bell_code children child_addr subbell_children _55
-          IF:<{	//  dest fwd_body priority time value bell_code children child_addr subbell_children
-            0 PUSHINT	//  dest fwd_body priority time value bell_code children child_addr subbell_children _57=0
-            SWAP	//  dest fwd_body priority time value bell_code children child_addr _57=0 subbell_children
-            1 STU	//  dest fwd_body priority time value bell_code children child_addr subbell_children
-          }>	//  dest fwd_body priority time value bell_code children child_addr subbell_children
-          1 PUSHINT	//  dest fwd_body priority time value bell_code children child_addr subbell_children _61=1
-          SWAP	//  dest fwd_body priority time value bell_code children child_addr _61=1 subbell_children
-          1 STU	//  dest fwd_body priority time value bell_code children child_addr subbell_children
-          SWAP	//  dest fwd_body priority time value bell_code children subbell_children child_addr
-          STSLICER	//  dest fwd_body priority time value bell_code children subbell_children
-          SWAP	//  dest fwd_body priority time value bell_code subbell_children children
-          96 LDU	//  dest fwd_body priority time value bell_code subbell_children _67 children
-          s0 s2 XCHG	//  dest fwd_body priority time value bell_code children _67 subbell_children
-          96 STU	//  dest fwd_body priority time value bell_code children subbell_children
-          OVER	//  dest fwd_body priority time value bell_code children subbell_children children
-          96 PLDU	//  dest fwd_body priority time value bell_code children subbell_children _73
-          32 PUSHPOW2DEC	//  dest fwd_body priority time value bell_code children subbell_children _73 _74=4294967295
-          AND	//  dest fwd_body priority time value bell_code children subbell_children _75
-          s5 s(-1) PUXC	//  dest fwd_body priority time value bell_code children subbell_children time _75
-          GREATER	//  dest fwd_body priority time value bell_code children subbell_children _76
+          96 PLDU	//  dest fwd_body priority time value bell_code children child_addr subbell_children _53
+          32 PUSHPOW2DEC	//  dest fwd_body priority time value bell_code children child_addr subbell_children _53 _54=4294967295
+          AND	//  dest fwd_body priority time value bell_code children child_addr subbell_children child_time
+          s6 s0 PUSH2	//  dest fwd_body priority time value bell_code children child_addr subbell_children child_time time child_time
+          LEQ	//  dest fwd_body priority time value bell_code children child_addr subbell_children child_time _56
+          IF:<{	//  dest fwd_body priority time value bell_code children child_addr subbell_children child_time
+            0 PUSHINT
+            ROT	//  dest fwd_body priority time value bell_code children child_addr child_time _58=0 subbell_children
+            1 STU	//  dest fwd_body priority time value bell_code children child_addr child_time subbell_children
+            SWAP	//  dest fwd_body priority time value bell_code children child_addr subbell_children child_time
+          }>	//  dest fwd_body priority time value bell_code children child_addr subbell_children child_time
+          1 PUSHINT
+          ROT	//  dest fwd_body priority time value bell_code children child_addr child_time _62=1 subbell_children
+          1 STU	//  dest fwd_body priority time value bell_code children child_addr child_time subbell_children
+          ROT	//  dest fwd_body priority time value bell_code children child_time subbell_children child_addr
+          STSLICER	//  dest fwd_body priority time value bell_code children child_time subbell_children
+          s0 s2 XCHG	//  dest fwd_body priority time value bell_code subbell_children child_time children
+          96 LDU	//  dest fwd_body priority time value bell_code subbell_children child_time _68 children
+          s0 s3 XCHG	//  dest fwd_body priority time value bell_code children child_time _68 subbell_children
+          96 STU	//  dest fwd_body priority time value bell_code children child_time subbell_children
+          s5 s1 PUXC	//  dest fwd_body priority time value bell_code children subbell_children time child_time
+          GREATER	//  dest fwd_body priority time value bell_code children subbell_children _73
           IF:<{	//  dest fwd_body priority time value bell_code children subbell_children
-            0 PUSHINT	//  dest fwd_body priority time value bell_code children subbell_children _78=0
-            SWAP	//  dest fwd_body priority time value bell_code children _78=0 subbell_children
+            0 PUSHINT	//  dest fwd_body priority time value bell_code children subbell_children _75=0
+            SWAP	//  dest fwd_body priority time value bell_code children _75=0 subbell_children
             1 STU	//  dest fwd_body priority time value bell_code children subbell_children
           }>	//  dest fwd_body priority time value bell_code children subbell_children
           ENDC	//  dest fwd_body priority time value bell_code children subbell_children
-          load_core_address CALLDICT	//  dest fwd_body priority time value bell_code children subbell_children _83
-          0 PUSHINT	//  dest fwd_body priority time value bell_code children subbell_children _83 _84=0
+          load_core_address CALLDICT	//  dest fwd_body priority time value bell_code children subbell_children _80
+          0 PUSHINT	//  dest fwd_body priority time value bell_code children subbell_children _80 _81=0
           s7 PUSH
           s7 s0 XCPU
           s0 s7 XCHG
           s0 s6 XCHG
           s5 s11 XCHG
           s4 s10 XCHG
-          s10 s0 s10 XCHG3	//  children time priority priority time value dest fwd_body _83 subbell_children bell_code _84=0
-          init_bell_with_children INLINECALLDICT	//  children time priority _85
-          s2 s3 XCHG2	//  _85 priority time children
+          s10 s0 s10 XCHG3	//  children time priority priority time value dest fwd_body _80 subbell_children bell_code _81=0
+          init_bell_with_children INLINECALLDICT	//  children time priority _82
+          s2 s3 XCHG2	//  _82 priority time children
           bell_info_lr_replace_left CALLDICT	//  new_children
         }>ELSE<{	//  dest fwd_body priority time value bell_code new_children child_addr children
           DROP	//  dest fwd_body priority time value bell_code new_children child_addr
-          4227836706 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _87=4227836706
-          0 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _87=4227836706 _88=0
-          16 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _87=4227836706 _88=0 _89=16
-          NEWC	//  dest fwd_body priority time value bell_code new_children child_addr _87=4227836706 _88=0 _89=16 _90
-          6 STU	//  dest fwd_body priority time value bell_code new_children child_addr _87=4227836706 _88=0 _92
-          s0 s3 XCHG2	//  dest fwd_body priority time value bell_code new_children _88=0 _87=4227836706 _92 child_addr
-          STSLICER	//  dest fwd_body priority time value bell_code new_children _88=0 _87=4227836706 _93
-          s2 PUSH	//  dest fwd_body priority time value bell_code new_children _88=0 _87=4227836706 _93 _94=0
-          STVARUINT16	//  dest fwd_body priority time value bell_code new_children _88=0 _87=4227836706 _95
-          s1 s2 XCHG	//  dest fwd_body priority time value bell_code new_children _87=4227836706 _88=0 _95
-          107 STU	//  dest fwd_body priority time value bell_code new_children _87=4227836706 _109
-          32 STU	//  dest fwd_body priority time value bell_code new_children _111
-          s1 s5 XCHG	//  dest fwd_body new_children time value bell_code priority _111
-          64 STU	//  dest fwd_body new_children time value bell_code _113
-          s1 s3 XCHG	//  dest fwd_body new_children bell_code value time _113
-          32 STU	//  dest fwd_body new_children bell_code value _115
-          64 STU	//  dest fwd_body new_children bell_code _117
-          s0 s4 XCHG2	//  bell_code fwd_body new_children _117 dest
-          STSLICER	//  bell_code fwd_body new_children _118
-          s1 s2 XCHG	//  bell_code new_children fwd_body _118
-          STREF	//  bell_code new_children _119
-          ROT	//  new_children _119 bell_code
-          store_ident_proof INLINECALLDICT	//  new_children _120
-          ENDC	//  new_children _121
-          64 PUSHINT	//  new_children _121 _122=64
+          4227836706 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _84=4227836706
+          0 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _84=4227836706 _85=0
+          16 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _84=4227836706 _85=0 _86=16
+          NEWC	//  dest fwd_body priority time value bell_code new_children child_addr _84=4227836706 _85=0 _86=16 _87
+          6 STU	//  dest fwd_body priority time value bell_code new_children child_addr _84=4227836706 _85=0 _89
+          s0 s3 XCHG2	//  dest fwd_body priority time value bell_code new_children _85=0 _84=4227836706 _89 child_addr
+          STSLICER	//  dest fwd_body priority time value bell_code new_children _85=0 _84=4227836706 _90
+          s2 PUSH	//  dest fwd_body priority time value bell_code new_children _85=0 _84=4227836706 _90 _91=0
+          STVARUINT16	//  dest fwd_body priority time value bell_code new_children _85=0 _84=4227836706 _92
+          s1 s2 XCHG	//  dest fwd_body priority time value bell_code new_children _84=4227836706 _85=0 _92
+          107 STU	//  dest fwd_body priority time value bell_code new_children _84=4227836706 _106
+          32 STU	//  dest fwd_body priority time value bell_code new_children _108
+          s1 s5 XCHG	//  dest fwd_body new_children time value bell_code priority _108
+          64 STU	//  dest fwd_body new_children time value bell_code _110
+          s1 s3 XCHG	//  dest fwd_body new_children bell_code value time _110
+          32 STU	//  dest fwd_body new_children bell_code value _112
+          64 STU	//  dest fwd_body new_children bell_code _114
+          s0 s4 XCHG2	//  bell_code fwd_body new_children _114 dest
+          STSLICER	//  bell_code fwd_body new_children _115
+          s1 s2 XCHG	//  bell_code new_children fwd_body _115
+          STREF	//  bell_code new_children _116
+          ROT	//  new_children _116 bell_code
+          store_ident_proof INLINECALLDICT	//  new_children _117
+          ENDC	//  new_children _118
+          64 PUSHINT	//  new_children _118 _119=64
           SENDRAWMSG
         }>
       }>
     }>ELSE<{	//  dest fwd_body priority time value bell_code new_children children
       NEWC	//  dest fwd_body priority time value bell_code new_children children left_child
       SWAP	//  dest fwd_body priority time value bell_code new_children left_child children
-      1 LDU	//  dest fwd_body priority time value bell_code new_children left_child _126 children
-      SWAP	//  dest fwd_body priority time value bell_code new_children left_child children _126
-      0 EQINT	//  dest fwd_body priority time value bell_code new_children left_child children _130
+      1 LDU	//  dest fwd_body priority time value bell_code new_children left_child _123 children
+      SWAP	//  dest fwd_body priority time value bell_code new_children left_child children _123
+      0 EQINT	//  dest fwd_body priority time value bell_code new_children left_child children _127
       IF:<{	//  dest fwd_body priority time value bell_code new_children left_child children
         0 PUSHINT
-        ROT	//  dest fwd_body priority time value bell_code new_children children _132=0 left_child
+        ROT	//  dest fwd_body priority time value bell_code new_children children _129=0 left_child
         1 STU	//  dest fwd_body priority time value bell_code new_children children left_child
       }>ELSE<{	//  dest fwd_body priority time value bell_code new_children left_child children
         1 PUSHINT
-        ROT	//  dest fwd_body priority time value bell_code new_children children _136=1 left_child
+        ROT	//  dest fwd_body priority time value bell_code new_children children _133=1 left_child
         1 STU	//  dest fwd_body priority time value bell_code new_children children left_child
         SWAP	//  dest fwd_body priority time value bell_code new_children left_child children
-        LDMSGADDR	//  dest fwd_body priority time value bell_code new_children left_child _140 children
-        -ROT	//  dest fwd_body priority time value bell_code new_children children left_child _140
+        LDMSGADDR	//  dest fwd_body priority time value bell_code new_children left_child _137 children
+        -ROT	//  dest fwd_body priority time value bell_code new_children children left_child _137
         STSLICER	//  dest fwd_body priority time value bell_code new_children children left_child
         SWAP	//  dest fwd_body priority time value bell_code new_children left_child children
-        96 LDU	//  dest fwd_body priority time value bell_code new_children left_child _144 children
-        s0 s2 XCHG	//  dest fwd_body priority time value bell_code new_children children _144 left_child
+        96 LDU	//  dest fwd_body priority time value bell_code new_children left_child _141 children
+        s0 s2 XCHG	//  dest fwd_body priority time value bell_code new_children children _141 left_child
         96 STU	//  dest fwd_body priority time value bell_code new_children children left_child
       }>
       SWAP	//  dest fwd_body priority time value bell_code new_children left_child children
-      1 LDU	//  dest fwd_body priority time value bell_code new_children left_child _149 children
-      SWAP	//  dest fwd_body priority time value bell_code new_children left_child children _149
-      0 EQINT	//  dest fwd_body priority time value bell_code new_children left_child children _153
+      1 LDU	//  dest fwd_body priority time value bell_code new_children left_child _146 children
+      SWAP	//  dest fwd_body priority time value bell_code new_children left_child children _146
+      0 EQINT	//  dest fwd_body priority time value bell_code new_children left_child children _150
       IF:<{	//  dest fwd_body priority time value bell_code new_children left_child children
         DROP
         NIP	//  dest fwd_body priority time value bell_code left_child
-        load_core_address CALLDICT	//  dest fwd_body priority time value bell_code left_child _154
-        0 PUSHINT	//  dest fwd_body priority time value bell_code left_child _154 _155=0
+        load_core_address CALLDICT	//  dest fwd_body priority time value bell_code left_child _151
+        0 PUSHINT	//  dest fwd_body priority time value bell_code left_child _151 _152=0
         s6 PUSH
         s6 s0 XCPU
         s0 s6 XCHG
         s0 s5 XCHG
         s4 s10 XCHG
         s3 s9 XCHG
-        s9 s0 s9 XCHG3	//  left_child time priority priority time value dest fwd_body _154 bell_code _155=0
-        init_bell_no_children INLINECALLDICT	//  left_child time priority _156
-        s0 s2 XCHG	//  left_child _156 priority time
+        s9 s0 s9 XCHG3	//  left_child time priority priority time value dest fwd_body _151 bell_code _152=0
+        init_bell_no_children INLINECALLDICT	//  left_child time priority _153
+        s0 s2 XCHG	//  left_child _153 priority time
         bell_info_lr_replace_right CALLDICT	//  new_children
       }>ELSE<{	//  dest fwd_body priority time value bell_code new_children left_child children
         LDMSGADDR	//  dest fwd_body priority time value bell_code new_children left_child child_addr children
         DUP	//  dest fwd_body priority time value bell_code new_children left_child child_addr children children
-        64 PLDU	//  dest fwd_body priority time value bell_code new_children left_child child_addr children _162
-        s8 s(-1) PUXC	//  dest fwd_body priority time value bell_code new_children left_child child_addr children priority _162
-        GREATER	//  dest fwd_body priority time value bell_code new_children left_child child_addr children _163
+        64 PLDU	//  dest fwd_body priority time value bell_code new_children left_child child_addr children _159
+        s8 s(-1) PUXC	//  dest fwd_body priority time value bell_code new_children left_child child_addr children priority _159
+        GREATER	//  dest fwd_body priority time value bell_code new_children left_child child_addr children _160
         IF:<{	//  dest fwd_body priority time value bell_code new_children left_child child_addr children
           s3 POP	//  dest fwd_body priority time value bell_code children left_child child_addr
           NEWC	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children
           s3 PUSH	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children children
-          96 PLDU	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _167
-          32 PUSHPOW2DEC	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _167 _168=4294967295
-          AND	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _169
-          s7 s(-1) PUXC	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children time _169
-          LEQ	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _170
-          IF:<{	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children
-            0 PUSHINT	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _172=0
-            SWAP	//  dest fwd_body priority time value bell_code children left_child child_addr _172=0 subbell_children
-            1 STU	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children
-          }>	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children
-          1 PUSHINT	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _176=1
-          SWAP	//  dest fwd_body priority time value bell_code children left_child child_addr _176=1 subbell_children
-          1 STU	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children
-          SWAP	//  dest fwd_body priority time value bell_code children left_child subbell_children child_addr
-          STSLICER	//  dest fwd_body priority time value bell_code children left_child subbell_children
-          s0 s2 XCHG	//  dest fwd_body priority time value bell_code subbell_children left_child children
-          96 LDU	//  dest fwd_body priority time value bell_code subbell_children left_child _182 children
-          s0 s3 XCHG	//  dest fwd_body priority time value bell_code children left_child _182 subbell_children
-          96 STU	//  dest fwd_body priority time value bell_code children left_child subbell_children
-          s0 s2 XCHG	//  dest fwd_body priority time value bell_code subbell_children left_child children
-          96 PLDU	//  dest fwd_body priority time value bell_code subbell_children left_child _188
-          32 PUSHPOW2DEC	//  dest fwd_body priority time value bell_code subbell_children left_child _188 _189=4294967295
-          AND	//  dest fwd_body priority time value bell_code subbell_children left_child _190
-          s5 s(-1) PUXC	//  dest fwd_body priority time value bell_code subbell_children left_child time _190
-          GREATER	//  dest fwd_body priority time value bell_code subbell_children left_child _191
+          96 PLDU	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _165
+          32 PUSHPOW2DEC	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children _165 _166=4294967295
+          AND	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children child_time
+          s7 s0 PUSH2	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children child_time time child_time
+          LEQ	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children child_time _168
+          IF:<{	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children child_time
+            0 PUSHINT
+            ROT	//  dest fwd_body priority time value bell_code children left_child child_addr child_time _170=0 subbell_children
+            1 STU	//  dest fwd_body priority time value bell_code children left_child child_addr child_time subbell_children
+            SWAP	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children child_time
+          }>	//  dest fwd_body priority time value bell_code children left_child child_addr subbell_children child_time
+          1 PUSHINT
+          ROT	//  dest fwd_body priority time value bell_code children left_child child_addr child_time _174=1 subbell_children
+          1 STU	//  dest fwd_body priority time value bell_code children left_child child_addr child_time subbell_children
+          ROT	//  dest fwd_body priority time value bell_code children left_child child_time subbell_children child_addr
+          STSLICER	//  dest fwd_body priority time value bell_code children left_child child_time subbell_children
+          s0 s3 XCHG	//  dest fwd_body priority time value bell_code subbell_children left_child child_time children
+          96 LDU	//  dest fwd_body priority time value bell_code subbell_children left_child child_time _278 _277
+          DROP	//  dest fwd_body priority time value bell_code subbell_children left_child child_time _180
+          s0 s3 XCHG2	//  dest fwd_body priority time value bell_code child_time left_child _180 subbell_children
+          96 STU	//  dest fwd_body priority time value bell_code child_time left_child subbell_children
+          s5 s2 PUXC	//  dest fwd_body priority time value bell_code subbell_children left_child time child_time
+          GREATER	//  dest fwd_body priority time value bell_code subbell_children left_child _185
           IF:<{	//  dest fwd_body priority time value bell_code subbell_children left_child
             0 PUSHINT
-            ROT	//  dest fwd_body priority time value bell_code left_child _193=0 subbell_children
+            ROT	//  dest fwd_body priority time value bell_code left_child _187=0 subbell_children
             1 STU	//  dest fwd_body priority time value bell_code left_child subbell_children
             SWAP	//  dest fwd_body priority time value bell_code subbell_children left_child
           }>	//  dest fwd_body priority time value bell_code subbell_children left_child
           SWAP	//  dest fwd_body priority time value bell_code left_child subbell_children
           ENDC	//  dest fwd_body priority time value bell_code left_child subbell_children
-          load_core_address CALLDICT	//  dest fwd_body priority time value bell_code left_child subbell_children _198
-          0 PUSHINT	//  dest fwd_body priority time value bell_code left_child subbell_children _198 _199=0
+          load_core_address CALLDICT	//  dest fwd_body priority time value bell_code left_child subbell_children _192
+          0 PUSHINT	//  dest fwd_body priority time value bell_code left_child subbell_children _192 _193=0
           s7 PUSH
           s7 s0 XCPU
           s0 s7 XCHG
           s0 s6 XCHG
           s5 s11 XCHG
           s4 s10 XCHG
-          s10 s0 s10 XCHG3	//  left_child time priority priority time value dest fwd_body _198 subbell_children bell_code _199=0
-          init_bell_with_children INLINECALLDICT	//  left_child time priority _200
-          s0 s2 XCHG	//  left_child _200 priority time
+          s10 s0 s10 XCHG3	//  left_child time priority priority time value dest fwd_body _192 subbell_children bell_code _193=0
+          init_bell_with_children INLINECALLDICT	//  left_child time priority _194
+          s0 s2 XCHG	//  left_child _194 priority time
           bell_info_lr_replace_right CALLDICT	//  new_children
         }>ELSE<{	//  dest fwd_body priority time value bell_code new_children left_child child_addr children
           DROP
           NIP	//  dest fwd_body priority time value bell_code new_children child_addr
-          4227836706 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _202=4227836706
-          0 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _202=4227836706 _203=0
-          16 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _202=4227836706 _203=0 _204=16
-          NEWC	//  dest fwd_body priority time value bell_code new_children child_addr _202=4227836706 _203=0 _204=16 _205
-          6 STU	//  dest fwd_body priority time value bell_code new_children child_addr _202=4227836706 _203=0 _207
-          s0 s3 XCHG2	//  dest fwd_body priority time value bell_code new_children _203=0 _202=4227836706 _207 child_addr
-          STSLICER	//  dest fwd_body priority time value bell_code new_children _203=0 _202=4227836706 _208
-          s2 PUSH	//  dest fwd_body priority time value bell_code new_children _203=0 _202=4227836706 _208 _209=0
-          STVARUINT16	//  dest fwd_body priority time value bell_code new_children _203=0 _202=4227836706 _210
-          s1 s2 XCHG	//  dest fwd_body priority time value bell_code new_children _202=4227836706 _203=0 _210
-          107 STU	//  dest fwd_body priority time value bell_code new_children _202=4227836706 _224
-          32 STU	//  dest fwd_body priority time value bell_code new_children _226
-          s1 s5 XCHG	//  dest fwd_body new_children time value bell_code priority _226
-          64 STU	//  dest fwd_body new_children time value bell_code _228
-          s1 s3 XCHG	//  dest fwd_body new_children bell_code value time _228
-          32 STU	//  dest fwd_body new_children bell_code value _230
-          64 STU	//  dest fwd_body new_children bell_code _232
-          s0 s4 XCHG2	//  bell_code fwd_body new_children _232 dest
-          STSLICER	//  bell_code fwd_body new_children _233
-          s1 s2 XCHG	//  bell_code new_children fwd_body _233
-          STREF	//  bell_code new_children _234
-          ROT	//  new_children _234 bell_code
-          store_ident_proof INLINECALLDICT	//  new_children _235
-          ENDC	//  new_children _236
-          64 PUSHINT	//  new_children _236 _237=64
+          4227836706 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _196=4227836706
+          0 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _196=4227836706 _197=0
+          16 PUSHINT	//  dest fwd_body priority time value bell_code new_children child_addr _196=4227836706 _197=0 _198=16
+          NEWC	//  dest fwd_body priority time value bell_code new_children child_addr _196=4227836706 _197=0 _198=16 _199
+          6 STU	//  dest fwd_body priority time value bell_code new_children child_addr _196=4227836706 _197=0 _201
+          s0 s3 XCHG2	//  dest fwd_body priority time value bell_code new_children _197=0 _196=4227836706 _201 child_addr
+          STSLICER	//  dest fwd_body priority time value bell_code new_children _197=0 _196=4227836706 _202
+          s2 PUSH	//  dest fwd_body priority time value bell_code new_children _197=0 _196=4227836706 _202 _203=0
+          STVARUINT16	//  dest fwd_body priority time value bell_code new_children _197=0 _196=4227836706 _204
+          s1 s2 XCHG	//  dest fwd_body priority time value bell_code new_children _196=4227836706 _197=0 _204
+          107 STU	//  dest fwd_body priority time value bell_code new_children _196=4227836706 _218
+          32 STU	//  dest fwd_body priority time value bell_code new_children _220
+          s1 s5 XCHG	//  dest fwd_body new_children time value bell_code priority _220
+          64 STU	//  dest fwd_body new_children time value bell_code _222
+          s1 s3 XCHG	//  dest fwd_body new_children bell_code value time _222
+          32 STU	//  dest fwd_body new_children bell_code value _224
+          64 STU	//  dest fwd_body new_children bell_code _226
+          s0 s4 XCHG2	//  bell_code fwd_body new_children _226 dest
+          STSLICER	//  bell_code fwd_body new_children _227
+          s1 s2 XCHG	//  bell_code new_children fwd_body _227
+          STREF	//  bell_code new_children _228
+          ROT	//  new_children _228 bell_code
+          store_ident_proof INLINECALLDICT	//  new_children _229
+          ENDC	//  new_children _230
+          64 PUSHINT	//  new_children _230 _231=64
           SENDRAWMSG
         }>
       }>
     }>
     DUP	//  new_children new_children
-    ISNULL	//  new_children _239
-    NOT	//  new_children _240
+    ISNULL	//  new_children _233
+    NOT	//  new_children _234
     IF:<{	//  new_children
-      c4 PUSH	//  new_children _242
+      c4 PUSH	//  new_children _236
       CTOS	//  new_children d
       LDREF	//  new_children own_schedule_body d
-      LDREF	//  new_children own_schedule_body _288 _287
+      LDREF	//  new_children own_schedule_body _282 _281
       NIP	//  new_children own_schedule_body d
       LDREF	//  new_children own_schedule_body init_children d
-      NEWC	//  new_children own_schedule_body init_children d _252
-      SWAP	//  new_children own_schedule_body init_children _252 d
-      STSLICER	//  new_children own_schedule_body init_children _253
-      s1 s2 XCHG	//  new_children init_children own_schedule_body _253
-      STREF	//  new_children init_children _254
-      s1 s2 XCHG	//  init_children new_children _254
-      STREF	//  init_children _255
-      STREF	//  _256
-      ENDC	//  _257
+      NEWC	//  new_children own_schedule_body init_children d _246
+      SWAP	//  new_children own_schedule_body init_children _246 d
+      STSLICER	//  new_children own_schedule_body init_children _247
+      s1 s2 XCHG	//  new_children init_children own_schedule_body _247
+      STREF	//  new_children init_children _248
+      s1 s2 XCHG	//  init_children new_children _248
+      STREF	//  init_children _249
+      STREF	//  _250
+      ENDC	//  _251
       c4 POP
     }>ELSE<{
       DROP	// 
