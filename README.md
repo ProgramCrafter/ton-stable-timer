@@ -24,8 +24,8 @@ _ priority:uint64 time:uint32 value:uint64 destination:MsgAddressInt body:^Any =
 _ bell_node_addr:MsgAddressInt bell_priority:uint64 bell_time:uint32 = BellInfo;
 _ left:(Maybe BellInfo) right:(Maybe BellInfo) = BellInfoLR;
 
-_ leftmost_schedule_time:uint32 root_bell:(Maybe BellInfo) bell:^Code = TimerContractData;
-_ data:BellDescriptor core_addr:MsgAddressInt children:^BellInfoLR init_children:^BellInfoLR = BellContractData;
+_ next_wakeup:uint32 root_bell:(Maybe BellInfo) bell:^Code = TimerContractData;
+_ next_wakeup:uint32 data:BellDescriptor core_addr:MsgAddressInt children:^BellInfoLR init_children:^BellInfoLR = BellContractData;
 
 proof_core$0 bell_code:^Code = IdentProof;
 proof_bell$1 init:^BellContractData code:^Code = IdentProof;
@@ -36,10 +36,11 @@ proof_bell$1 init:^BellContractData code:^Code = IdentProof;
 direct_init#_ = BellInboundMsg;
 retranslate_init#fbffab22 data:BellDescriptor proof:IdentProof = BellInboundMsg;
 bell#733be087 proof:IdentProof [TODO/forwarder:MsgAddressInt] = BellInboundMsg;
-hang_new_bell#96f5c875 proof:IdentProof right_node:(Maybe BellInfo) = BellInboundMsg;
+hang_new_bell#96f5c875 proof:IdentProof right_node:(Maybe BellInfo) next_wakeup:uint32 = BellInboundMsg;
+forward_next_wakeup#4e094ec7 proof:IdentProof nonroot_bell:Bool parent:MsgAddressInt = BellInboundMsg;
 
-root_update_next_wakeup#d416dc0f proof:IdentProof right_child:(Maybe BellInfo) = TimerInboundMsg;
-update_next_wakeup#07ebc8c5 proof:IdentProof bell_time:uint32 bell_rtime:uint32 = TimerInboundMsg;
+root_update_next_wakeup#d416dc0f proof:IdentProof right_child:(Maybe BellInfo) next_wakeup:uint32 = TimerInboundMsg;
+update_next_wakeup#07ebc8c5 proof:IdentProof bell_time:uint32 next_wakeup:uint32 = TimerInboundMsg;
 tick#_ = TimerInboundMsg;
 pull_ton_out#_ (nanoton >= 1) nanoton:uint64 = TimerInboundMsg;
 restart_loop#0000000000000001 = TimerInboundMsg;
@@ -62,7 +63,8 @@ schedule_msg#f5431aa5 time:uint32 value:uint64 destination:MsgAddressInt body:^A
 | BellIn$direct_init     | 0    | 0    |
 | BellIn$retrans_init    | 460  | 3    |
 | BellIn$bell            | 33   | 2    |
-| BellIn$hang_new_bell   | 397  | 2    |
+| BellIn$hang_new_bell   | 429  | 2    |
+| BellIn$fwd_next_wakeup | 301  | 2    |
 | [BellInboundMsg]       | 460  | 3    |
 | TimerIn$root_upd_wake  | 397  | 2    |
 | TimerIn$upd_wake       | 97   | 2    |

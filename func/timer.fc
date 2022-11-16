@@ -84,7 +84,9 @@
     if (in_msg_copy~load_uint(1)) {
       in_msg_copy~load_msg_addr();
       in_msg_copy~skip_bits(64);
+      
       next_time = in_msg_copy~load_uint(32);
+      ;; ^^^ root of right bells subtree isn't leftmost node in general
       
       TIM::send_schedule_loop_msg();
     }

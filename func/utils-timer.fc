@@ -34,8 +34,8 @@ slice TIM::check_ident_proof(slice source, slice proof) impure inline_ref {
     throw_if(111, source~load_uint(256) != cell_hash(bell_state_init));
     
     slice bell_init = bell_init.begin_parse();  ;; BellContractData
-    bell_init~skip_bits(160);    ;;  \
-    bell_init~load_msg_addr();   ;;  |  BellDescriptor
+    bell_init~skip_bits(192);    ;;  \
+    bell_init~load_msg_addr();   ;;  |  next BellDescriptor
     bell_init~load_ref();        ;;  /
     
     throw_unless(112, equal_slices(bell_init~load_msg_addr(), my_address()));

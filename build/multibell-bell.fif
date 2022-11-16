@@ -1258,3 +1258,4 @@ PROGRAM{
   }>
 }END>c
 boc>B "build/boc/contract.boc" B>file
+boc>B "build/boc/contract.boc" B>file

@@ -6,9 +6,9 @@ slice load_core_address() {
   ;; _ data:BellDescriptor core_addr:MsgAddressInt left:(Maybe ^BellInfo) right:(Maybe ^BellInfo) = BellContractData;
   
   slice d = get_data().begin_parse();
-  d~skip_bits(160);   ;; priority, schedule time, value
+  d~skip_bits(192);   ;; next wakeup, priority, schedule time, value
   d~load_msg_addr();  ;; scheduled message destination
-  d~load_ref();       ;; scheduled message body
+  ;; d~load_ref();      ;; scheduled message body (loading reference is unnecessary)
   
   return d~load_msg_addr();
 }
@@ -61,7 +61,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   
   slice bell_current_data = get_data().begin_parse();
   builder init_bell_data = begin_cell()
-    .store_uint(bell_current_data~load_uint(160), 160)
+    .store_uint(bell_current_data~load_uint(192), 192)
     .store_slice(bell_current_data~load_msg_addr())
     .store_ref(bell_current_data~load_ref())
     .store_slice(bell_current_data~load_msg_addr());
@@ -84,7 +84,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   cell bell_code = check_ident_proof_get_code(parent, proof);
   
   slice d = get_data().begin_parse();
-  d~skip_bits(64);
+  d~skip_bits(96);  ;; next wakeup time, timer priority
   int time = d~load_uint(32);
   int value = d~load_uint(64);
   slice dest = d~load_msg_addr();
@@ -93,7 +93,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   slice core = d~load_msg_addr();
   
   slice children = d~load_ref().begin_parse();
-  if (children~load_uint(1) == 1) {
+  if (children~load_uint(1)) {
     ;; There is bell with schedule time lower than ours.
     ;; It has to be removed first.
     
@@ -120,6 +120,25 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
     .store_ref(body)
     .end_cell(), 0);
   
+  slice children_copy = children;
+  
+  ;; We don't know next wakeup time of right subbell so we need to send message to it and not to parent.
+  ;; That subbell will notify parent bell/timer itself.
+  if (children~load_uint(1)) {
+    send_raw_message(begin_cell()
+      .store_uint(0x10, 6)
+      .store_slice(children~load_msg_addr())
+      .store_coins(0)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(op::forward_next_wakeup, 32)
+      .store_ident_proof(bell_code)
+      .store_uint(is_nonroot_bell, 1)
+      .store_slice(parent)
+      .end_cell(), 128 + 32);
+    
+    return ();
+  }
+  
   if (is_nonroot_bell) {
     ;; Notifying parent about having been destroyed.
     send_raw_message(begin_cell()
@@ -129,7 +148,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
       .store_uint(op::hang_new_bell, 32)
       .store_ident_proof(bell_code)
-      .store_slice(children)  ;; left node flag has already been read out of that slice
+      .store_uint(0xFFFFFFFF, 33)
       .end_cell(), 128 + 32);
   } else {
     ;; Notifying timer about having been destroyed.
@@ -140,21 +159,64 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
       .store_uint(op::root_update_next_wakeup, 32)
       .store_ident_proof(bell_code)
-      .store_slice(children)
+      .store_uint(0xFFFFFFFF, 33)
       .end_cell(), 128 + 32);
   }
 }
 
+;; TIM::BEL::forward_next_wakeup (#4e094ec7)
+() forward_next_wakeup(slice parent, slice body) impure {
+  cell bell_code = check_ident_proof_get_code(parent, body);
+  
+  ;; skipping IdentProof
+  throw_unless(402, body~load_uint(1));
+  ;; body~load_ref();
+  ;; body~load_ref();
+  
+  slice d = get_data().begin_parse();
+  int next_wakeup = d~load_uint(32);
+  
+  if (body~load_uint(1)) {  ;; nonroot bell
+    send_raw_message(begin_cell()
+      .store_uint(0x10, 6)
+      .store_slice(parent)
+      .store_coins(0)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(op::hang_new_bell, 32)
+      .store_ident_proof(bell_code)
+      .store_uint(1, 1)                 ;;  \
+      .store_slice(my_address())        ;;  |  (Maybe BellInfo)
+      .store_uint(d~load_uint(96), 96)  ;;  /
+      .store_uint(next_wakeup, 32)
+      .end_cell(), 64);
+  } else {
+    send_raw_message(begin_cell()
+      .store_uint(0x10, 6)
+      .store_slice(parent)
+      .store_coins(0)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(op::root_update_next_wakeup, 32)
+      .store_ident_proof(bell_code)
+      .store_uint(1, 1)                 ;;  \
+      .store_slice(my_address())        ;;  |  (Maybe BellInfo)
+      .store_uint(d~load_uint(96), 96)  ;;  /
+      .store_uint(next_wakeup, 32)
+      .end_cell(), 64);
+  }
+}
+
 ;; TIM::BEL::hang_new_bell (#96f5c875)
-() hang_new_bell(slice parent, slice body) impure method_id {
+() hang_new_bell(slice parent, slice body) impure {
   cell bell_code = check_ident_proof_get_code(parent, body);
   
   ;; skipping IdentProof
   throw_unless(402, body~load_uint(1));
   slice old_lbell_data = body~load_ref().begin_parse();
-  body~load_ref();
+  ;; body~load_ref();
   
   slice old_data = get_data().begin_parse();
+  old_data~skip_bits(32);
+  
   builder new_data = begin_cell();
   
   {--}  ;; Notifying timer root contract
@@ -162,13 +224,8 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   {--}  
   {--}  ;; getting old time
   {--}  int time = old_lbell_data.preload_uint(96) & ((1 << 32) - 1);
-  {--}  int rtime = old_data.preload_uint(96) & ((1 << 32) - 1);
-  {--}  if (body_cp~load_uint(1)) {
-  {--}    body_cp~load_msg_addr();
-  {--}    body_cp~skip_bits(64);
-  {--}    throw_if(403, rtime < body_cp.preload_uint(32));
-  {--}    rtime = body_cp.preload_uint(32);
-  {--}  }
+  {--}  int rtime = min(old_data.preload_uint(96) & ((1 << 32) - 1),
+  {--}                  body.slice_last(32).preload_uint(32));
   {--}  
   {--}  send_raw_message(begin_cell()
   {--}    .store_uint(0x10, 6)
@@ -180,6 +237,8 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   {--}    .store_uint(time, 32)
   {--}    .store_uint(rtime, 32)
   {--}    .end_cell(), 64);
+  
+  new_data~store_uint(rtime, 32);
   
   ;; copying BellDescriptor
   new_data~store_uint(old_data~load_uint(160), 160);
@@ -206,10 +265,12 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
 
 ;; TIM::BEL::retranslate_init (#fbffab22)
 () create_bell(slice parent, slice proof, int priority, int time, int value,
-               slice dest, cell fwd_body) impure inline_ref method_id {
+               slice dest, cell fwd_body) impure inline_ref {
   cell bell_code = check_ident_proof_get_code(parent, proof);
   
   slice d = get_data().begin_parse();
+  int next_wakeup = min(d~load_uint(32), time);
+  
   throw_if(100, priority > d~load_uint(64));
   throw_if(101, time < now());
   
@@ -322,14 +383,31 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
   
   if (~ is_null(new_children)) {
     slice d = get_data().begin_parse();
+    d~skip_bits(32);
     cell own_schedule_body = d~load_ref();
     d~load_ref();
     cell init_children = d~load_ref();
     set_data(
        begin_cell()
+      .store_uint(next_wakeup, 32)
       .store_slice(d)
       .store_ref(own_schedule_body)
       .store_ref(new_children)
+      .store_ref(init_children)
+      .end_cell()
+    );
+  } elseif (next_wakeup == time) {
+    slice d = get_data().begin_parse();
+    d~skip_bits(32);
+    cell own_schedule_body = d~load_ref();
+    cell cur_children = d~load_ref();
+    cell init_children = d~load_ref();
+    set_data(
+       begin_cell()
+      .store_uint(next_wakeup, 32)
+      .store_slice(d)
+      .store_ref(own_schedule_body)
+      .store_ref(cur_children)
       .store_ref(init_children)
       .end_cell()
     );
@@ -340,7 +418,7 @@ builder store_ident_proof(builder msg, cell bell_code) inline_ref {
 ;;   time, value, dest, body, core, child_left, child_right
 (int, int, slice, cell, slice, slice, slice) get_bell_data() method_id {
   slice d = get_data().begin_parse();
-  d~skip_bits(64);
+  d~skip_bits(96);
   
   cell body = d~load_ref();
   
