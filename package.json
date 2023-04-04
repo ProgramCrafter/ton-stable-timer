@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@tact-lang/compiler": "^1.0.0"
+  },
+  "scripts": {
+    "build": "tact --config ./tact.config.json"
+  }
+}
