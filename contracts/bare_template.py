@@ -29,7 +29,7 @@ class TimerContract(Contract):
     
     @impure
     def process_schedules(self) -> None:
-        if self.data.earliest_schedule > std.now():
+        if self.data.earliest > std.now():
             self.send_bounce()
             return
         
@@ -37,9 +37,11 @@ class TimerContract(Contract):
         while True:
             schedules, key, bell, ok = std.udict_delete_get_min(schedules, 256)
             if not ok:
+                self.data.earliest = 0
                 break
             bell = bell % Bell
             if bell.scheduled_at > std.now():
+                self.data.earliest = bell.scheduled_at
                 schedules = std.udict_set(schedules, 256, key, bell)
                 self.send_bounce()
                 break
