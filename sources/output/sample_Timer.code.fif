@@ -3,31 +3,39 @@ PROGRAM{
   DECLPROC __tact_load_address
   DECLPROC __tact_store_address
   DECLPROC __tact_not_null
-  DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
   DECLPROC __tact_store_bool
-  DECLPROC __tact_address_eq
+  DECLPROC __tact_dict_set_int_cell
   DECLPROC __gen_read_Deploy
   DECLPROC __gen_write_DeployOk
   DECLPROC __gen_writecell_DeployOk
-  DECLPROC __gen_read_Add
-  DECLPROC __gen_write_SampleTactContract
-  DECLPROC __gen_read_SampleTactContract
-  DECLPROC __gen_read_$init$SampleTactContract
-  DECLPROC $__gen_SampleTactContract_init
-  DECLPROC __gen_load_SampleTactContract
-  DECLPROC __gen_store_SampleTactContract
+  DECLPROC __gen_write_Bell
+  DECLPROC __gen_writecell_Bell
+  DECLPROC __gen_read_Bell
+  DECLPROC __gen_read_ScheduleRequest
+  DECLPROC __gen_write_Timer
+  DECLPROC __gen_read_Timer
+  DECLPROC __gen_Bell_from_tuple
+  DECLPROC __gen_read_$init$Timer
   DECLPROC $send
+  DECLPROC __gen_constructor_SendParameters$to_value_mode_bounce_body
+  DECLPROC $__gen_Timer_send_tick
+  DECLPROC $__gen_Timer_init
+  DECLPROC __gen_load_Timer
+  DECLPROC __gen_store_Timer
   DECLPROC __gen_constructor_SendParameters$bounce_to_value_mode_body
   DECLPROC $reply
-  DECLPROC $__gen_SampleTactContract_add
-  DECLPROC $__gen_SampleTactContract_counter
-  104984 DECLMETHOD $__gen_get_counter
-  DECLPROC $__gen_SampleTactContract_receive_Add
-  DECLPROC $__gen_SampleTactContract_receive_comment_c4f8d72312edfdef5b7bec7833bdbb162d1511bd78a912aed0f2637af65572ae
+  DECLPROC $__gen_Timer_earliest_schedule
+  92484 DECLMETHOD $__gen_get_earliest_schedule
+  DECLPROC $__gen_Timer_furthest_schedule
+  103237 DECLMETHOD $__gen_get_furthest_schedule
+  DECLPROC $__gen_Timer_schedule_fee
+  116846 DECLMETHOD $__gen_get_schedule_fee
+  DECLPROC $__gen_Timer_receive_ScheduleRequest
+  DECLPROC $__gen_Timer_receive_comment_7060e17c85989769a94a3b11ad372bda58bcb203411baa384b12c65562e912ab
   DECLPROC __gen_constructor_DeployOk$queryId
-  DECLPROC $__gen_SampleTactContract_receive_Deploy
-  DECLPROC __gen_router_SampleTactContract
+  DECLPROC $__gen_Timer_receive_Deploy
+  DECLPROC __gen_router_Timer
   DECLPROC recv_internal
   113617 DECLMETHOD supported_interfaces
   DECLPROC get_abi_ipfs
@@ -46,14 +54,11 @@ PROGRAM{
     DUP
     10 PUSHPOW2
     EQUAL
-    OVER
+    SWAP
     1279 PUSHINT
     EQUAL
     OR
     136 THROWIFNOT
-    10 PUSHPOW2
-    EQUAL
-    137 THROWIFNOT
   }>
   __tact_load_address PROCINLINE:<{
     LDMSGADDR
@@ -69,10 +74,6 @@ PROGRAM{
     ISNULL
     128 THROWIF
   }>
-  __tact_context_get PROCINLINE:<{
-    __tact_context GETGLOB
-    4 UNTUPLE
-  }>
   __tact_context_get_sender PROCINLINE:<{
     __tact_context_sender GETGLOB
   }>
@@ -80,8 +81,18 @@ PROGRAM{
     SWAP
     1 STI
   }>
-  __tact_address_eq PROCINLINE:<{
-    SDEQ
+  __tact_dict_set_int_cell PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      s1 s3 s3 XCHG3
+      DICTISETREF
+    }>
   }>
   __gen_read_Deploy PROCINLINE:<{
     32 LDU
@@ -104,67 +115,54 @@ PROGRAM{
     __gen_write_DeployOk INLINECALLDICT
     ENDC
   }>
-  __gen_read_Add PROCINLINE:<{
+  __gen_write_Bell PROCINLINE:<{
+    s0 s2 XCHG
+    32 STU
+    STREF
+  }>
+  __gen_writecell_Bell PROCINLINE:<{
+    NEWC
+    -ROT
+    __gen_write_Bell INLINECALLDICT
+    ENDC
+  }>
+  __gen_read_Bell PROCINLINE:<{
+    32 LDU
+    LDREF
+    -ROT
+  }>
+  __gen_read_ScheduleRequest PROCINLINE:<{
     32 LDU
     SWAP
-    2278832834 PUSHINT
+    3445486643 PUSHINT
     EQUAL
     129 THROWIFNOT
-    32 LDU
-    SWAP
+    __gen_read_Bell INLINECALLDICT
   }>
-  __gen_write_SampleTactContract PROCINLINE:<{
-    -ROT
+  __gen_write_Timer PROCINLINE:<{
+    s4 s3 XCHG2
     __tact_store_address INLINECALLDICT
     32 STU
+    s1 s2 XCHG
+    32 STU
+    STDICT
   }>
-  __gen_read_SampleTactContract PROCINLINE:<{
+  __gen_read_Timer PROCINLINE:<{
     __tact_load_address INLINECALLDICT
     SWAP
     32 LDU
-    -ROT
+    32 LDU
+    LDDICT
+    4 -ROLL
   }>
-  __gen_read_$init$SampleTactContract PROCINLINE:<{
+  __gen_Bell_from_tuple PROCINLINE:<{
+    2 UNTUPLE
+  }>
+  __gen_read_$init$Timer PROCINLINE:<{
     __tact_load_address INLINECALLDICT
-  }>
-  $__gen_SampleTactContract_init PROCREF:<{
-    0 PUSHINT
-  }>
-  __gen_load_SampleTactContract PROCINLINE:<{
-    c4 PUSH
-    CTOS
-    LDREF
     SWAP
-    __tact_context_sys SETGLOB
-    1 LDI
-    SWAP
-    IF:<{
-      __gen_read_SampleTactContract INLINECALLDICT
-      1 2 BLKDROP2
-    }>ELSE<{
-      MYADDR
-      11 PLDU
-      10 PUSHPOW2
-      EQUAL
-      137 THROWIFNOT
-      __gen_read_$init$SampleTactContract INLINECALLDICT
-      SWAP
-      ENDS
-      $__gen_SampleTactContract_init INLINECALLDICT
-    }>
-  }>
-  __gen_store_SampleTactContract PROCINLINE:<{
-    NEWC
-    __tact_context_sys GETGLOB
-    SWAP
-    STREF
-    TRUE
-    SWAP
-    1 STI
-    -ROT
-    __gen_write_SampleTactContract INLINECALLDICT
-    ENDC
-    c4 POP
+    __gen_read_Bell INLINECALLDICT
+    s2 s3 XCHG
   }>
   $send PROCREF:<{
     NEWC
@@ -265,6 +263,72 @@ PROGRAM{
     SWAP
     SENDRAWMSG
   }>
+  __gen_constructor_SendParameters$to_value_mode_bounce_body PROCINLINE:<{
+    s1 s4 XCHG
+    s3 s3 s0 XCHG3
+    PUSHNULL
+    PUSHNULL
+  }>
+  $__gen_Timer_send_tick PROCREF:<{
+    B{b5ee9c724101010100240000439fe000000000000000000000000000000000000000000000000000000000000000309e17f2f9} B>boc <s PUSHSLICE
+    300000000 PUSHINT
+    2 PUSHINT
+    TRUE
+    NEWC
+    B{b5ee9c724101010100020000004cacb9cd} B>boc <s PUSHSLICE
+    STSLICER
+    ENDC
+    __gen_constructor_SendParameters$to_value_mode_bounce_body INLINECALLDICT
+    $send INLINECALLDICT
+  }>
+  $__gen_Timer_init PROCREF:<{
+    PUSHNULL
+    s2 s2 PUSH2
+    257 PUSHINT
+    s5 PUSH
+    224 LSHIFT#
+    s5 PUSH
+    HASHCU
+    32 RSHIFT#
+    ADD
+    s6 s5 XCHG2
+    __gen_writecell_Bell INLINECALLDICT
+    s5 s4 s0 XCHG3
+    __tact_dict_set_int_cell INLINECALLDICT
+    $__gen_Timer_send_tick INLINECALLDICT
+  }>
+  __gen_load_Timer PROCINLINE:<{
+    c4 PUSH
+    CTOS
+    LDREF
+    SWAP
+    __tact_context_sys SETGLOB
+    1 LDI
+    SWAP
+    IF:<{
+      __gen_read_Timer INLINECALLDICT
+      1 4 BLKDROP2
+    }>ELSE<{
+      __gen_read_$init$Timer INLINECALLDICT
+      s0 s3 XCHG
+      ENDS
+      ROT
+      $__gen_Timer_init INLINECALLDICT
+    }>
+  }>
+  __gen_store_Timer PROCINLINE:<{
+    NEWC
+    __tact_context_sys GETGLOB
+    SWAP
+    STREF
+    TRUE
+    SWAP
+    1 STI
+    4 -ROLL
+    __gen_write_Timer INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
   __gen_constructor_SendParameters$bounce_to_value_mode_body PROCINLINE:<{
     PUSHNULL
     PUSHNULL
@@ -280,38 +344,45 @@ PROGRAM{
     __gen_constructor_SendParameters$bounce_to_value_mode_body INLINECALLDICT
     $send INLINECALLDICT
   }>
-  $__gen_SampleTactContract_add PROCREF:<{
-    __tact_context_get INLINECALLDICT
+  $__gen_Timer_earliest_schedule PROCREF:<{
+    s2 s3 XCHG
+    3 BLKDROP
+  }>
+  $__gen_get_earliest_schedule PROC:<{
+    __gen_load_Timer INLINECALLDICT
+    $__gen_Timer_earliest_schedule INLINECALLDICT
+  }>
+  $__gen_Timer_furthest_schedule PROCREF:<{
+    s1 s3 XCHG
+    3 BLKDROP
+  }>
+  $__gen_get_furthest_schedule PROC:<{
+    __gen_load_Timer INLINECALLDICT
+    $__gen_Timer_furthest_schedule INLINECALLDICT
+  }>
+  $__gen_Timer_schedule_fee PROCREF:<{
+    6 BLKDROP
+    200000000 PUSHINT
+  }>
+  $__gen_get_schedule_fee PROC:<{
+    __gen_Bell_from_tuple INLINECALLDICT
+    __gen_load_Timer INLINECALLDICT
+    2 4 BLKSWAP
+    $__gen_Timer_schedule_fee INLINECALLDICT
+  }>
+  $__gen_Timer_receive_ScheduleRequest PROCINLINE:<{
     2DROP
-    4429 PUSHINT
-    s2 POP
-    s4 PUSH
-    __tact_address_eq INLINECALLDICT
-    THROWANYIFNOT
-    ADD
   }>
-  $__gen_SampleTactContract_counter PROCREF:<{
-    NIP
-  }>
-  $__gen_get_counter PROC:<{
-    __gen_load_SampleTactContract INLINECALLDICT
-    $__gen_SampleTactContract_counter INLINECALLDICT
-  }>
-  $__gen_SampleTactContract_receive_Add PROCINLINE:<{
-    $__gen_SampleTactContract_add INLINECALLDICT
-  }>
-  $__gen_SampleTactContract_receive_comment_c4f8d72312edfdef5b7bec7833bdbb162d1511bd78a912aed0f2637af65572ae PROCINLINE:<{
-    1 PUSHINT
-    $__gen_SampleTactContract_add INLINECALLDICT
+  $__gen_Timer_receive_comment_7060e17c85989769a94a3b11ad372bda58bcb203411baa384b12c65562e912ab PROCINLINE:<{
   }>
   __gen_constructor_DeployOk$queryId PROCINLINE:<{
   }>
-  $__gen_SampleTactContract_receive_Deploy PROCINLINE:<{
+  $__gen_Timer_receive_Deploy PROCINLINE:<{
     __gen_constructor_DeployOk$queryId INLINECALLDICT
     __gen_writecell_DeployOk INLINECALLDICT
     $reply INLINECALLDICT
   }>
-  __gen_router_SampleTactContract PROCREF:<{
+  __gen_router_Timer PROCREF:<{
     c2 SAVE
     SAMEALTSAVE
     0 PUSHINT
@@ -329,13 +400,13 @@ PROGRAM{
       TRUE
     }>
     OVER
-    2278832834 PUSHINT
+    3445486643 PUSHINT
     EQUAL
     IFJMP:<{
       NIP
-      __gen_read_Add INLINECALLDICT
-      NIP
-      $__gen_SampleTactContract_receive_Add INLINECALLDICT
+      __gen_read_ScheduleRequest INLINECALLDICT
+      1 2 BLKDROP2
+      $__gen_Timer_receive_ScheduleRequest INLINECALLDICT
       TRUE
     }>
     OVER
@@ -345,17 +416,17 @@ PROGRAM{
       NIP
       __gen_read_Deploy INLINECALLDICT
       NIP
-      $__gen_SampleTactContract_receive_Deploy INLINECALLDICT
+      $__gen_Timer_receive_Deploy INLINECALLDICT
       TRUE
     }>
     SWAP
     0 EQINT
     IF:<{
       HASHSU
-      89092981215441470209245890604563109773385607357076622359718516871332286001838 PUSHINT
+      50830212609575282272971464678442248588405391722521691076843067535727279018667 PUSHINT
       EQUAL
       IFJMP:<{
-        $__gen_SampleTactContract_receive_comment_c4f8d72312edfdef5b7bec7833bdbb162d1511bd78a912aed0f2637af65572ae INLINECALLDICT
+        $__gen_Timer_receive_comment_7060e17c85989769a94a3b11ad372bda58bcb203411baa384b12c65562e912ab INLINECALLDICT
         TRUE
         RETALT
       }>
@@ -387,20 +458,20 @@ PROGRAM{
     __tact_context SETGLOB
     s0 s2 XCHG
     __tact_context_sender SETGLOB
-    __gen_load_SampleTactContract INLINECALLDICT
-    2SWAP
-    __gen_router_SampleTactContract INLINECALLDICT
+    __gen_load_Timer INLINECALLDICT
+    2 4 BLKSWAP
+    __gen_router_Timer INLINECALLDICT
     DROP
-    __gen_store_SampleTactContract INLINECALLDICT
+    __gen_store_Timer INLINECALLDICT
   }>
   supported_interfaces PROC:<{
     123515602279859691144772641439386770278 PUSHINT
     209801025412363888721030803524359905849 PUSHINT
     42980537499636128163026532310500881091 PUSHINT
-    209474421377847335869795010607481022628 PUSHINT
+    289074767680806556846472852687671582181 PUSHINT
   }>
   get_abi_ipfs PROC:<{
-    x{697066733a2f2f516d59656b5a736e6a64773477617265695a385a443433366e466341716e6747744b594e336a5163756a3947374e} PUSHSLICE
+    x{697066733a2f2f516d517973616861656b41446261507031547166753838375a4c674e5264674450346b37385766686e5a52756b33} PUSHSLICE
   }>
   lazy_deployment_completed PROC:<{
     c4 PUSH

@@ -1,9 +1,9 @@
 # TACT Compilation Report
-Contract: SampleTactContract
-BOC Size: 850 bytes
+Contract: Timer
+BOC Size: 1146 bytes
 
 # Types
-Total Types: 6
+Total Types: 7
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -25,14 +25,23 @@ Signature: `Deploy{queryId:uint64}`
 TLB: `deploy_ok#aff90f57 queryId:uint64 = DeployOk`
 Signature: `DeployOk{queryId:uint64}`
 
-## Add
-TLB: `add#87d43ac2 amount:uint32 = Add`
-Signature: `Add{amount:uint32}`
+## Bell
+TLB: `_ timestamp:uint32 msg:^cell = Bell`
+Signature: `Bell{timestamp:uint32,msg:^cell}`
+
+## ScheduleRequest
+TLB: `schedule_request#cd5df433 request:Bell{timestamp:uint32,msg:^cell} = ScheduleRequest`
+Signature: `ScheduleRequest{request:Bell{timestamp:uint32,msg:^cell}}`
 
 # Get Methods
-Total Get Methods: 1
+Total Get Methods: 3
 
-## counter
+## earliest_schedule
+
+## furthest_schedule
+
+## schedule_fee
+Argument: bell
 
 # Error Codes
 2: Stack undeflow
@@ -59,4 +68,3 @@ Total Get Methods: 1
 135: Code of a contract was not found
 136: Invalid address
 137: Masterchain support is not enabled for this contract
-4429: Invalid sender

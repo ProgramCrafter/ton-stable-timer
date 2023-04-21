@@ -1,0 +1,368 @@
+#pragma version =0.4.2;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+slice __tact_verify_address(slice address) inline {
+    throw_unless(136, address.slice_bits() == 267);
+    var h = address.preload_uint(11);
+    throw_unless(136, (h == 1024) | (h == 1279));
+
+    return address;
+}
+
+(slice, slice) __tact_load_address(slice cs) inline {
+    slice raw = cs~load_msg_addr();
+    return (cs, __tact_verify_address(raw));
+}
+
+builder __tact_store_address(builder b, slice address) inline {
+    return b.store_slice(__tact_verify_address(address));
+}
+
+forall X -> X __tact_not_null(X x) inline { throw_if(128, null?(x)); return x; }
+
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_context_sys;
+
+slice __tact_context_get_sender() inline { return __tact_context_sender; }
+
+builder __tact_store_bool(builder b, int v) inline {
+    b = b.store_int(v, 1);
+    return b;
+}
+
+(cell, ()) __tact_dict_set_int_cell(cell d, int kl, int k, cell v) inline {
+    if (null?(v)) {
+        var (r, ok) = idict_delete?(d, kl, k);
+        return (r, ());
+    } else {
+        return (idict_set_ref(d, kl, k, v), ());
+    }
+}
+
+int __tact_address_eq(slice a, slice b) inline {
+    return equal_slice_bits(a, b);
+}
+
+forall X0, X1 -> (X0, X1) __tact_tuple_destroy_2(tuple v) asm "2 UNTUPLE";
+
+(slice, ((int))) __gen_read_Deploy(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2490013878);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+builder __gen_write_DeployOk(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell __gen_writecell_DeployOk((int) v) inline {
+    return __gen_write_DeployOk(begin_cell(), v).end_cell();
+}
+
+builder __gen_write_Bell(builder build_0, (int, cell) v) inline {
+    var (v'timestamp, v'msg) = v;
+    build_0 = build_0.store_uint(v'timestamp, 32);
+    build_0 = build_0.store_ref(v'msg);
+    return build_0;
+}
+
+cell __gen_writecell_Bell((int, cell) v) inline {
+    return __gen_write_Bell(begin_cell(), v).end_cell();
+}
+
+(slice, ((int, cell))) __gen_read_Bell(slice sc_0) inline {
+    var v'timestamp = sc_0~load_uint(32);
+    var v'msg = sc_0~load_ref();
+    return (sc_0, (v'timestamp, v'msg));
+}
+
+(slice, (((int, cell)))) __gen_read_ScheduleRequest(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3445486643);
+    var v'request = sc_0~__gen_read_Bell();
+    return (sc_0, (v'request));
+}
+
+(slice, ((int))) __gen_read_Tick(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 4294967295);
+    var v'amount = sc_0~load_uint(32);
+    return (sc_0, (v'amount));
+}
+
+builder __gen_write_Timer(builder build_0, (slice, int, int, cell) v) inline {
+    var (v'deployer, v'earliest, v'furthest, v'schedules) = v;
+    build_0 = __tact_store_address(build_0, v'deployer);
+    build_0 = build_0.store_uint(v'earliest, 32);
+    build_0 = build_0.store_uint(v'furthest, 32);
+    build_0 = build_0.store_dict(v'schedules);
+    return build_0;
+}
+
+(slice, ((slice, int, int, cell))) __gen_read_Timer(slice sc_0) inline {
+    var v'deployer = sc_0~__tact_load_address();
+    var v'earliest = sc_0~load_uint(32);
+    var v'furthest = sc_0~load_uint(32);
+    var v'schedules = sc_0~load_dict();
+    return (sc_0, (v'deployer, v'earliest, v'furthest, v'schedules));
+}
+
+(int, cell) __gen_Bell_from_tuple(tuple v) inline {
+    var (int v'timestamp, cell v'msg) = __tact_tuple_destroy_2(v);
+    return (v'timestamp, v'msg);
+}
+
+(slice, ((slice, (int, cell)))) __gen_read_$init$Timer(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'init_bell = sc_0~__gen_read_Bell();
+    return (sc_0, (v'owner, v'init_bell));
+}
+
+() $send((int, slice, int, int, cell, cell, cell) $params) impure inline_ref {
+    var (($params'bounce, $params'to, $params'value, $params'mode, $params'body, $params'code, $params'data)) = $params;
+    builder $b = begin_cell();
+    $b = store_int($b, 1, 2);
+    $b = __tact_store_bool($b, $params'bounce);
+    $b = store_int($b, 0, 3);
+    $b = __tact_store_address($b, $params'to);
+    $b = store_coins($b, $params'value);
+    $b = store_int($b, 0, ((((1 + 4) + 4) + 64) + 32));
+    if (((~ null?($params'code)) | (~ null?($params'data)))) {
+        $b = __tact_store_bool($b, true);
+        builder $bc = begin_cell();
+        $bc = __tact_store_bool($bc, false);
+        $bc = __tact_store_bool($bc, false);
+        if ((~ null?($params'code))) {
+            $bc = __tact_store_bool($bc, true);
+            $bc = store_ref($bc, __tact_not_null($params'code));
+        } else {
+            $bc = __tact_store_bool($bc, false);
+        }
+        if ((~ null?($params'data))) {
+            $bc = __tact_store_bool($bc, true);
+            $bc = store_ref($bc, __tact_not_null($params'data));
+        } else {
+            $bc = __tact_store_bool($bc, false);
+        }
+        $bc = __tact_store_bool($bc, false);
+        $b = __tact_store_bool($b, true);
+        $b = store_ref($b, end_cell($bc));
+    } else {
+        $b = __tact_store_bool($b, false);
+    }
+    cell $body = $params'body;
+    if ((~ null?($body))) {
+        $b = __tact_store_bool($b, true);
+        $b = store_ref($b, __tact_not_null($body));
+    } else {
+        $b = __tact_store_bool($b, false);
+    }
+    cell $c = end_cell($b);
+    send_raw_message($c, $params'mode);
+}
+
+((int, slice, int, int, cell, cell, cell)) __gen_constructor_SendParameters$to_value_mode_bounce_body(slice to, int value, int mode, int bounce, cell body) inline {
+    return (bounce, to, value, mode, body, null(), null());
+}
+
+;; ;; Ef8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASA1
+slice __gen_slice_address_e2cda6bd7a7fb9d87dff4cf59dec4a5cec097237ed592ff5bf649f0381a5b187() asm "B{b5ee9c724101010100240000439fe000000000000000000000000000000000000000000000000000000000000000309e17f2f9} B>boc <s PUSHSLICE";
+
+;; ;; Cell lqKW0iTyhcZ77pPDD4owkVfw2qNdxbh+QQt4YwoJz8c=
+slice __gen_slice_cell_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7() asm "B{b5ee9c724101010100020000004cacb9cd} B>boc <s PUSHSLICE";
+
+((slice, int, int, cell), ()) $__gen_Timer_send_tick((slice, int, int, cell) $self) impure inline_ref {
+    var (($self'deployer, $self'earliest, $self'furthest, $self'schedules)) = $self;
+    $send(__gen_constructor_SendParameters$to_value_mode_bounce_body(__gen_slice_address_e2cda6bd7a7fb9d87dff4cf59dec4a5cec097237ed592ff5bf649f0381a5b187(), 300000000, 2, true, begin_cell().store_slice(__gen_slice_cell_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7()).end_cell()));
+    return (($self'deployer, $self'earliest, $self'furthest, $self'schedules), ());
+}
+
+(slice, int, int, cell) $__gen_Timer_init(slice $owner, (int, cell) $init_bell) impure inline_ref {
+    var (($init_bell'timestamp, $init_bell'msg)) = $init_bell;
+    var (($self'deployer, $self'earliest, $self'furthest, $self'schedules)) = (null(), null(), null(), null());
+    $self'deployer = $owner;
+    $self'earliest = $init_bell'timestamp;
+    $self'furthest = $init_bell'timestamp;
+    $self'schedules~__tact_dict_set_int_cell(257, (($init_bell'timestamp << (256 - 32)) + (cell_hash($init_bell'msg) >> 32)), __gen_writecell_Bell(($init_bell'timestamp, $init_bell'msg)));
+    ($self'deployer, $self'earliest, $self'furthest, $self'schedules)~$__gen_Timer_send_tick();
+    return ($self'deployer, $self'earliest, $self'furthest, $self'schedules);
+}
+
+(slice, int, int, cell) __gen_load_Timer() impure inline {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~__gen_read_Timer();
+    } else {
+        (slice owner, (int, cell) init_bell) = $sc~__gen_read_$init$Timer();
+        $sc.end_parse();
+        return $__gen_Timer_init(owner, init_bell);
+    }
+}
+
+() __gen_store_Timer((slice, int, int, cell) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = __gen_write_Timer(b, v);
+    set_data(b.end_cell());
+}
+
+((int, slice, int, int, cell, cell, cell)) __gen_constructor_SendParameters$bounce_to_value_mode_body(int bounce, slice to, int value, int mode, cell body) inline {
+    return (bounce, to, value, mode, body, null(), null());
+}
+
+() $reply(cell $body) impure inline_ref {
+    $send(__gen_constructor_SendParameters$bounce_to_value_mode_body(true, __tact_context_get_sender(), 0, (64 + 2), $body));
+}
+
+int $__gen_Timer_earliest_schedule((slice, int, int, cell) $self) impure inline_ref {
+    var (($self'deployer, $self'earliest, $self'furthest, $self'schedules)) = $self;
+    return $self'earliest;
+}
+
+_ $__gen_get_earliest_schedule() method_id(92484) {
+    var self = __gen_load_Timer();
+    var res = $__gen_Timer_earliest_schedule(self);
+    return res;
+}
+
+int $__gen_Timer_furthest_schedule((slice, int, int, cell) $self) impure inline_ref {
+    var (($self'deployer, $self'earliest, $self'furthest, $self'schedules)) = $self;
+    return $self'furthest;
+}
+
+_ $__gen_get_furthest_schedule() method_id(103237) {
+    var self = __gen_load_Timer();
+    var res = $__gen_Timer_furthest_schedule(self);
+    return res;
+}
+
+int $__gen_Timer_schedule_fee((slice, int, int, cell) $self, (int, cell) $bell) impure inline_ref {
+    var (($self'deployer, $self'earliest, $self'furthest, $self'schedules)) = $self;
+    var (($bell'timestamp, $bell'msg)) = $bell;
+    int $fee = 200000000;
+    cell $storage_info = __tact_not_null(config_param(18));
+    return $fee;
+}
+
+_ $__gen_get_schedule_fee(tuple $$bell) method_id(116846) {
+    (int, cell) $bell = __gen_Bell_from_tuple($$bell);
+    var self = __gen_load_Timer();
+    var res = $__gen_Timer_schedule_fee(self, $bell);
+    return res;
+}
+
+(((slice, int, int, cell)), ()) $__gen_Timer_receive_ScheduleRequest((slice, int, int, cell) $self, ((int, cell)) $msg) impure inline {
+    var ($self'deployer, $self'earliest, $self'furthest, $self'schedules) = $self;
+    var (($msg'request'timestamp, $msg'request'msg)) = $msg;
+    return (($self'deployer, $self'earliest, $self'furthest, $self'schedules), ());
+}
+
+(((slice, int, int, cell)), ()) $__gen_Timer_receive_Tick((slice, int, int, cell) $self, (int) $_) impure inline {
+    var ($self'deployer, $self'earliest, $self'furthest, $self'schedules) = $self;
+    var ($_'amount) = $_;
+    throw_unless(21292, __tact_address_eq(__tact_context_get_sender(), __gen_slice_address_e2cda6bd7a7fb9d87dff4cf59dec4a5cec097237ed592ff5bf649f0381a5b187()));
+    if (($self'earliest <= now())) {
+        while (true) {
+        }
+    }
+    if (($self'furthest > now())) {
+        ($self'deployer, $self'earliest, $self'furthest, $self'schedules)~$__gen_Timer_send_tick();
+    } else {
+        $send(__gen_constructor_SendParameters$to_value_mode_bounce_body($self'deployer, 0, 160, false, begin_cell().store_slice(__gen_slice_cell_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7()).end_cell()));
+    }
+    return (($self'deployer, $self'earliest, $self'furthest, $self'schedules), ());
+}
+
+((int)) __gen_constructor_DeployOk$queryId(int queryId) inline {
+    return (queryId);
+}
+
+(((slice, int, int, cell)), ()) $__gen_Timer_receive_Deploy((slice, int, int, cell) $self, (int) $deploy) impure inline {
+    var ($self'deployer, $self'earliest, $self'furthest, $self'schedules) = $self;
+    var ($deploy'queryId) = $deploy;
+    $reply(__gen_writecell_DeployOk(__gen_constructor_DeployOk$queryId($deploy'queryId)));
+    return (($self'deployer, $self'earliest, $self'furthest, $self'schedules), ());
+}
+
+((slice, int, int, cell), int) __gen_router_Timer((slice, int, int, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Receive ScheduleRequest message
+    if (op == 3445486643) {
+        var msg = in_msg~__gen_read_ScheduleRequest();
+        self~$__gen_Timer_receive_ScheduleRequest(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Tick message
+    if (op == 4294967295) {
+        var msg = in_msg~__gen_read_Tick();
+        self~$__gen_Timer_receive_Tick(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~__gen_read_Deploy();
+        self~$__gen_Timer_receive_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = ((msg_flags & 1) == 1 ? true : false);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = __gen_load_Timer();
+    
+    ;; Handle operation
+    int handled = self~__gen_router_Timer(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(handled, 130);
+    
+    ;; Persist state
+    __gen_store_Timer(self);
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.chain.any.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() {
+    return "ipfs://QmUduHtv5zmA1owKd1ihek9Xos9hegL8KFPEVYmBcTXpE9";
+}
+
+_ lazy_deployment_completed() {
+    return get_data().begin_parse().load_int(1);
+}

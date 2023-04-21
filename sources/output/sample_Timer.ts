@@ -271,72 +271,119 @@ function dictValueParserDeployOk(): DictionaryValue<DeployOk> {
     }
 }
 
-export type Add = {
-    $$type: 'Add';
-    amount: bigint;
+export type Bell = {
+    $$type: 'Bell';
+    timestamp: bigint;
+    msg: Cell;
 }
 
-export function storeAdd(src: Add) {
+export function storeBell(src: Bell) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(2278832834, 32);
-        b_0.storeUint(src.amount, 32);
+        b_0.storeUint(src.timestamp, 32);
+        b_0.storeRef(src.msg);
     };
 }
 
-export function loadAdd(slice: Slice) {
+export function loadBell(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2278832834) { throw Error('Invalid prefix'); }
-    let _amount = sc_0.loadUintBig(32);
-    return { $$type: 'Add' as const, amount: _amount };
+    let _timestamp = sc_0.loadUintBig(32);
+    let _msg = sc_0.loadRef();
+    return { $$type: 'Bell' as const, timestamp: _timestamp, msg: _msg };
 }
 
-function loadTupleAdd(source: TupleReader) {
-    let _amount = source.readBigNumber();
-    return { $$type: 'Add' as const, amount: _amount };
+function loadTupleBell(source: TupleReader) {
+    let _timestamp = source.readBigNumber();
+    let _msg = source.readCell();
+    return { $$type: 'Bell' as const, timestamp: _timestamp, msg: _msg };
 }
 
-function storeTupleAdd(source: Add) {
+function storeTupleBell(source: Bell) {
     let builder = new TupleBuilder();
-    builder.writeNumber(source.amount);
+    builder.writeNumber(source.timestamp);
+    builder.writeCell(source.msg);
     return builder.build();
 }
 
-function dictValueParserAdd(): DictionaryValue<Add> {
+function dictValueParserBell(): DictionaryValue<Bell> {
     return {
         serialize: (src, buidler) => {
-            buidler.storeRef(beginCell().store(storeAdd(src)).endCell());
+            buidler.storeRef(beginCell().store(storeBell(src)).endCell());
         },
         parse: (src) => {
-            return loadAdd(src.loadRef().beginParse());
+            return loadBell(src.loadRef().beginParse());
         }
     }
 }
 
- type SampleTactContract_init_args = {
-    $$type: 'SampleTactContract_init_args';
-    owner: Address;
+export type ScheduleRequest = {
+    $$type: 'ScheduleRequest';
+    request: Bell;
 }
 
-function initSampleTactContract_init_args(src: SampleTactContract_init_args) {
+export function storeScheduleRequest(src: ScheduleRequest) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeAddress(src.owner);
+        b_0.storeUint(3445486643, 32);
+        b_0.store(storeBell(src.request));
     };
 }
 
-async function SampleTactContract_init(owner: Address) {
-    const __code = Cell.fromBase64('te6ccgECEAEAA0YAART/APSkE/S88sgLAQIBYgIDAX7QAdDTAwFxsMABkX+RcOIB+kABINdJgQELuvLgiCDXCwoggwm6IYEE/7qx8uCIgwm68uCJVFBTA28E+GEC+GIEAgFqDA0D4O1E0NQB+GPSAAGOKvpAASDXSYEBC7ry4Igg1wsKIIMJuiGBBP+6sfLgiIMJuvLgiQHTH1lsEo6z+CjXCwqDCbry4In6QAEg10mBAQu68uCIINcLCiCDCbohgQT/urHy4IiDCbry4IkB0ds84lrbPDAOBQYD2O2i7ftwIddJwh+VMCDXCx/eApJbf+AhghCH1DrCuo6VMdMfAYIQh9Q6wrry4IHTHwEx2zx/4CGCEJRqmLa6jqMx0x8BghCUapi2uvLggdM/ATHIAYIQr/kPV1jLH8s/yds8f+ABwACRMOMNcAsHCABmyPhDAcx/AcoAWVkg10mBAQu68uCIINcLCiCDCbohgQT/urHy4IiDCbry4InPFssfye1UARp/+EJwWAOAQgFtbds8CQFc+QGC8MT41yMS7f3vW3vseDO9uxYtFRG9eKkSrtDyY3r2VXKuuo6Gcds8f9sx4AsBzshxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCDCbohgQT/urHy4IiDCbry4InPFlAD+gJwAcpoI26zJW6zsZczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wAKAJh/AcoAyHABygBwAcoAJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4iRus51/AcoABCBu8tCAUATMljQDcAHKAOJwAcoAAn8BygACyVjMAB74QW8kW4ERTTIkxwXy9KAC4bdDHaiaGoA/DHpAADHFX0gAJBrpMCAhd15cEQQa4WFEEGE3RDAgn/dWPlwREGE3XlwRIDpj6y2CUdZ/BRrhYVBhN15cET9IACQa6TAgIXdeXBEEGuFhRBBhN0QwIJ/3Vj5cERBhN15cESA6O2ecW2eQDg8Albd6ME4LnYerpZXPY9CdhzrJUKNs0E4TusalpWyPlmRadeW/vixHME4ECrgDcAzscpnLB1XI5LZYcE4TsunLVmnZbmdB0s2yjN0UkAACcAACMQ==');
-    const __system = Cell.fromBase64('te6cckECEgEAA1AAAQHAAQEFoebTAgEU/wD0pBP0vPLICwMCAWIIBAIBagYFAJW3ejBOC52Hq6WVz2PQnYc6yVCjbNBOE7rGpaVsj5ZkWnXlv74sRzBOBAq4A3AM7HKZywdVyOS2WHBOE7Lpy1Zp2W5nQdLNsozdFJAC4bdDHaiaGoA/DHpAADHFX0gAJBrpMCAhd15cEQQa4WFEEGE3RDAgn/dWPlwREGE3XlwRIDpj6y2CUdZ/BRrhYVBhN15cET9IACQa6TAgIXdeXBEEGuFhRBBhN0QwIJ/3Vj5cERBhN15cESA6O2ecW2eQEQcAAjEBftAB0NMDAXGwwAGRf5Fw4gH6QAEg10mBAQu68uCIINcLCiCDCbohgQT/urHy4IiDCbry4IlUUFMDbwT4YQL4YgkD4O1E0NQB+GPSAAGOKvpAASDXSYEBC7ry4Igg1wsKIIMJuiGBBP+6sfLgiIMJuvLgiQHTH1lsEo6z+CjXCwqDCbry4In6QAEg10mBAQu68uCIINcLCiCDCbohgQT/urHy4IiDCbry4IkB0ds84lrbPDARCwoAZsj4QwHMfwHKAFlZINdJgQELuvLgiCDXCwoggwm6IYEE/7qx8uCIgwm68uCJzxbLH8ntVAPY7aLt+3Ah10nCH5UwINcLH94Cklt/4CGCEIfUOsK6jpUx0x8BghCH1DrCuvLggdMfATHbPH/gIYIQlGqYtrqOozHTHwGCEJRqmLa68uCB0z8BMcgBghCv+Q9XWMsfyz/J2zx/4AHAAJEw4w1wEA0MAVz5AYLwxPjXIxLt/e9be+x4M727Fi0VEb14qRKu0PJjevZVcq66joZx2zx/2zHgEAEaf/hCcFgDgEIBbW3bPA4BzshxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCDCbohgQT/urHy4IiDCbry4InPFlAD+gJwAcpoI26zJW6zsZczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wAPAJh/AcoAyHABygBwAcoAJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4iRus51/AcoABCBu8tCAUATMljQDcAHKAOJwAcoAAn8BygACyVjMAB74QW8kW4ERTTIkxwXy9KAAAnCyhfqf');
+export function loadScheduleRequest(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3445486643) { throw Error('Invalid prefix'); }
+    let _request = loadBell(sc_0);
+    return { $$type: 'ScheduleRequest' as const, request: _request };
+}
+
+function loadTupleScheduleRequest(source: TupleReader) {
+    const _request = loadTupleBell(source.readTuple());
+    return { $$type: 'ScheduleRequest' as const, request: _request };
+}
+
+function storeTupleScheduleRequest(source: ScheduleRequest) {
+    let builder = new TupleBuilder();
+    builder.writeTuple(storeTupleBell(source.request));
+    return builder.build();
+}
+
+function dictValueParserScheduleRequest(): DictionaryValue<ScheduleRequest> {
+    return {
+        serialize: (src, buidler) => {
+            buidler.storeRef(beginCell().store(storeScheduleRequest(src)).endCell());
+        },
+        parse: (src) => {
+            return loadScheduleRequest(src.loadRef().beginParse());
+        }
+    }
+}
+
+ type Timer_init_args = {
+    $$type: 'Timer_init_args';
+    owner: Address;
+    init_bell: Bell;
+}
+
+function initTimer_init_args(src: Timer_init_args) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeAddress(src.owner);
+        b_0.store(storeBell(src.init_bell));
+    };
+}
+
+async function Timer_init(owner: Address, init_bell: Bell) {
+    const __code = Cell.fromBase64('te6ccgECFgEABG4AART/APSkE/S88sgLAQIBYgIDAXLQAdDTAwFxsMABkX+RcOIB+kABINdJgQELuvLgiCDXCwoggwm6AYEE/7qx8uCIVFBTA28E+GEC+GIEAgEgCQoDzu1E0NQB+GPSAAGOKfpAASDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiAHTH9Mf9ARVMGwUjqr6QAEg10mBAQu68uCIINcLCiCDCboBgQT/urHy4IgB0x/UWRAjA9FY2zziVRPbPDARBQYC2u2i7ftwIddJwh+VMCDXCx/eApJbf+AhghDNXfQzuo4WMdMfAYIQzV30M7ry4IHTH9RZbBJbf+AhghCUapi2uo6jMdMfAYIQlGqYtrry4IHTPwExyAGCEK/5D1dYyx/LP8nbPH/gAcAAkTDjDXAHCABoyPhDAcx/AcoAVTBQQyDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiM8Wyx8Syx/0AMntVAEaf/hCcFgDgEIBbW3bPBQAVPkBgvBwYOF8hZiXaalKOxGtNyvaWLyyA0EbqjhLEsZVYukSq7qTf9sx4ALNv0onaiaGoA/DHpAADHFP0gAJBrpMCAhd15cEQQa4WFEEGE3QDAgn/dWPlwRADpj+mP+gIqmDYKR1V9IACQa6TAgIXdeXBEEGuFhRBBhN0AwIJ/3Vj5cEQA6Y/qLIgRgeisbZ5xbZ5BELAgEgDA0ACBAjXwMCASAODwLVuIbm8i7UTQ1AH4Y9IAAY4p+kABINdJgQELuvLgiCDXCwoggwm6AYEE/7qx8uCIAdMf0x/0BFUwbBSOqvpAASDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiAHTH9RZECMD0VjbPOJVE9s8gREgLNtmi9qJoagD8MekAAMcU/SAAkGukwICF3XlwRBBrhYUQQYTdAMCCf91Y+XBEAOmP6Y/6AiqYNgpHVX0gAJBrpMCAhd15cEQQa4WFEEGE3QDAgn/dWPlwRADpj+osiBGB6KxtnnFtnkBEQAJW3ejBOC52Hq6WVz2PQnYc6yVCjbNBOE7rGpaVsj5ZkWnXlv74sRzBOBAq4A3AM7HKZywdVyOS2WHBOGy84zdGHN4T1ltQmJrcbvLAABhNfAwFUbVMigQEBJarfJfkAqx+gUGXIWQLLH8zJRUAgbpUwWfRaMJRBM/QV4ts8EwAQXwaCEAvrwgABco0IZ/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADIIQEeGjAHJ/yIsIzxbJFEMwbW3bPBQBwshxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCDCboBgQT/urHy4IjPFlAD+gJwAcpoI26zJW6zsZczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wAVAJh/AcoAyHABygBwAcoAJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4iRus51/AcoABCBu8tCAUATMljQDcAHKAOJwAcoAAn8BygACyVjM');
+    const __system = Cell.fromBase64('te6cckECGAEABHgAAQHAAQEFoItDAgEU/wD0pBP0vPLICwMCAWIOBAIBIAwFAgEgCAYC1biG5vIu1E0NQB+GPSAAGOKfpAASDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiAHTH9Mf9ARVMGwUjqr6QAEg10mBAQu68uCIINcLCiCDCboBgQT/urHy4IgB0x/UWRAjA9FY2zziVRPbPIFAcAEF8GghAL68IAAgEgCgkAlbd6ME4LnYerpZXPY9CdhzrJUKNs0E4TusalpWyPlmRadeW/vixHME4ECrgDcAzscpnLB1XI5LZYcE4bLzjN0Yc3hPWW1CYmtxu8sALNtmi9qJoagD8MekAAMcU/SAAkGukwICF3XlwRBBrhYUQQYTdAMCCf91Y+XBEAOmP6Y/6AiqYNgpHVX0gAJBrpMCAhd15cEQQa4WFEEGE3QDAgn/dWPlwRADpj+osiBGB6KxtnnFtnkBQLAAYTXwMCzb9KJ2omhqAPwx6QAAxxT9IACQa6TAgIXdeXBEEGuFhRBBhN0AwIJ/3Vj5cEQA6Y/pj/oCKpg2CkdVfSAAkGukwICF3XlwRBBrhYUQQYTdAMCCf91Y+XBEAOmP6iyIEYHorG2ecW2eQUDQAIECNfAwFy0AHQ0wMBcbDAAZF/kXDiAfpAASDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiFRQUwNvBPhhAvhiDwPO7UTQ1AH4Y9IAAY4p+kABINdJgQELuvLgiCDXCwoggwm6AYEE/7qx8uCIAdMf0x/0BFUwbBSOqvpAASDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiAHTH9RZECMD0VjbPOJVE9s8MBQREABoyPhDAcx/AcoAVTBQQyDXSYEBC7ry4Igg1wsKIIMJugGBBP+6sfLgiM8Wyx8Syx/0AMntVALa7aLt+3Ah10nCH5UwINcLH94Cklt/4CGCEM1d9DO6jhYx0x8BghDNXfQzuvLggdMf1FlsElt/4CGCEJRqmLa6jqMx0x8BghCUapi2uvLggdM/ATHIAYIQr/kPV1jLH8s/yds8f+ABwACRMOMNcBMSAFT5AYLwcGDhfIWYl2mpSjsRrTcr2li8sgNBG6o4SxLGVWLpEqu6k3/bMeABGn/4QnBYA4BCAW1t2zwWAVRtUyKBAQElqt8l+QCrH6BQZchZAssfzMlFQCBulTBZ9FowlEEz9BXi2zwVAXKNCGf4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAyCEBHhowByf8iLCM8WyRRDMG1t2zwWAcLIcQHKAVAHAcoAcAHKAlAFINdJgQELuvLgiCDXCwoggwm6AYEE/7qx8uCIzxZQA/oCcAHKaCNusyVus7GXMzMBcAHKAOMNIW6znH8BygABIG7y0IABzJUxcAHKAOLJAfsAFwCYfwHKAMhwAcoAcAHKACRus51/AcoABCBu8tCAUATMljQDcAHKAOIkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDicAHKAAJ/AcoAAslYzGBQLUM=');
     let builder = beginCell();
     builder.storeRef(__system);
     builder.storeUint(0, 1);
-    initSampleTactContract_init_args({ $$type: 'SampleTactContract_init_args', owner })(builder);
+    initTimer_init_args({ $$type: 'Timer_init_args', owner, init_bell })(builder);
     const __data = builder.endCell();
     return { code: __code, data: __data };
 }
 
-const SampleTactContract_errors: { [key: number]: { message: string } } = {
+const Timer_errors: { [key: number]: { message: string } } = {
     2: { message: `Stack undeflow` },
     3: { message: `Stack overflow` },
     4: { message: `Integer overflow` },
@@ -361,29 +408,28 @@ const SampleTactContract_errors: { [key: number]: { message: string } } = {
     135: { message: `Code of a contract was not found` },
     136: { message: `Invalid address` },
     137: { message: `Masterchain support is not enabled for this contract` },
-    4429: { message: `Invalid sender` },
 }
 
-export class SampleTactContract implements Contract {
+export class Timer implements Contract {
     
-    static async init(owner: Address) {
-        return await SampleTactContract_init(owner);
+    static async init(owner: Address, init_bell: Bell) {
+        return await Timer_init(owner, init_bell);
     }
     
-    static async fromInit(owner: Address) {
-        const init = await SampleTactContract_init(owner);
+    static async fromInit(owner: Address, init_bell: Bell) {
+        const init = await Timer_init(owner, init_bell);
         const address = contractAddress(0, init);
-        return new SampleTactContract(address, init);
+        return new Timer(address, init);
     }
     
     static fromAddress(address: Address) {
-        return new SampleTactContract(address);
+        return new Timer(address);
     }
     
     readonly address: Address; 
     readonly init?: { code: Cell, data: Cell };
     readonly abi: ContractABI = {
-        errors: SampleTactContract_errors
+        errors: Timer_errors
     };
     
     private constructor(address: Address, init?: { code: Cell, data: Cell }) {
@@ -391,13 +437,13 @@ export class SampleTactContract implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Add | 'increment' | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: ScheduleRequest | 'Tick' | Deploy) {
         
         let body: Cell | null = null;
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Add') {
-            body = beginCell().store(storeAdd(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ScheduleRequest') {
+            body = beginCell().store(storeScheduleRequest(message)).endCell();
         }
-        if (message === 'increment') {
+        if (message === 'Tick') {
             body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
@@ -409,9 +455,24 @@ export class SampleTactContract implements Contract {
         
     }
     
-    async getCounter(provider: ContractProvider) {
+    async getEarliestSchedule(provider: ContractProvider) {
         let builder = new TupleBuilder();
-        let source = (await provider.get('counter', builder.build())).stack;
+        let source = (await provider.get('earliest_schedule', builder.build())).stack;
+        let result = source.readBigNumber();
+        return result;
+    }
+    
+    async getFurthestSchedule(provider: ContractProvider) {
+        let builder = new TupleBuilder();
+        let source = (await provider.get('furthest_schedule', builder.build())).stack;
+        let result = source.readBigNumber();
+        return result;
+    }
+    
+    async getScheduleFee(provider: ContractProvider, bell: Bell) {
+        let builder = new TupleBuilder();
+        builder.writeTuple(storeTupleBell(bell));
+        let source = (await provider.get('schedule_fee', builder.build())).stack;
         let result = source.readBigNumber();
         return result;
     }
