@@ -1,4 +1,0 @@
-contract-timer:
-  func:
-    - func/timer.fc
-  
