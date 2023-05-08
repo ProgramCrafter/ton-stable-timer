@@ -1,15 +1,4 @@
-multibell-timer:
+contract-timer:
   func:
     - func/timer.fc
-  tests:
-    - tests/tests-timer.fc
-
-multibell-bell:
-  func:
-    - func/bell.fc
-  tests:
-    - tests/tests-bell.fc
-
-multibell-forwarder:
-  func:
-    - func/forwarder.fc
+  

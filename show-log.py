@@ -51,10 +51,6 @@ with open(__file__ + '/../toncli.log', 'r', encoding='utf-8') as f:
       line = line.replace(f'code: [{code}]', f'code: [{code} | {desc}]')
       line = line.replace(f'code: [{c2}]', f'code: [{c2} | CALLEE_{desc}]')
     
-    if 'apiaries_tick_1' in line and 'tick_1]' not in line: continue
-    if 'apiaries_tick_2' in line and 'tick_2]' not in line: continue
-    if 'apiaries_tick_3' in line and 'tick_3]' not in line: continue
-    
     if line.strip() == '#DEBUG#: s0 = 4445':
       debug_line_tostr = True
       continue

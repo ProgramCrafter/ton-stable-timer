@@ -1,173 +1,197 @@
 ;; Timer smart-contract for scheduling messages.
-;; (c) ProgramCrafter, 2022
+;; (c) ProgramCrafter, 2022-2023
 
-#include "func/utils-timer.fc";
 
-() good_randomize(cell msg) impure asm "HASHCU ADDRAND BALANCE UNPAIR DROP NOW XOR ADDRAND LTIME ADDRAND";
+const int milliton = 1000000;
+const int ton      = 1000 * milliton;
+const int MOD      = 998244353;
 
-;; TIM::TIM::main
-() recv_internal(int coins, cell in_msg_full, slice in_msg) impure {
-  {------------------------------------------------------}
-  {-    Extracting source address from CommonMsgInfo    -}
-  {------------------------------------------------------}
-  
-  good_randomize(in_msg_full);
-  
-  slice in_msg_full = in_msg_full.begin_parse();
-  int bounced = in_msg_full~load_uint(4);  ;; int_msg_info$0, ihr_disabled, bounce, bounced
-  
-  slice src = in_msg_full~load_msg_addr();
-  
-  {----------------------------------------------------}
-  {-    Messages from self for processing schedule    -}
-  {-    bounced from masterchain to slow down timer   -}
-  {-    [FASTPATH]                                    -}
-  {----------------------------------------------------}
-  if (equal_slices(src, unused_masterchain_address())) {
-    TIM::process_schedule();
-    
-    return ();
-  }
-  
-  
-  if (bounced & 1) {
-    return ();
-  }
-  
-  {----------------------------------------------------------}
-  {-    No message present - considering this a donation    -}
-  {----------------------------------------------------------}
-  if (in_msg.slice_bits() < 32) {
-    return ();
-  }
-  
-  int opcode = in_msg~load_uint(32);
-  
-  {-------------------------------}
-  {-    Next bell time update    -}
-  {-------------------------------}
-  if (opcode == op::update_next_wakeup) {
-    in_msg = TIM::check_ident_proof(src, in_msg);
-    
-    slice old_timer_data = get_data().begin_parse();
-    
-    throw_if(120, old_timer_data~load_uint(32) != in_msg.preload_uint(32));
-    throw_if(121, old_timer_data~load_uint(1) == 0);
-    
-    int next_time = in_msg~load_uint(32);
-    
-    builder new_timer_data = begin_cell().store_uint(next_time, 32);
-    
-    slice root_addr = old_timer_data~load_msg_addr();
-    throw_if(122, equal_slices(root_addr, src));
-    new_timer_data~store_slice(root_addr);
-    new_timer_data~store_ref(old_timer_data~load_ref());
-    new_timer_data~store_slice(old_timer_data);
-    set_data(new_timer_data.end_cell());
-    
-    TIM::send_schedule_loop_msg();
-    
-    return ();
-  }
-  if (opcode == op::root_update_next_wakeup) {
-    in_msg = TIM::check_ident_proof(src, in_msg);
-    
-    slice old_timer_data = get_data().begin_parse();
-    old_timer_data~skip_bits(32);
-    throw_unless(126, old_timer_data~load_uint(1));
-    
-    slice root_addr = old_timer_data~load_msg_addr();
-    throw_unless(127, equal_slices(root_addr, src));
-    
-    slice in_msg_copy = in_msg;
-    int next_time = 0xFFFFFFFF;
-    if (in_msg_copy~load_uint(1)) {
-      in_msg_copy~load_msg_addr();
-      in_msg_copy~skip_bits(64);
-      
-      next_time = in_msg_copy~load_uint(32);
-      ;; ^^^ root of right bells subtree isn't leftmost node in general
-      
-      TIM::send_schedule_loop_msg();
-    }
-    
-    builder new_timer_data = begin_cell()
-      .store_uint(next_time, 32)
-      .store_slice(in_msg)
-      .store_ref(old_timer_data~load_ref());
-    
-    set_data(new_timer_data.end_cell());
-    
-    return ();
-  }
-  
-  {------------------------------------------------------}
-  {-    Owner can take TON obtained by this contract    -}
-  {------------------------------------------------------}
-  if (equal_slices(src, owner_address())) {
-    int request_nton = (opcode << 32) + in_msg~load_uint(32);
-    
-    if (request_nton == 1) {
-      {--------------------------------------------------------------------}
-      {-    Too small values are not sensical so using them as opcodes    -}
-      {--------------------------------------------------------------------}
-      TIM::send_schedule_loop_msg();
-      return ();
-    }
-    
-    [int balance, _] = get_balance();
-    int time_to_unix_epoch_end = 4294967295 - now();
-    
-    ;; Cost of maintaining contract is equal to 13 TON/h = 3'611'111 nTON/s.
-    ;; This timer is able to work up to end of the Unix epoch (2**32 seconds - year 2106).
-    ;; Assuring that there will be always enough money to work.
-    
-    ;; 10M TON will be sufficient to provide service from 2022 to 2106 years.
-    ;; All excess money can be taken by me, author of the timer, for other purposes.
-    
-    ;; [TODO]: review this. Restriction was removed during testing.
-    ;; throw_if(105, balance - request_nton < 3611111 * time_to_unix_epoch_end);
-    
-    send_raw_message(begin_cell()
-      .store_uint(0x18, 6)
-      .store_slice(owner_address())
-      .store_coins(request_nton)
-      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-      .end_cell(), 64);
-    
-    return ();
-  }
-  
-  {-------------------------------------------}
-  {-    Incoming message - maybe schedule    -}
-  {-------------------------------------------}
-  
-  throw_if(140, opcode != op::schedule_msg);
-  
-  ;; Components of message scheduling cost
-  ;; 1. Forwarding TON amount           specified by user; not less than 0.01 TON
-  ;; 2. Price for keeping timer awake.  6.5 TON/h = 6'500'000'000 nTON/h = 1'805'556 nTON/s
-  ;; 3. Timer's profit + gas.           0.7 TON
-  
-  int schedule_at = in_msg~load_uint(32);
-  int forward_nton = in_msg~load_uint(64);
-  throw_if(100, forward_nton < 10000000);
-  
-  int timer_work_cost = 1805556 * max(0, schedule_at - now());
-  
-  throw_if(101, coins < timer_work_cost + forward_nton + 700000000);
-  
-  TIM::create_bell(rand(18446744073709551616), schedule_at, forward_nton,
-    in_msg~load_msg_addr(), in_msg~load_ref());
-  
-  send_raw_message(begin_cell()
-    .store_uint(0x18, 6)
-    .store_slice(owner_address())
-    .store_coins(100000000)
-    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)   {-  no message body here  -}
-    .end_cell(),  0);
+const slice bounce_mc_addr = "-1:2023050200000000000000000000000000000000000000000000000000000001"a;
+const int   op::schedule   = 0x24E5F1CA;    ;; zlib.crc32(b'op::schedule')
+const int   bounty         = 400 * milliton;
+
+
+int equal_slices(slice a, slice b) asm "SDEQ";
+
+cell get_bounce_msg() asm """
+  <b
+    b{011000} s,                                 // .store_uint(0x18, 6)
+    b{100} s,                                    // .store_slice(bounce_mc_addr)
+      x{FF} s,
+      x{2023050200000000000000000000000000000000000000000000000000000001} s,
+    500000000 Gram,                              // .store_coins(500 * milliton)
+    0 107 u,                                     // .store_uint(0, 107)
+  b> PUSHREF
+""";
+
+cell get_bounty_msg(slice owner, int actual_bounty) inline {
+  return begin_cell()
+    .store_uint(0x10, 6)
+    .store_slice(owner)
+    .store_coins(actual_bounty)
+    .store_uint(0, 107 + 32)
+    .store_slice("Bounty")
+    .end_cell();
 }
 
-() recv_external() {
+(cell, slice, int) load_contract() inline {
+  slice ds = get_data().begin_parse();
+  cell schedule = ds~load_dict();
+  (slice owner, int furthest_schedule) = ds.load_uint(64);
+  return (schedule, owner, furthest_schedule);
+}
+
+cell serialize_contract(cell schedule, slice owner, int furthest) inline {
+  return begin_cell()
+    .store_dict(schedule)
+    .store_uint(furthest, 64)
+    .store_slice(owner)
+    .end_cell();
+}
+
+int load_workchain() inline {
+  ;; in case someone accidentaly deploys timer in masterchain
+  (int workchain, _) = parse_std_addr(my_address());
+  return workchain;
+}
+
+int calc_storage_fee_raw(int cells, int bits, int time) inline {
+  cell prices_by_workchain = config_param(18);
+  (slice prices, _) = prices_by_workchain.idict_get?(32, load_workchain());
   
+  ;; _#cc utime_since:uint32 bit_price_ps:uint64 cell_price_ps:uint64 ...
+  prices~skip_bits(40);
+  
+  int base_fee = prices~load_uint(64) * bits;
+  base_fee += prices~load_uint(64) * cells;
+  return base_fee * time / 65536;              ;; to be optimized with MULRSHIFT
+}
+
+int calc_storage_fee(cell in, int time) inline {
+  (int cells, int bits, _) = in.compute_data_size(100000);
+  return calc_storage_fee_raw(cells, bits, time);
+}
+
+(slice, ()) load_state_init(slice cs) impure inline {
+  if (cs~load_uint(1)) { cs~skip_bits(5); }     ;; Maybe (## 5)
+  if (cs~load_uint(1)) { cs~skip_bits(2); }     ;; Maybe TickTock
+  if (cs~load_uint(1)) { cs~load_ref();   }     ;; Maybe ^Cell
+  if (cs~load_uint(1)) { cs~load_ref();   }     ;; Maybe ^Cell
+  cs~load_dict();
+  return (cs, ());
+}
+
+int validate_msg_value(cell msg) impure inline {
+  int value = 0;
+  slice msg = msg.begin_parse();
+  
+  ;; info
+  if (msg~load_uint(1)) {   ;; ext_out_msg_info
+    throw_unless(100, msg~load_uint(1) == 1);
+    msg~load_msg_addr();
+    msg~load_msg_addr();
+  } else {                  ;; int_msg_info
+    throw_if(110, msg~load_uint(3) & 3);  ;; we require non-bounceable not bounced message
+    msg~load_msg_addr();
+    throw_if(111, equal_slices(bounce_mc_addr, msg~load_msg_addr()));
+    value = msg~load_coins();
+    throw_unless(112, dict_empty?(msg~load_dict()));
+    msg~load_coins();
+    msg~load_coins();
+  }
+  msg~skip_bits(96);
+  
+  ;; init
+  if (msg~load_uint(1)) {  ;; Maybe (Either StateInit ^StateInit)
+    if (msg~load_uint(1)) {
+      msg~load_ref().begin_parse().load_state_init();
+    } else {
+      msg~load_state_init();
+    }
+  }
+  
+  ;; body
+  if (msg~load_uint(1)) {
+    msg~load_ref();
+  }
+  
+  return value;
+}
+
+(cell, int) do_schedule((cell, slice, int) old_state, slice sender, int time, cell msg) impure inline {
+  (cell schedule, slice owner, int furthest) = old_state;
+  int old_fee = get_data().calc_storage_fee(furthest - now());
+  int timer_fee = 0;
+  
+  if (time > furthest) {
+    owner = sender;
+    timer_fee = 3 * milliton * (furthest - time);
+    furthest = time;
+  }
+  schedule~udict_set_ref(64, (time << 32) | (cur_lt() % MOD), msg);
+  cell new_storage = serialize_contract(schedule, owner, furthest);
+  int new_fee = new_storage.calc_storage_fee(furthest - now());
+  
+  int storage_fee = new_fee - old_fee;
+  int reserve = 100 * milliton;
+  
+  return (new_storage, storage_fee + bounty + timer_fee + reserve + validate_msg_value(msg));
+}
+
+int continue_parsing(int success, int scheduled_at, int current_time) inline {
+  ;; lazy evaluation required, because `scheduled_at` is nullable
+  if (~ success) {
+    return 0;
+  }
+  return current_time >= (scheduled_at >> 32);
+}
+
+(cell, ()) process_schedule(cell scheduled) impure inline {
+  int current_time = now();
+  
+  (int scheduled_at, cell scheduled_msg, int success) = udict_get_min_ref?(scheduled, 64);
+  while (continue_parsing(success, scheduled_at, current_time)) {
+    send_raw_message(scheduled_msg, 0);
+    
+    int t = scheduled~udict_delete?(64, scheduled_at);
+    (scheduled_at, scheduled_msg, success) = udict_get_min_ref?(scheduled, 64);
+  }
+  
+  return (scheduled, ());
+}
+
+() recv_internal(int coins, cell in_msg_full, slice in_msg_body) {
+  slice in_msg = in_msg_full.begin_parse();
+  
+  if (in_msg~load_uint(4) & 1) {
+    ;; bounced message: tick
+    
+    accept_message();
+    
+    (cell scheduled, slice owner, int furthest) = load_contract();
+    scheduled~process_schedule();
+    
+    if (dict_empty?(scheduled)) {
+      send_raw_message(get_bounty_msg(owner, 0), 160);       ;; destroying timer
+    } else {
+      set_data(serialize_contract(scheduled, owner, furthest));
+      send_raw_message(get_bounce_msg(), 0);
+    }
+  } elseif (in_msg_body.slice_empty?()) {
+    
+  } elseif (in_msg_body~load_uint(32) == op::schedule) {
+    slice sender = in_msg~load_msg_addr();
+    int time = in_msg_body~load_uint(32);
+    cell msg = in_msg_body~load_ref();
+    
+    (cell scheduled, slice owner, int furthest) = load_contract();
+    (cell new_storage, int required_coins) = do_schedule((scheduled, owner, furthest), sender, time, msg);
+    throw_unless(140, coins >= required_coins);
+    
+    if (dict_empty?(scheduled)) {
+      send_raw_message(get_bounce_msg(), 0);
+    }
+    send_raw_message(get_bounty_msg(owner, bounty), 0);
+    set_data(new_storage);
+  }
 }
