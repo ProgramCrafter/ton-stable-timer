@@ -22,7 +22,7 @@ cell get_bounce_msg() asm """
     b{100} s,                                    // .store_slice(bounce_mc_addr)
       x{FF} s,
       x{2023050200000000000000000000000000000000000000000000000000000001} s,
-    500000000 Gram,                              // .store_coins(500 * milliton)
+    80000000 Gram,                               // .store_coins(80 * milliton)
     0 107 u,                                     // .store_uint(0, 107)
   b> PUSHREF
 """;
