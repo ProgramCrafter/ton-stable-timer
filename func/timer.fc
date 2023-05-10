@@ -11,6 +11,7 @@ const int   op::schedule   = 0x24E5F1CA;    ;; zlib.crc32(b'op::schedule')
 const int   bounty         = 400000000;
 
 
+(cell, ()) udict_new_ref(cell dict, int key_len, int index, cell value) impure asm(value index dict key_len) "DICTUADDREF 170 THROWIFNOT";
 int equal_slices(slice a, slice b) asm "SDEQ";
 
 cell get_bounce_msg() asm """
@@ -131,7 +132,7 @@ int validate_msg_value(cell msg) impure inline {
     timer_fee = 3 * milliton * (furthest - time);
     furthest = time;
   }
-  schedule~udict_set_ref(64, (time << 32) | (cur_lt() % MOD), msg);
+  schedule~udict_new_ref(64, (time << 32) | (cur_lt() % MOD), msg);
   cell new_storage = serialize_contract(schedule, owner, furthest);
   int new_fee = new_storage.calc_storage_fee(furthest - now());
   
