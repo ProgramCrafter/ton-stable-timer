@@ -1,8 +1,15 @@
 <script>
   import TonWeb from '../node_modules/tonweb/dist/tonweb.js';
 
-  const timer_code = 'te6ccgECCAEAAroAART/APSkE/S88sgLAQPk0wHQ0wMBcbCPZiHHAJJfA49dAdMfAYIQJOXxyrqPTAH6QDAB0x/UMO1E0PQE0z8BIlFCQxRHZts8FL7y4IxujoSIcPsA3oIQF9eEAHCAEMjLBVADzxYB+gLLiotkJvdW50eYzxbJcPsA7VSSXwPi4uMNAgcDAfbtRCT4I6EBggGGoPlBMFiAEvgz+Cj6RDABgCD0DG+hMIAo1yHTPwOoAtM/MFADqKABqKsPcFM1vI4SMDWCCC3GwFFCoRSoIRA1UEQDkTTiAqof+CWCEDuAAAGpCLFUQReAQPQ38uCqVBBDAsj0ABLLPwHPFskC+COhUiAEAexfA/gA7UTQ9ATTPwEC+CMhgED0h2+lnFMTArOSW3CTqx++4o4TAXD7AFiAQPRbMCCAQPSHb6UQNOhfAyBujiIwMXBwgBDIywVQA88WAfoCy4qLZCb3VudHmM8WyYEAoPsAjpICAsj0ABLLPwHPFsntVIhw+wDiBwGKAYIBhqD5QTBYgBL4M/go+kQwAYAg9AxvoTCAKNch0z8DqALTPzBQA6igAairD1ADoYIQBfXhAAGCEBfXhACgUAOgWKACBQHccAHQ0wABntMAAcAB8uBk+kAx+kAxjkcx0wIBc7Dy0G76QI0IZ/kBGCgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDL6QFnHBfLQb/oA9AQBbvLgcPoAMfoAMeKAYNch0wAB4wDTADAwEqAGAJzTAAGOJdQB0NMAAZN11yHe0wABk3LXId7TAAGS1DHe0wABktQx3vQEMTCOIdMAAZN11yHe0wABk3LXId7TAAGS1DHe0wABktQx3vQEMeIAaGJ/kBGCgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgJiWgAAAAAAAAAAAAAAAAAAA=';
+  export const timer_code = 'te6ccgECCAEAAroAART/APSkE/S88sgLAQPk0wHQ0wMBcbCPZiHHAJJfA49dAdMfAYIQJOXxyrqPTAH6QDAB0x/UMO1E0PQE0z8BIlFCQxRHZts8FL7y4IxujoSIcPsA3oIQF9eEAHCAEMjLBVADzxYB+gLLiotkJvdW50eYzxbJcPsA7VSSXwPi4uMNAgcDAfbtRCT4I6EBggGGoPlBMFiAEvgz+Cj6RDABgCD0DG+hMIAo1yHTPwOoAtM/MFADqKABqKsPcFM1vI4SMDWCCC3GwFFCoRSoIRA1UEQDkTTiAqof+CWCEDuAAAGpCLFUQReAQPQ38uCqVBBDAsj0ABLLPwHPFskC+COhUiAEAexfA/gA7UTQ9ATTPwEC+CMhgED0h2+lnFMTArOSW3CTqx++4o4TAXD7AFiAQPRbMCCAQPSHb6UQNOhfAyBujiIwMXBwgBDIywVQA88WAfoCy4qLZCb3VudHmM8WyYEAoPsAjpICAsj0ABLLPwHPFsntVIhw+wDiBwGKAYIBhqD5QTBYgBL4M/go+kQwAYAg9AxvoTCAKNch0z8DqALTPzBQA6igAairD1ADoYIQBfXhAAGCEBfXhACgUAOgWKACBQHccAHQ0wABntMAAcAB8uBk+kAx+kAxjkcx0wIBc7Dy0G76QI0IZ/kBGCgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDL6QFnHBfLQb/oA9AQBbvLgcPoAMfoAMeKAYNch0wAB4wDTADAwEqAGAJzTAAGOJdQB0NMAAZN11yHe0wABk3LXId7TAAGS1DHe0wABktQx3vQEMTCOIdMAAZN11yHe0wABk3LXId7TAAGS1DHe0wABktQx3vQEMeIAaGJ/kBGCgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgJiWgAAAAAAAAAAAAAAAAAAA=';
   
+  export let new_timer = {
+    address: '',
+    balance: -1,
+    activate_link: ''
+  };
+
+  export let timer_join_link = '';
   export let margin = 4;
   export let delta_ms = 0;
   export let send_value = 0.000000001;
@@ -15,7 +22,6 @@
   let address = '';
   let bounty_address = '';
 
-  let timer_address = '';
   let init_boc = '';
   let main_message_boc = '';
 
@@ -43,9 +49,15 @@
       (async () => {
         main_message_boc = TonWeb.utils.bytesToBase64(await main_message.toBoc(false));
         console.warn(main_message_boc);
+
+        timer_join_link = 'ton://transfer/{}?amount={}&bin='
+          + main_message_boc.replaceAll('+', '-').replaceAll('/', '_');
       })();
     } catch (e) {
       console.warn('Forming scheduling message failed', e);
+      new_timer.activate_link = '';
+      main_message_boc = '';
+      timer_join_link = '';
     }
   }
 
@@ -67,7 +79,12 @@
         init_boc = TonWeb.utils.bytesToBase64(await init_cell.toBoc(false));
         
         let hex_addr = '0:' + TonWeb.utils.bytesToHex(await init_cell.hash());
-        timer_address = (new TonWeb.Address(hex_addr)).toString(true, true, true);
+        new_timer.address = (new TonWeb.Address(hex_addr)).toString(true, true, true);
+
+        new_timer.activate_link = 'ton://transfer/{}?amount={}&init='
+          + init_boc.replaceAll('+', '-').replaceAll('/', '_')
+          + '&bin='
+          + main_message_boc.replaceAll('+', '-').replaceAll('/', '_');
       })();
     } catch (e) {
       console.warn('Forming contract state failed', e);
@@ -127,7 +144,7 @@
     <span>Message</span><input type="text" placeholder="TON Timer is a great service" bind:value={msg_content}>
   </div>
 
-  <div>Timer address: {timer_address}</div>
+  <div>Timer address: {new_timer.address}</div>
   <div>Init BOC: {init_boc}</div>
   <div>Msg BOC: {main_message_boc}</div>
 </form>
