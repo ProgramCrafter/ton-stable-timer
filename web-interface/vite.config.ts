@@ -5,8 +5,5 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	optimizeDeps: {
 		exclude: ['scheduler.ts']
-	},
-	build: {
-		outDir: 'public'
 	}
 });

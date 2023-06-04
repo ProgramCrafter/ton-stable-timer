@@ -4,6 +4,7 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="/ton-stable-timer/logo.png" />
 		<meta name="viewport" content="width=device-width" />
+		<title>TON Timer</title>
 		<style>
 			html, body {
 				position: relative;
@@ -70,25 +71,27 @@
 			}
 		</style>		
 		
-		<link rel="modulepreload" href="./_app/immutable/entry/start.67899b9a.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.1cf8b3b8.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.07381a0b.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.abd8885e.js">
+		<link rel="modulepreload" href="/ton-stable-timer/_app/immutable/entry/start.30fc2fb7.js">
+		<link rel="modulepreload" href="/ton-stable-timer/_app/immutable/chunks/index.1cf8b3b8.js">
+		<link rel="modulepreload" href="/ton-stable-timer/_app/immutable/chunks/singletons.e9e101cc.js">
+		<link rel="modulepreload" href="/ton-stable-timer/_app/immutable/chunks/paths.0b2a8dea.js">
+		<link rel="modulepreload" href="/ton-stable-timer/_app/immutable/entry/app.a408ab2c.js">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">
 			<script>
 				{
-					__sveltekit_1so0hw9 = {
-						base: new URL(".", location).pathname.slice(0, -1),
+					__sveltekit_1efgegr = {
+						assets: "/ton-stable-timer",
+						base: "/ton-stable-timer",
 						env: {}
 					};
 
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.67899b9a.js"),
-						import("./_app/immutable/entry/app.abd8885e.js")
+						import("/ton-stable-timer/_app/immutable/entry/start.30fc2fb7.js"),
+						import("/ton-stable-timer/_app/immutable/entry/app.a408ab2c.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element);
 					});

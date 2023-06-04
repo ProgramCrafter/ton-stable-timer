@@ -1,4 +1,5 @@
 <script>
+    import { base } from "$app/paths";
     import { is_tc2_connected_init, request_connect, sdk } from "$lib/ton_connect";
   
     export let is_testnet = true;
@@ -72,7 +73,7 @@
   
 <header>
     <div class="logo">
-        <img src="/logo.png" class="icon" alt="TON Timer logo"><span>TON Timer</span>
+        <img src="{base}/logo.png" class="icon" alt="TON Timer logo"><span>TON Timer</span>
     </div>
     <button class="greyout" disabled on:click={() => {is_testnet = !is_testnet;}}>
         <img class="icon" class:flip={is_testnet} src="https://ton.org/download/ton_symbol.svg" alt="TON logo" />
