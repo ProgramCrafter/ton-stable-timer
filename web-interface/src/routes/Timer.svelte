@@ -1,10 +1,11 @@
 <script lang="ts">
     import type { MessageParams } from "$lib/scheduler";
-    import { sdk, is_tc2_connected } from "$lib/ton_connect";
+    import { sdk } from "$lib/ton_connect";
     import { CHAIN } from "@tonconnect/sdk";
     
     export let use_message_promise : Promise<MessageParams>;
     export let is_testnet = true;
+    export let popup_link = '';
     
     let is_new_timer : boolean | null = null;
     let address : string | null = null;
@@ -23,7 +24,7 @@
     async function use_timer() {
         let use_message = await use_message_promise;
 
-        if (await is_tc2_connected()) {
+        if (sdk!.connected) {
             sdk!.sendTransaction({
                 validUntil: Math.ceil(Date.now() / 1000 + 300),
                 from: undefined,
@@ -36,7 +37,8 @@
                     + '?amount=' + use_message.amount
                     + '&bin=' + use_message.payload.replaceAll('+', '-').replaceAll('/', '_')
                     + (si ? '&init=' + si : '');
-            console.log(url);
+            popup_link = url;
+            console.log('Link to use timer', use_message.address, '=', url);
         }
     }
 </script>

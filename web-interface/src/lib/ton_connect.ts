@@ -11,19 +11,20 @@ function ensure_sdk() : TonConnect {
     return sdk;
 }
 
-export async function is_tc2_connected() : Promise<boolean> {
+export async function is_tc2_connected_init() : Promise<boolean> {
     let sdk = ensure_sdk();
     await sdk.restoreConnection();
     return sdk.connected;
 }
 
-export async function console_connect() {
+export async function request_connect() : Promise<string | null> {
     let sdk = ensure_sdk();
-    if (sdk.connected) return;
+    if (sdk.connected) return null;
 
     let wallets = await sdk.getWallets();
     let tonkeeper = wallets[0] as WalletInfoRemote;
 
-    console.log(tonkeeper);
-    console.log(sdk.connect({bridgeUrl: tonkeeper.bridgeUrl, universalLink: tonkeeper.universalLink}));
+    let url = sdk.connect({bridgeUrl: tonkeeper.bridgeUrl, universalLink: tonkeeper.universalLink});
+    console.log('TON Connect 2 link:', url);
+    return url;
 }

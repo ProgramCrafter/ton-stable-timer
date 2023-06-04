@@ -1,8 +1,20 @@
 <script>
-    import { console_connect, is_tc2_connected, sdk } from "$lib/ton_connect"
+    import { is_tc2_connected_init, request_connect, sdk } from "$lib/ton_connect";
   
     export let is_testnet = true;
-    let tc2_connected_promise = is_tc2_connected();  // : Promise<boolean>
+    export let popup_link = '';
+    let tc2_connected_promise = is_tc2_connected_init();  // : Promise<boolean>
+
+    sdk?.onStatusChange(
+        (wallet_object) => {
+            tc2_connected_promise = sdk ? Promise.resolve(sdk.connected) : Promise.reject("sdk unavailable");
+            if (wallet_object) popup_link = '';
+        }
+    );
+    
+    async function connect() {
+        popup_link = await request_connect() ?? '';
+    }
 </script>
 
 <style>
@@ -76,7 +88,7 @@
         {#if tc2_connected}
             <button on:click={() => {sdk?.disconnect();}}><span>Disconnect wallet</span></button>
         {:else}
-            <button on:click={console_connect}><span>Connect wallet</span></button>
+            <button on:click={connect}><span>Connect wallet</span></button>
         {/if}
     {/await}
 </header>
