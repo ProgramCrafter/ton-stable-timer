@@ -20,6 +20,10 @@ export function substitute_values(base: MessageParamsCalc, contract: ExistingTim
 }
 
 export async function make_join_message(send_parameters : SendParamsRelaxed) : Promise<MessageParamsCalc> {
+    if (+send_parameters.value_ton < 0.1) {
+        throw new Error("send requires >= 0.1 TON")
+    }
+
     let schedule_message = new TonWeb.boc.Cell();
     schedule_message.bits.writeUint(0x10, 6);
     schedule_message.bits.writeAddress(new TonWeb.Address(send_parameters.destination));

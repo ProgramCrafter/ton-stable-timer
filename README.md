@@ -5,4 +5,4 @@
 
 # Test
 
-1. `npx ts-node timer.js`
+1. `npx ts-node timer.ts`

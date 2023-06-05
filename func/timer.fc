@@ -99,6 +99,7 @@ int validate_msg_value(cell msg) impure inline {
     msg~load_msg_addr();
     throw_if(111, equal_slices(bounce_mc_addr, msg~load_msg_addr()));
     value = msg~load_coins();
+    throw_unless(113, value >= 10 * milliton);
     throw_unless(112, dict_empty?(msg~load_dict()));
     msg~load_coins();
     msg~load_coins();
@@ -118,6 +119,8 @@ int validate_msg_value(cell msg) impure inline {
   if (msg~load_uint(1)) {
     msg~load_ref();
   }
+
+  msg~impure_touch();
   
   return value;
 }
@@ -127,12 +130,15 @@ int validate_msg_value(cell msg) impure inline {
   int old_fee = get_data().calc_storage_fee(furthest - now());
   int timer_fee = 0;
   
+  if (dict_empty?(schedule)) {
+    furthest = now();
+  }
   if (time > furthest) {
     owner = sender;
-    timer_fee = 3 * milliton * (furthest - time);
+    timer_fee = 3 * milliton * (time - furthest);
     furthest = time;
   }
-  schedule~udict_new_ref(64, (time << 32) | (cur_lt() % MOD), msg);
+  schedule~udict_new_ref(96, (time << 32) | (cur_lt() % MOD), msg);
   cell new_storage = serialize_contract(schedule, owner, furthest);
   int new_fee = new_storage.calc_storage_fee(furthest - now());
   
@@ -153,12 +159,12 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline {
 (cell, ()) process_schedule(cell scheduled) impure inline {
   int current_time = now();
   
-  (int scheduled_at, cell scheduled_msg, int success) = udict_get_min_ref?(scheduled, 64);
+  (int scheduled_at, cell scheduled_msg, int success) = udict_get_min_ref?(scheduled, 96);
   while (continue_parsing(success, scheduled_at, current_time)) {
     send_raw_message(scheduled_msg, 0);
     
-    int t = scheduled~udict_delete?(64, scheduled_at);
-    (scheduled_at, scheduled_msg, success) = udict_get_min_ref?(scheduled, 64);
+    int t = scheduled~udict_delete?(96, scheduled_at);
+    (scheduled_at, scheduled_msg, success) = udict_get_min_ref?(scheduled, 96);
   }
   
   return (scheduled, ());
@@ -185,7 +191,7 @@ int continue_parsing(int success, int scheduled_at, int current_time) inline {
     
   } elseif (in_msg_body~load_uint(32) == op::schedule) {
     slice sender = in_msg~load_msg_addr();
-    int time = in_msg_body~load_uint(32);
+    int time = in_msg_body~load_uint(64);
     cell msg = in_msg_body~load_ref();
     
     (cell scheduled, slice owner, int furthest) = load_contract();
