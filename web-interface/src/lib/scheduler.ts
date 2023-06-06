@@ -29,12 +29,12 @@ export async function make_join_message(send_parameters : SendParamsRelaxed) : P
     schedule_message.bits.writeAddress(new TonWeb.Address(send_parameters.destination));
     schedule_message.bits.writeCoins(TonWeb.utils.toNano(send_parameters.value_ton));
     try {
-      let msg_content_ref = TonWeb.boc.Cell.oneFromBoc(TonWeb.utils.base64ToBytes(send_parameters.message));
-      schedule_message.bits.writeUint(1, 107);
-      schedule_message.refs.push(msg_content_ref);
+        let msg_content_ref = TonWeb.boc.Cell.oneFromBoc(TonWeb.utils.base64ToBytes(send_parameters.message));
+        schedule_message.bits.writeUint(1, 107);
+        schedule_message.refs.push(msg_content_ref);
     } catch {
-      schedule_message.bits.writeUint(0, 139);
-      schedule_message.bits.writeString(send_parameters.message);
+        schedule_message.bits.writeUint(0, 139);
+        schedule_message.bits.writeString(send_parameters.message);
     }
     
     let main_message = new TonWeb.boc.Cell();

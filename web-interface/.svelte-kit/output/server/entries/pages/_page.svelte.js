@@ -228,7 +228,7 @@ const SchedulePanel = create_ssr_component(($$result, $$props, $$bindings, slots
     <div class="row svelte-1aa3dcg"><span class="svelte-1aa3dcg">Destination</span><input class="wide svelte-1aa3dcg" type="text" placeholder="www.ton"${add_attribute("value", dest_address, 0)}>
       <span class="svelte-1aa3dcg">UTC datetime</span><input type="datetime-local" class="svelte-1aa3dcg"${add_attribute("value", target_date_str, 0)}>
     </div><div class="row svelte-1aa3dcg"><span class="svelte-1aa3dcg">Bounty* addr</span><input class="wide svelte-1aa3dcg" type="text" placeholder="ratelance.ton"${add_attribute("value", bounty_address, 0)}>
-      <span class="svelte-1aa3dcg">Value (TON)</span><input type="number" placeholder="1.000000000 (min 1 TON)" min="0.1" step="0.000000001" class="svelte-1aa3dcg"${add_attribute("value", send_value, 0)}></div>
+      <span class="svelte-1aa3dcg">Value (TON)</span><input type="number" placeholder="1.000000000 (min 0.1 TON)" min="0.1" step="0.000000001" class="svelte-1aa3dcg"${add_attribute("value", send_value, 0)}></div>
     <div class="row svelte-1aa3dcg"><span class="svelte-1aa3dcg">Message</span><input type="text" placeholder="TON Timer is a great service" class="svelte-1aa3dcg"${add_attribute("value", msg_content, 0)}></div></form>`;
 });
 const Timer_svelte_svelte_type_style_lang = "";

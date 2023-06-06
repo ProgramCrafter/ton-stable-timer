@@ -19,9 +19,9 @@ export async function load_timers(is_testnet=false) : Promise<ExistingTimer[]> {
     const provider = new TonWeb.HttpProvider(endpoint);
   
     const tx_list_response = await fetch('https://dton.io/graphql/', {
-      method: 'POST',
-      body: JSON.stringify({query: timers_gql_request}),
-      headers: {'Content-Type': 'application/json'}
+        method: 'POST',
+        body: JSON.stringify({query: timers_gql_request}),
+        headers: {'Content-Type': 'application/json'}
     });
     const tx_list = (await tx_list_response.json()).data.transactions;
 

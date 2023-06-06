@@ -17,7 +17,7 @@
 
     $: send_parameters = {
         destination: dest_address, time: target_date_str + 'Z',
-        value_ton: send_value.toString(), message: msg_content
+        value_ton: (send_value ?? '').toString(), message: msg_content
     };
     $: deploy_parameters = {
         bounty_address: bounty_address
@@ -68,7 +68,7 @@
       <span>UTC datetime</span><input type="datetime-local" bind:value={target_date_str}>
     </div><div class="row">
       <span>Bounty* addr</span><input class="wide" type="text" placeholder="ratelance.ton" bind:value={bounty_address}>
-      <span>Value (TON)</span><input type="number" placeholder="1.000000000 (min 1 TON)"
+      <span>Value (TON)</span><input type="number" placeholder="1.000000000 (min 0.1 TON)"
                                     min="0.1" step="0.000000001" bind:value={send_value}>
     </div>
     <div class="row">
